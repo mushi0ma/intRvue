@@ -1,0 +1,37 @@
+# Жергілікті PostgreSQL (және қаласаңыз API сервері).
+#   docker compose up -d db                 # тек дерекқор, 127.0.0.1:5433
+#   docker compose --profile api up -d      # дерекқор + API, 127.0.0.1:8787
+# Android эмуляторынан API: http://10.0.2.2:8787
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: intrvue
+      POSTGRES_USER: intrvue
+      POSTGRES_PASSWORD: intrvue_dev
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/docker/init-test-db.sql:/docker-entrypoint-initdb.d/10-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intrvue -d intrvue"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  api:
+    profiles: [api]
+    build: ./server
+    environment:
+      DATABASE_URL: postgresql://intrvue:intrvue_dev@db:5432/intrvue?sslmode=disable
+      HOST: 0.0.0.0
+      PORT: "8787"
+    ports:
+      - "127.0.0.1:8787:8787"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

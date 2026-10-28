@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- app_colors.dart: primary және surface -->
+    <color name="brand_green">#006C4C</color>
+    <color name="splash_light">#FBFDF9</color>
+    <color name="splash_dark">#191C1A</color>
+</resources>

@@ -89,50 +89,47 @@ class _HistoryScreenState extends State<HistoryScreen> {
       subtitle: S.historySubtitle,
       headerGap: 28,
       body: [
-        Row(
-          spacing: 12,
-          children: [
-            Expanded(
-              child: FilterDropdown<Direction?>(
-                value: _direction,
-                values: const [null, ...Direction.values],
-                labelOf: (d) => d?.label ?? S.allDirections,
-                semanticLabel: S.fieldDirection,
-                onChanged: (d) => setState(() => _direction = d),
-              ),
+        // Бір жолдағы көлденең айналатын сүзгілер (M3 filter chips үлгісі):
+        // ені мәтінге қарай, 360dp экранда «Барлық сесс…» болып қысқармайды.
+        FullBleed(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.inset),
+            child: Row(
+              spacing: 8,
+              children: [
+                FilterDropdown<Direction?>(
+                  expand: false,
+                  value: _direction,
+                  values: const [null, ...Direction.values],
+                  labelOf: (d) => d?.label ?? S.allDirections,
+                  semanticLabel: S.fieldDirection,
+                  onChanged: (d) => setState(() => _direction = d),
+                ),
+                FilterDropdown<_StatusFilter>(
+                  expand: false,
+                  value: _status,
+                  values: _StatusFilter.values,
+                  labelOf: (f) => f.label,
+                  semanticLabel: S.statusFilter,
+                  onChanged: (f) => setState(() => _status = f),
+                ),
+                FilterDropdown<HistorySort>(
+                  expand: false,
+                  value: _sort,
+                  values: HistorySort.values,
+                  labelOf: (v) => v.label,
+                  semanticLabel: S.sortLabel,
+                  onChanged: (v) => setState(() => _sort = v),
+                ),
+                _PeriodButton(
+                  period: _period,
+                  onPick: _pickPeriod,
+                  onClear: () => setState(() => _period = null),
+                ),
+              ],
             ),
-            Expanded(
-              child: FilterDropdown<_StatusFilter>(
-                value: _status,
-                values: _StatusFilter.values,
-                labelOf: (f) => f.label,
-                semanticLabel: S.statusFilter,
-                onChanged: (f) => setState(() => _status = f),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          spacing: 12,
-          children: [
-            Expanded(
-              child: FilterDropdown<HistorySort>(
-                value: _sort,
-                values: HistorySort.values,
-                labelOf: (v) => v.label,
-                semanticLabel: S.sortLabel,
-                onChanged: (v) => setState(() => _sort = v),
-              ),
-            ),
-            Expanded(
-              child: _PeriodButton(
-                period: _period,
-                onPick: _pickPeriod,
-                onClear: () => setState(() => _period = null),
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 12),
         if (sessions.isEmpty)
@@ -242,6 +239,7 @@ class _PeriodButton extends StatelessWidget {
               minHeight: AppSpacing.touchTarget,
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(width: 12),
                 Icon(
@@ -250,7 +248,7 @@ class _PeriodButton extends StatelessWidget {
                   color: colors.onSurfaceVariant,
                 ),
                 const SizedBox(width: 8),
-                Expanded(
+                Flexible(
                   child: Text(
                     label,
                     style: context.text.labelMedium,

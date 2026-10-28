@@ -27,7 +27,12 @@ abstract final class AppTheme {
         errorContainer: brand.errorContainer,
         onErrorContainer: brand.onErrorContainer,
       ),
-      palette.copyWith(navigationBar: scheme.surfaceContainerHighest),
+      // Графиктің бұлыңғыр бағандары да жүйелік палитрадан — әйтпесе
+      // бренд жасылы мен жүйелік түс араласып кетеді.
+      palette.copyWith(
+        navigationBar: scheme.surfaceContainerHighest,
+        chartMuted: scheme.secondary,
+      ),
     );
   }
 

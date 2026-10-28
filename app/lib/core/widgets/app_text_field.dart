@@ -106,6 +106,9 @@ class _AppTextFieldState extends State<AppTextField> {
           decoration: InputDecoration(
             hintText: widget.hint,
             helperText: widget.helper,
+            // Қазақша мәтіндер ұзын: бір жолға сыймаса қысқармасын.
+            helperMaxLines: 4,
+            errorMaxLines: 4,
             helperStyle: context.text.bodyMedium!.copyWith(
               color: colors.onSurfaceVariant,
             ),

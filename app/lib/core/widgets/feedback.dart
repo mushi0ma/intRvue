@@ -74,8 +74,11 @@ class FilterDropdown<T> extends StatelessWidget {
     required this.labelOf,
     required this.onChanged,
     this.semanticLabel,
+    this.expand = true,
   });
 
+  /// false — ені мәтінге қарай (Wrap ішінде): тар экранда қысқармайды.
+  final bool expand;
   final T value;
   final List<T> values;
   final String Function(T) labelOf;
@@ -107,8 +110,10 @@ class FilterDropdown<T> extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.choice),
         ),
         child: Row(
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
           children: [
-            Expanded(
+            Flexible(
+              fit: expand ? FlexFit.tight : FlexFit.loose,
               child: Text(
                 labelOf(value),
                 style: context.text.labelMedium,

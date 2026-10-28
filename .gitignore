@@ -1,0 +1,22 @@
+# Локалды агент баптаулары (құпия кілттер мен жеке жолдар болуы мүмкін)
+.mcp.json
+.codex/
+.omp/
+.agents/
+.impeccable/
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/flutter-ui-critique/
+
+# Office құлыптары, ОЖ қоқысы
+.~lock.*#
+.DS_Store
+*.swp
+
+# Сервер: жергілікті орта айнымалылары
+server/.env
+server/.dart_tool/
+
+# Golden тесттерінің сәтсіз нәтижелері
+app/test/failures/

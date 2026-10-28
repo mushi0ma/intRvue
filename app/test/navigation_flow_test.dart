@@ -1,0 +1,388 @@
+// Негізгі экрандардың ашылуы мен өзара байланысын тексеру.
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:intrvue/core/constants/app_strings.dart';
+import 'package:intrvue/data/models/enums.dart';
+import 'package:intrvue/data/repositories/settings_repository.dart';
+import 'package:intrvue/data/repositories/session_repository.dart';
+
+import 'package:intrvue/data/services/reminder_scheduler.dart';
+
+import 'helpers/test_app.dart';
+
+Future<void> tapText(WidgetTester tester, String text) async {
+  await tester.pump();
+  final finder = find.text(text).last;
+  await tester.ensureVisible(finder);
+  await tester.pump();
+  await tester.tap(finder);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 600));
+}
+
+Future<void> back(WidgetTester tester) => tapText(tester, S.back);
+
+void main() {
+  testWidgets('Splash → Onboarding → Welcome → Login → Home', (tester) async {
+    await pumpApp(
+      tester,
+      location: '/splash',
+      loggedIn: false,
+      prefs: {'onboarding.seen': false},
+    );
+    expect(find.text(S.splashTagline), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.text(S.onboarding1Title), findsOneWidget);
+    await tapText(tester, S.next);
+    expect(find.text(S.onboarding2Title), findsOneWidget);
+    await tapText(tester, S.next);
+    await tapText(tester, S.start);
+
+    expect(find.text(S.welcomeHero), findsOneWidget);
+    await tapText(tester, S.haveAccountLogin);
+    expect(find.text(S.loginTitle), findsOneWidget);
+
+    // Бос өрістер: түсінікті хабарламалар.
+    await tapText(tester, S.loginAction);
+    expect(find.text(S.emailEmpty), findsOneWidget);
+    expect(find.text(S.passwordEmpty), findsOneWidget);
+
+    // Қате email форматы.
+    await tester.enterText(find.byType(TextFormField).at(0), 'aidana@');
+    await tester.pump();
+    expect(find.text(S.emailInvalid), findsOneWidget);
+
+    // Қате пароль.
+    await tester.enterText(
+      find.byType(TextFormField).at(0),
+      'aidana@example.com',
+    );
+    await tester.enterText(find.byType(TextFormField).at(1), 'wrong123');
+    await tapText(tester, S.loginAction);
+    expect(find.text(S.loginWrongCredentials), findsOneWidget);
+    expect(find.text(S.loginErrorTitle), findsOneWidget);
+
+    // Дұрыс деректер → басты бет.
+    await tester.enterText(find.byType(TextFormField).at(1), 'intrvue2026');
+    await tapText(tester, S.loginAction);
+    expect(find.text(S.greeting('Айдана')), findsOneWidget);
+  });
+
+  testWidgets('Тіркелу: валидация → профиль баптау → басты бет', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/register', loggedIn: false);
+    await tapText(tester, S.createAccount);
+    expect(find.text(S.nameEmpty), findsOneWidget);
+    expect(find.text(S.emailEmpty), findsOneWidget);
+    expect(find.text(S.passwordEmpty), findsOneWidget);
+    expect(find.text(S.privacyConsentRequired), findsOneWidget);
+
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'Ерлан');
+    await tester.enterText(fields.at(1), 'erlan@example.com');
+    await tester.enterText(fields.at(2), 'short');
+    await tester.pump();
+    expect(find.text(S.passwordWeak), findsOneWidget);
+
+    await tester.enterText(fields.at(2), 'erlan2026');
+    await tapText(tester, S.privacyConsent);
+    await tapText(tester, S.createAccount);
+
+    expect(find.text(S.setupTitle), findsOneWidget);
+    await tapText(tester, 'QA');
+    await tapText(tester, S.setupSave);
+    expect(find.text(S.greeting('Ерлан')), findsOneWidget);
+  });
+
+  testWidgets('Home → List → Detail → таңдаулы → Profile → Edit', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/home', noFavorites: true);
+    await tapText(tester, S.homeCatalog);
+    expect(find.text(S.catalogTitle), findsOneWidget);
+
+    await tapText(tester, 'Күйді басқару');
+    expect(find.text(S.whatWeReview), findsOneWidget);
+    await tapText(tester, S.addFavorite);
+    expect(find.text(S.removeFavorite), findsOneWidget);
+    expect(find.text(S.addedToFavorites), findsOneWidget);
+
+    await tapText(tester, S.open);
+    expect(find.text(S.favoritesTitle), findsOneWidget);
+    expect(find.text('Күйді басқару'), findsOneWidget);
+
+    await tapText(tester, S.toProfile);
+    expect(find.text(S.profileTitle), findsOneWidget);
+    await tapText(tester, S.editProfile);
+    await tester.enterText(find.byType(TextFormField).first, '');
+    await tapText(tester, S.saveChanges);
+    expect(find.text(S.nameEmpty), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField).first, 'Айдана Н.');
+    await tapText(tester, S.saveChanges);
+    expect(find.text('Айдана Н.'), findsOneWidget);
+    expect(find.text(S.profileTitle), findsOneWidget);
+  });
+
+  testWidgets('Іздеу: нәтиже және «табылмады»', (tester) async {
+    await pumpApp(tester, location: '/search');
+    await tester.enterText(find.byType(TextFormField), 'flutter');
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text(S.found(1)), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField), 'Kubernetes');
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text(S.notFoundTitle), findsOneWidget);
+    await tapText(tester, S.clearSearch);
+    expect(find.text(S.popularTopics), findsOneWidget);
+  });
+
+  testWidgets('Төменгі навигация: төрт бөлім', (tester) async {
+    await pumpApp(tester, location: '/home');
+    await tapText(tester, S.navHistory);
+    expect(find.text(S.historySubtitle), findsOneWidget);
+    await tapText(tester, S.navProgress);
+    expect(find.text(S.progressSubtitle), findsOneWidget);
+    await tapText(tester, S.navSettings);
+    expect(find.text(S.settingsSubtitle), findsOneWidget);
+    await tapText(tester, S.navHome);
+    expect(find.text(S.homeNextTitle), findsOneWidget);
+  });
+
+  testWidgets('Толық жаттығу сессиясы: 5 сұрақ → қорытынды → ұсыныс', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/home');
+    await tester.runAsync(repo<SessionRepository>(tester).finishActive);
+    await tester.pump();
+
+    await tapText(tester, S.homeStartAction);
+    expect(find.text(S.topicsPickTitle), findsOneWidget);
+    await tapText(tester, S.continueWithTopics(2));
+    expect(find.text(S.paramsTitle), findsOneWidget);
+    await tapText(tester, S.paramsStart);
+    expect(find.text(S.consentAccept), findsOneWidget);
+    await tapText(tester, S.consentAccept);
+    expect(find.text(S.preparingMotto), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 600));
+
+    for (var i = 1; i <= 5; i++) {
+      expect(find.text(S.progressOf(i, 5)), findsOneWidget);
+      if (i == 3) {
+        await tapText(tester, S.skipQuestion);
+        await tapText(tester, S.skip);
+        continue;
+      }
+      // Бос жауапты жіберуге болмайды.
+      await tapText(tester, S.submitAnswer);
+      expect(find.text(S.answerEmpty), findsOneWidget);
+
+      await tester.enterText(
+        find.byType(TextFormField),
+        'Null safety және StatelessWidget State setState() мысалы. Future бір мән.',
+      );
+      await tapText(tester, S.submitAnswer);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.text(S.evidenceTitle), findsOneWidget);
+
+      if (i == 1) {
+        await tapText(tester, S.readModelAnswer);
+        expect(find.text(S.modelAnswerTitle), findsOneWidget);
+        await tapText(tester, S.backToFeedback);
+      }
+      await tapText(tester, i == 5 ? S.finishSession : S.nextQuestion);
+    }
+
+    expect(find.text(S.summaryTitle), findsOneWidget);
+    expect(find.text(S.statusComplete), findsOneWidget);
+    await tapText(tester, S.whatToReview);
+    expect(find.text(S.recommendTitle), findsOneWidget);
+    await back(tester);
+    await tapText(tester, S.reviewAnswers);
+    expect(find.text(S.sessionAnswers), findsOneWidget);
+    expect(find.text(S.skippedPoints), findsOneWidget);
+  });
+
+  testWidgets('Тарих: сессияны ашу және жою', (tester) async {
+    await pumpApp(tester, location: '/history');
+    final before = repo<SessionRepository>(tester).history.length;
+    await tapText(tester, '80,0');
+    expect(find.text(S.summaryTitle), findsOneWidget);
+    await back(tester);
+    await tester.tap(find.text(S.delete).first);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text(S.deleteSessionTitle), findsOneWidget);
+    await tester.tap(find.text(S.delete).last);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(repo<SessionRepository>(tester).history.length, before - 1);
+  });
+
+  testWidgets('Баптаулар: тақырып → қараңғы, шығу', (tester) async {
+    await pumpApp(tester, location: '/settings');
+    await tapText(tester, S.theme);
+    await tapText(tester, S.themeDark);
+    await tapText(tester, S.save);
+    expect(
+      Theme.of(tester.element(find.text(S.settingsSubtitle))).brightness,
+      Brightness.dark,
+    );
+
+    await tapText(tester, S.logout);
+    expect(find.text(S.logoutTitle), findsOneWidget);
+    await tapText(tester, S.logoutAction);
+    expect(find.text(S.loginTitle), findsOneWidget);
+  });
+
+  testWidgets('Аккаунтты жою: қате пароль', (tester) async {
+    await pumpApp(tester, location: '/settings/delete-account');
+    await tapText(tester, S.deleteAccountAction);
+    expect(find.text(S.passwordEmpty), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField), 'wrong');
+    await tapText(tester, S.deleteAccountAction);
+    expect(find.text(S.deleteAccountWrongPassword), findsOneWidget);
+  });
+
+  testWidgets('Тақырып CRUD: Create → Read → Update → Delete', (tester) async {
+    await pumpApp(tester, location: '/topics');
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Create: бос форма — міндетті өрістер хабарламалары.
+    await tapText(tester, S.addTopic);
+    expect(find.text(S.topicFormCreate), findsOneWidget);
+    await tapText(tester, S.addTopic);
+    expect(find.text(S.topicTitleEmpty), findsOneWidget);
+    expect(find.text(S.summaryEmpty), findsOneWidget);
+    expect(find.text(S.questionTextEmpty), findsOneWidget);
+    expect(find.text(S.modelAnswerEmpty), findsOneWidget);
+
+    Finder field(String label) => find.descendant(
+      of: find
+          .ancestor(of: find.text(label), matching: find.byType(Column))
+          .first,
+      matching: find.byType(TextFormField),
+    );
+    await tester.enterText(field(S.fieldTopicTitle), 'Тест тақырыбы');
+    await tester.enterText(field(S.fieldSummary), 'Қысқа');
+    await tester.enterText(field(S.fieldReviewPoints), 'Бірінші тармақ');
+    await tester.enterText(field(S.fieldQuestionText), 'Тест сұрағы?');
+    await tester.enterText(field(S.fieldModelAnswer), 'Үлгі жауап.');
+    await tapText(tester, S.addTopic);
+    await tester.pump(const Duration(milliseconds: 600));
+
+    // Read: Detail экраны.
+    expect(find.text('Тест тақырыбы'), findsWidgets);
+    expect(find.text(S.edit), findsOneWidget);
+
+    // Update. Алдыңғы хабарлама төменгі батырманы жаппауы үшін жабамыз.
+    ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first))
+        .removeCurrentSnackBar();
+    await tapText(tester, S.edit);
+    expect(find.text(S.topicFormEdit), findsOneWidget);
+    await tester.enterText(field(S.fieldTopicTitle), 'Өзгертілген тақырып');
+    await tapText(tester, S.saveChanges);
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('Өзгертілген тақырып'), findsWidgets);
+
+    // Delete.
+    ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first))
+        .removeCurrentSnackBar();
+    await tapText(tester, S.edit);
+    await tapText(tester, S.deleteTopic);
+    expect(find.text(S.deleteTopicTitle), findsOneWidget);
+    await tester.tap(find.text(S.delete).last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text(S.catalogTitle), findsOneWidget);
+    expect(find.text('Өзгертілген тақырып'), findsNothing);
+  });
+
+  testWidgets('Каталог: іздеу, «Менікі» сүзгісі және бос күй', (tester) async {
+    await pumpApp(tester, location: '/topics');
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Dart негіздері'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'асинх');
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Асинхрондылық'), findsOneWidget);
+    expect(find.text('Dart негіздері'), findsNothing);
+
+    await tester.enterText(find.byType(TextField).first, '');
+    await tester.pump(const Duration(milliseconds: 400));
+    await tapText(tester, S.filterMine);
+    expect(find.text(S.catalogEmptyTitle), findsOneWidget);
+    await tapText(tester, S.resetFilters);
+    expect(find.text('Frontend'), findsNothing);
+    expect(find.text('HTML және CSS'), findsOneWidget);
+  });
+
+  testWidgets('Еске салу: рұқсат бар → «Еске салу қосулы»', (tester) async {
+    await pumpApp(tester, location: '/settings/reminders');
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+    await tapText(tester, S.remindersSave);
+    expect(find.text(S.remindersEnabledTitle), findsOneWidget);
+    expect(find.textContaining('Дс'), findsOneWidget);
+  });
+
+  testWidgets('Еске салу: рұқсат жоқ → «Хабарламалар өшірулі»', (tester) async {
+    await pumpApp(
+      tester,
+      location: '/settings/reminders',
+      reminders: const NoopReminderScheduler(permitted: false),
+    );
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+    await tapText(tester, S.remindersSave);
+    expect(find.text(S.notificationsOffTitle), findsOneWidget);
+    expect(find.text(S.openAndroidSettings), findsOneWidget);
+    await tapText(tester, S.notNow);
+    expect(find.text(S.settingsSubtitle), findsOneWidget);
+  });
+
+  testWidgets('Парольді ұмыттым → сілтеме → жаңа пароль → кіру', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/forgot-password', loggedIn: false);
+    await tester.enterText(find.byType(TextFormField), 'aidana@example.com');
+    await tapText(tester, S.resetSend);
+    expect(find.text(S.resetSentTitle), findsOneWidget);
+    await tapText(tester, S.resetDemoOpen);
+    expect(find.text(S.newPasswordSubtitle), findsOneWidget);
+
+    await tapText(tester, S.savePassword);
+    expect(find.text(S.passwordEmpty), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField).at(0), 'jana2026pass');
+    await tester.enterText(find.byType(TextFormField).at(1), 'basqa2026');
+    await tapText(tester, S.savePassword);
+    expect(find.text(S.passwordMismatch), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField).at(1), 'jana2026pass');
+    await tapText(tester, S.savePassword);
+    expect(find.text(S.loginTitle), findsOneWidget);
+    await tester.enterText(
+      find.byType(TextFormField).at(0),
+      'aidana@example.com',
+    );
+    await tester.enterText(find.byType(TextFormField).at(1), 'jana2026pass');
+    await tapText(tester, S.loginAction);
+    expect(find.text(S.greeting('Айдана')), findsOneWidget);
+  });
+
+  testWidgets('Тілді ауыстыру: қазақша → орысша, сақталады', (tester) async {
+    await pumpApp(tester, location: '/settings/appearance');
+    await tapText(tester, 'Русский');
+    await tapText(tester, S.save);
+    expect(find.text('Настройки'), findsWidgets);
+    expect(find.text('Язык интерфейса'), findsOneWidget);
+    expect(find.text('Главная'), findsOneWidget);
+    expect(repo<SettingsRepository>(tester).language, InterfaceLanguage.ru);
+    // Қайта ауыстыру.
+    await tapText(tester, 'Язык интерфейса');
+    await tapText(tester, 'Қазақша');
+    await tapText(tester, 'Сохранить');
+    expect(find.text('Баптаулар'), findsWidgets);
+  });
+}

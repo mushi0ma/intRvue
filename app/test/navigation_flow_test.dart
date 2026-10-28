@@ -6,8 +6,12 @@ import 'package:intrvue/data/models/enums.dart';
 import 'package:intrvue/data/repositories/settings_repository.dart';
 import 'package:intrvue/data/repositories/session_repository.dart';
 
+import 'package:intrvue/data/remote/sync_api.dart';
+import 'package:intrvue/data/repositories/sync_repository.dart';
+import 'package:intrvue/data/repositories/topic_repository.dart';
 import 'package:intrvue/data/services/reminder_scheduler.dart';
 
+import 'helpers/fake_sync_api.dart';
 import 'helpers/test_app.dart';
 
 Future<void> tapText(WidgetTester tester, String text) async {
@@ -384,5 +388,136 @@ void main() {
     await tapText(tester, 'Қазақша');
     await tapText(tester, 'Сохранить');
     expect(find.text('Баптаулар'), findsWidgets);
+  });
+
+  testWidgets('Бұлттық синхрондау: қосу → күйі → ажырату', (tester) async {
+    final api = FakeSyncApi();
+    await pumpApp(tester, location: '/settings', syncApi: (_) => api);
+    expect(find.text(S.syncTitle), findsOneWidget);
+    expect(find.text(S.syncOff), findsWidgets);
+    await tapText(tester, S.syncTitle);
+
+    // Бос пароль — валидация, серверге сұрау жоқ.
+    await tapText(tester, S.syncConnect);
+    expect(find.text(S.passwordEmpty), findsOneWidget);
+    expect(api.pushed, isEmpty);
+
+    await tester.enterText(find.byType(TextFormField).first, 'intrvue2026');
+    await tapText(tester, S.syncConnect);
+    expect(find.text(S.syncNow), findsOneWidget);
+    expect(find.text(S.syncAccount), findsOneWidget);
+    expect(api.pushed, hasLength(1));
+    // Суретте демо аккаунттың сессиялары мен таңдаулысы бар.
+    expect(api.pushed.single['sessions'], isNotEmpty);
+    expect(api.pushed.single['favorites'], isNotEmpty);
+    expect(repo<SyncRepository>(tester).link?.lastSyncAt, isNotNull);
+
+    await tapText(tester, S.syncNow);
+    expect(api.pushed, hasLength(2));
+
+    await tapText(tester, S.syncDisconnect);
+    expect(find.text(S.syncDisconnectTitle), findsOneWidget);
+    await tapText(tester, S.syncDisconnect);
+    expect(find.text(S.syncConnect), findsOneWidget);
+    expect(repo<SyncRepository>(tester).link, isNull);
+  });
+
+  testWidgets('Синхрондау: сервер қолжетімсіз → түсінікті хабарлама', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      location: '/settings/sync',
+      syncApi: (_) => FakeSyncApi(failure: SyncFailure.offline),
+    );
+    // Сервер мекенжайы әдепкіде жасырын — «Өзгерту» арқылы ашылады.
+    expect(find.text(S.syncServer), findsNothing);
+    await tapText(tester, S.edit);
+    await tester.enterText(find.byType(TextFormField).last, 'ftp://x');
+    await tester.enterText(find.byType(TextFormField).first, 'intrvue2026');
+    await tapText(tester, S.syncConnect);
+    expect(find.text(S.syncServerInvalid), findsOneWidget);
+
+    await tester.enterText(
+      find.byType(TextFormField).last,
+      'http://192.168.1.10:8787',
+    );
+    await tapText(tester, S.syncConnect);
+    expect(find.text(S.syncErrOffline), findsOneWidget);
+    expect(repo<SyncRepository>(tester).link, isNull);
+    expect(
+      repo<SyncRepository>(tester).serverUrl.toString(),
+      'http://192.168.1.10:8787',
+    );
+  });
+
+  testWidgets('Жаңа құрылғыда кіру → деректер бұлттан қалпына келеді', (
+    tester,
+  ) async {
+    const created = 1761700000000;
+    final api = FakeSyncApi(
+      accounts: {'erlan@example.com': 'qwerty2026'},
+      remote: {
+        'topics': [
+          {
+            'id': 'u7-1',
+            'title': 'Kafka негіздері',
+            'summary': 'Топик, партиция',
+            'direction': 'backend',
+            'level': 'junior',
+            'description': '',
+            'review_points': '["Партиция"]',
+            'sample_question': 'Партиция деген не?',
+            'created_at': created,
+            'updated_at': created,
+            'questions': [
+              {
+                'id': 'u7-1-q0',
+                'position': 0,
+                'text': 'Партиция деген не?',
+                'hint': '',
+                'model_answer': 'Топиктің реттелген бөлігі.',
+                'concepts': '[]',
+              },
+            ],
+          },
+        ],
+        'favorites': [
+          {'topic_id': 'u7-1', 'created_at': created},
+        ],
+      },
+    );
+    await pumpApp(
+      tester,
+      location: '/login',
+      loggedIn: false,
+      syncApi: (_) => api,
+    );
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.first, 'erlan@example.com');
+    await tester.enterText(fields.last, 'qwerty2026');
+    await tapText(tester, S.loginAction);
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.text(S.syncRestored), findsOneWidget);
+    expect(find.text(S.greeting('Ерлан')), findsOneWidget);
+    final topics = repo<TopicRepository>(tester);
+    expect(topics.tryById('u7-1')?.title, 'Kafka негіздері');
+    expect(topics.isFavorite('u7-1'), isTrue);
+    expect(repo<SyncRepository>(tester).link?.email, 'erlan@example.com');
+  });
+
+  testWidgets('Жаңа құрылғы, сервер жоқ → «Кіру орындалмады»', (tester) async {
+    await pumpApp(
+      tester,
+      location: '/login',
+      loggedIn: false,
+      syncApi: (_) => FakeSyncApi(failure: SyncFailure.offline),
+    );
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.first, 'ghost@example.com');
+    await tester.enterText(fields.last, 'qwerty2026');
+    await tapText(tester, S.loginAction);
+    expect(find.text(S.loginWrongCredentials), findsOneWidget);
   });
 }

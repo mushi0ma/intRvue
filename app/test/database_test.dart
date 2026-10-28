@@ -56,7 +56,7 @@ void main() {
   tearDown(() => s.dispose());
 
   group('Схема және бастапқы деректер', () {
-    test('жеті кесте және сыртқы кілттер қосулы', () async {
+    test('сегіз кесте және сыртқы кілттер қосулы', () async {
       final tables = await s.database.db.rawQuery(
         "SELECT name FROM sqlite_master WHERE type = 'table' "
         "AND name NOT LIKE 'sqlite_%' AND name != 'android_metadata'",
@@ -69,6 +69,7 @@ void main() {
         'answers',
         'favorites',
         'password_resets',
+        'sync_deletions',
       });
       final fk = await s.database.db.rawQuery('PRAGMA foreign_keys');
       expect(fk.first.values.first, 1);
@@ -381,7 +382,7 @@ void main() {
     });
   });
 
-  test('v1 → v3 миграциясы деректерді сақтайды, пікір сақталады', () async {
+  test('v1 → v4 миграциясы деректерді сақтайды, пікір сақталады', () async {
     final dir = Directory.systemTemp.createTempSync('intrvue_mig_');
     addTearDown(() => dir.deleteSync(recursive: true));
     final path = '${dir.path}/intrvue.db';
@@ -396,6 +397,9 @@ void main() {
     await db.execute('ALTER TABLE answers DROP COLUMN dispute_comment');
     await db.execute('ALTER TABLE answers DROP COLUMN dispute_reason');
     await db.execute('DROP TABLE password_resets');
+    await db.execute('ALTER TABLE answers DROP COLUMN updated_at');
+    await db.execute('ALTER TABLE sessions DROP COLUMN updated_at');
+    await db.execute('DROP TABLE sync_deletions');
     await db.setVersion(1);
     await app.dispose();
 
@@ -405,9 +409,9 @@ void main() {
     );
     expect(
       columns.map((c) => c['name']),
-      containsAll(['dispute_reason', 'dispute_comment']),
+      containsAll(['dispute_reason', 'dispute_comment', 'updated_at']),
     );
-    expect(await app.database.db.getVersion(), 3);
+    expect(await app.database.db.getVersion(), 4);
     expect(
       Sqflite.firstIntValue(
         await app.database.db.rawQuery('SELECT COUNT(*) FROM answers'),

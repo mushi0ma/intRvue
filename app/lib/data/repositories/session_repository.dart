@@ -10,6 +10,7 @@ import '../local/app_database.dart';
 import '../local/db_errors.dart';
 import '../local/db_schema.dart';
 import '../local/mappers.dart';
+import '../local/sync_journal.dart';
 import '../models/enums.dart';
 import '../models/interview_session.dart';
 import '../models/question.dart';
@@ -296,7 +297,11 @@ class SessionRepository extends ChangeNotifier implements UserScoped {
   Future<void> _saveSession(InterviewSession s) => dbGuard(
     () => _db.update(
       DbSchema.sessions,
-      {'current_index': s.currentIndex, 'finished': s.finished ? 1 : 0},
+      {
+        'current_index': s.currentIndex,
+        'finished': s.finished ? 1 : 0,
+        'updated_at': Mappers.ms(DateTime.now()),
+      },
       where: 'id = ?',
       whereArgs: [s.id],
     ),
@@ -415,12 +420,19 @@ class SessionRepository extends ChangeNotifier implements UserScoped {
 
   /// Сессия мен оның жауаптары (answers — ON DELETE CASCADE).
   Future<void> delete(String sessionId) async {
+    final uid = _userId;
+    if (uid == null) return;
     await dbGuard(
-      () => _db.delete(
-        DbSchema.sessions,
-        where: 'id = ? AND user_id = ?',
-        whereArgs: [sessionId, _userId],
-      ),
+      () => _db.transaction((txn) async {
+        final n = await txn.delete(
+          DbSchema.sessions,
+          where: 'id = ? AND user_id = ?',
+          whereArgs: [sessionId, uid],
+        );
+        if (n > 0) {
+          await SyncJournal.deleted(txn, uid, SyncJournal.session, sessionId);
+        }
+      }),
     );
     _history.removeWhere((s) => s.id == sessionId);
     notifyListeners();

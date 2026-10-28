@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intrvue/app/app.dart';
 import 'package:intrvue/app/bootstrap.dart';
+import 'package:intrvue/data/remote/sync_api.dart';
 import 'package:intrvue/data/services/reminder_scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -55,6 +56,7 @@ Future<void> pumpApp(
   bool noFavorites = false,
   String? databasePath,
   ReminderScheduler? reminders,
+  SyncApi Function(Uri)? syncApi,
 }) async {
   tester.view
     ..physicalSize = size
@@ -77,6 +79,7 @@ Future<void> pumpApp(
       path: databasePath,
       noFavorites: noFavorites,
       reminders: reminders,
+      syncApi: syncApi,
     ),
   );
   addTearDown(() => tester.runAsync(services!.dispose));
@@ -93,11 +96,13 @@ Future<AppServices> startServices({
   String? path,
   bool noFavorites = false,
   ReminderScheduler? reminders,
+  SyncApi Function(Uri)? syncApi,
 }) async {
   final services = await AppServices.start(
     factory: databaseFactoryFfiNoIsolate,
     databasePath: path ?? inMemoryDatabasePath,
     reminders: reminders ?? const NoopReminderScheduler(),
+    syncApi: syncApi,
   );
   if (noFavorites) {
     await services.database.db.delete('favorites');

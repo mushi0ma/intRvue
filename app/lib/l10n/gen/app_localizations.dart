@@ -2408,6 +2408,180 @@ abstract class AppLocalizations {
   /// **'Тақырыптар, сессиялар, жауаптар және таңдаулылар құрылғыдағы SQLite қорында сақталады. Қосымша интернетсіз толық жұмыс істейді.'**
   String get privacyOfflineBody;
 
+  /// No description provided for @syncTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Бұлттық синхрондау'**
+  String get syncTitle;
+
+  /// No description provided for @syncSubtitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Деректер құрылғыда тұрады, сервер — қосымша көшірме.'**
+  String get syncSubtitle;
+
+  /// No description provided for @syncOff.
+  ///
+  /// In kk, this message translates to:
+  /// **'Өшірулі'**
+  String get syncOff;
+
+  /// No description provided for @syncIntro.
+  ///
+  /// In kk, this message translates to:
+  /// **'Қоссаңыз, өз тақырыптарыңыз, сессиялар мен таңдаулылар intRvue серверіне көшіріледі. Телефонды ауыстырсаңыз немесе қосымшаны қайта орнатсаңыз, сол email мен парольмен кіріп, бәрін қалпына келтіресіз.'**
+  String get syncIntro;
+
+  /// No description provided for @syncServer.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервер мекенжайы'**
+  String get syncServer;
+
+  /// No description provided for @syncServerInvalid.
+  ///
+  /// In kk, this message translates to:
+  /// **'Мекенжай http:// немесе https:// деп басталуы керек.'**
+  String get syncServerInvalid;
+
+  /// No description provided for @syncPassword.
+  ///
+  /// In kk, this message translates to:
+  /// **'Аккаунт паролі'**
+  String get syncPassword;
+
+  /// No description provided for @syncPasswordHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверде аккаунт болмаса, осы парольмен жасалады.'**
+  String get syncPasswordHint;
+
+  /// No description provided for @syncConnect.
+  ///
+  /// In kk, this message translates to:
+  /// **'Синхрондауды қосу'**
+  String get syncConnect;
+
+  /// No description provided for @syncNow.
+  ///
+  /// In kk, this message translates to:
+  /// **'Қазір синхрондау'**
+  String get syncNow;
+
+  /// No description provided for @syncDisconnect.
+  ///
+  /// In kk, this message translates to:
+  /// **'Ажырату'**
+  String get syncDisconnect;
+
+  /// No description provided for @syncDisconnectTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Синхрондауды ажырату керек пе?'**
+  String get syncDisconnectTitle;
+
+  /// No description provided for @syncDisconnectBody.
+  ///
+  /// In kk, this message translates to:
+  /// **'Құрылғыдағы деректер өзгермейді. Сервердегі көшірме қалады — қайта қосқанда жаңартылады.'**
+  String get syncDisconnectBody;
+
+  /// No description provided for @syncAccount.
+  ///
+  /// In kk, this message translates to:
+  /// **'Аккаунт'**
+  String get syncAccount;
+
+  /// No description provided for @syncLast.
+  ///
+  /// In kk, this message translates to:
+  /// **'Соңғы синхрондау'**
+  String get syncLast;
+
+  /// No description provided for @syncNever.
+  ///
+  /// In kk, this message translates to:
+  /// **'Әлі болған жоқ'**
+  String get syncNever;
+
+  /// No description provided for @syncInProgress.
+  ///
+  /// In kk, this message translates to:
+  /// **'Синхрондалуда…'**
+  String get syncInProgress;
+
+  /// No description provided for @syncDone.
+  ///
+  /// In kk, this message translates to:
+  /// **'Синхрондалды.'**
+  String get syncDone;
+
+  /// No description provided for @syncAuto.
+  ///
+  /// In kk, this message translates to:
+  /// **'Өзгерістер желі болғанда өздігінен жіберіледі.'**
+  String get syncAuto;
+
+  /// No description provided for @syncErrOffline.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервер қолжетімсіз. Деректер құрылғыда сақталды — желі пайда болғанда қайталаймыз.'**
+  String get syncErrOffline;
+
+  /// No description provided for @syncErrCredentials.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверде бұл email басқа парольмен тіркелген.'**
+  String get syncErrCredentials;
+
+  /// No description provided for @syncErrUnauthorized.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сеанс ескірді. Синхрондауды қайта қосыңыз.'**
+  String get syncErrUnauthorized;
+
+  /// No description provided for @syncErrWeak.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервер бұл парольді қабылдамайды: кемінде 8 таңба, әріп пен сан.'**
+  String get syncErrWeak;
+
+  /// No description provided for @syncErrRateLimited.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тым көп әрекет. 15 минуттан кейін қайталаңыз.'**
+  String get syncErrRateLimited;
+
+  /// No description provided for @syncErrServer.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверде қате болды. Кейінірек қайталаңыз.'**
+  String get syncErrServer;
+
+  /// No description provided for @syncDeleteRemoteFailed.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервердегі көшірмені жою мүмкін болмады — желіні тексеріңіз. Тек құрылғыдан жою үшін алдымен синхрондауды ажыратыңыз.'**
+  String get syncDeleteRemoteFailed;
+
+  /// No description provided for @syncRestored.
+  ///
+  /// In kk, this message translates to:
+  /// **'Деректер бұлттан қалпына келтірілді.'**
+  String get syncRestored;
+
+  /// No description provided for @privacySyncTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Бұлттық көшірме'**
+  String get privacySyncTitle;
+
+  /// No description provided for @privacySyncBody.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде PBKDF2 хэшімен сақталады.'**
+  String get privacySyncBody;
+
   /// No description provided for @levelBeginner.
   ///
   /// In kk, this message translates to:

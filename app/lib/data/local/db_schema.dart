@@ -9,7 +9,8 @@
 abstract final class DbSchema {
   /// 2 — answers кестесіне бағаға пікірдің себебі мен мәтіні қосылды.
   /// 3 — парольді қалпына келтіру токендері (password_resets).
-  static const version = 3;
+  /// 4 — синхрондау: sessions/answers.updated_at және жойылғандар журналы.
+  static const version = 4;
   static const fileName = 'intrvue.db';
 
   static const users = 'users';
@@ -19,6 +20,7 @@ abstract final class DbSchema {
   static const answers = 'answers';
   static const favorites = 'favorites';
   static const passwordResets = 'password_resets';
+  static const syncDeletions = 'sync_deletions';
 
   // Бір реттік сілтеме: 15 минут жарамды, қолданылғаннан кейін used = 1.
   static const _passwordResetsTable =
@@ -28,6 +30,18 @@ abstract final class DbSchema {
       user_id    INTEGER NOT NULL REFERENCES $users(id) ON DELETE CASCADE,
       expires_at INTEGER NOT NULL,
       used       INTEGER NOT NULL DEFAULT 0
+    )''';
+
+  // Жойылған жазбалар серверге жеткенше осында тұрады (entity: topic,
+  // session, favorite). Синхрондаудан кейін тазаланады.
+  static const _syncDeletionsTable =
+      '''
+    CREATE TABLE $syncDeletions (
+      user_id    INTEGER NOT NULL REFERENCES $users(id) ON DELETE CASCADE,
+      entity     TEXT    NOT NULL,
+      entity_id  TEXT    NOT NULL,
+      deleted_at INTEGER NOT NULL,
+      PRIMARY KEY (user_id, entity, entity_id)
     )''';
 
   static const create = [
@@ -83,7 +97,8 @@ abstract final class DbSchema {
       topic_ids     TEXT    NOT NULL,
       started_at    INTEGER NOT NULL,
       current_index INTEGER NOT NULL DEFAULT 0,
-      finished      INTEGER NOT NULL DEFAULT 0
+      finished      INTEGER NOT NULL DEFAULT 0,
+      updated_at    INTEGER NOT NULL DEFAULT 0
     )''',
     'CREATE INDEX idx_sessions_user ON $sessions(user_id, started_at)',
     // Сессияда қолданылған сұрақты жоюға болмайды (ON DELETE RESTRICT):
@@ -106,6 +121,7 @@ abstract final class DbSchema {
       disputed      INTEGER NOT NULL DEFAULT 0,
       dispute_reason  TEXT,
       dispute_comment TEXT,
+      updated_at    INTEGER NOT NULL DEFAULT 0,
       UNIQUE (session_id, position)
     )''',
     'CREATE INDEX idx_answers_question ON $answers(question_id)',
@@ -117,6 +133,7 @@ abstract final class DbSchema {
       PRIMARY KEY (user_id, topic_id)
     )''',
     _passwordResetsTable,
+    _syncDeletionsTable,
   ];
 
   /// Ескі нұсқадан жаңартқанда орындалатын өзгерістер.
@@ -126,5 +143,10 @@ abstract final class DbSchema {
       'ALTER TABLE $answers ADD COLUMN dispute_comment TEXT',
     ],
     3: [_passwordResetsTable],
+    4: [
+      'ALTER TABLE $sessions ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+      'ALTER TABLE $answers ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0',
+      _syncDeletionsTable,
+    ],
   };
 }

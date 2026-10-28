@@ -10,6 +10,7 @@ import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/sync_repository.dart';
 
 /// Аккаунтты жою: парольмен растау, қате парольде аккаунт сақталады.
 class DeleteAccountScreen extends StatefulWidget {
@@ -35,10 +36,18 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     setState(() => _error = null);
     if (!_form.currentState!.validate()) return;
     setState(() => _loading = true);
+    final sync = context.read<SyncRepository>();
     final AuthError? error;
     try {
       error = await context.read<AuthRepository>().deleteAccount(
         _password.text,
+        // Бұлттағы көшірме де жойылады; сервер қолжетімсіз болса,
+        // құрылғыдағы аккаунт сақталып, себебі көрсетіледі.
+        beforeDelete: () async {
+          if (await sync.deleteRemote() != null) {
+            throw AppException(S.syncDeleteRemoteFailed);
+          }
+        },
       );
     } on AppException catch (e) {
       if (!mounted) return;

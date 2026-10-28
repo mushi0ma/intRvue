@@ -6,6 +6,7 @@ import '../local/app_database.dart';
 import '../local/db_errors.dart';
 import '../local/db_schema.dart';
 import '../local/mappers.dart';
+import '../local/sync_journal.dart';
 import '../models/enums.dart';
 import '../models/question.dart';
 import '../models/topic.dart';
@@ -250,11 +251,14 @@ class TopicRepository extends ChangeNotifier implements UserScoped {
   Future<void> delete(String id) async {
     final uid = _requireUser();
     await dbGuard(
-      () => _db.delete(
-        DbSchema.topics,
-        where: 'id = ? AND owner_id = ?',
-        whereArgs: [id, uid],
-      ),
+      () => _db.transaction((txn) async {
+        final n = await txn.delete(
+          DbSchema.topics,
+          where: 'id = ? AND owner_id = ?',
+          whereArgs: [id, uid],
+        );
+        if (n > 0) await SyncJournal.deleted(txn, uid, SyncJournal.topic, id);
+      }),
       foreignKey: S.topicInUse,
     );
     await _reload();
@@ -336,11 +340,14 @@ class TopicRepository extends ChangeNotifier implements UserScoped {
   Future<void> addFavorite(String id, {DateTime? at}) async {
     final uid = _requireUser();
     await dbGuard(
-      () => _db.insert(DbSchema.favorites, {
-        'user_id': uid,
-        'topic_id': id,
-        'created_at': Mappers.ms(at ?? DateTime.now()),
-      }, conflictAlgorithm: ConflictAlgorithm.ignore),
+      () => _db.transaction((txn) async {
+        await txn.insert(DbSchema.favorites, {
+          'user_id': uid,
+          'topic_id': id,
+          'created_at': Mappers.ms(at ?? DateTime.now()),
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+        await SyncJournal.restored(txn, uid, SyncJournal.favorite, id);
+      }),
     );
     await _reload();
   }
@@ -356,11 +363,16 @@ class TopicRepository extends ChangeNotifier implements UserScoped {
       ),
     );
     await dbGuard(
-      () => _db.delete(
-        DbSchema.favorites,
-        where: 'user_id = ? AND topic_id = ?',
-        whereArgs: [uid, id],
-      ),
+      () => _db.transaction((txn) async {
+        final n = await txn.delete(
+          DbSchema.favorites,
+          where: 'user_id = ? AND topic_id = ?',
+          whereArgs: [uid, id],
+        );
+        if (n > 0) {
+          await SyncJournal.deleted(txn, uid, SyncJournal.favorite, id);
+        }
+      }),
     );
     await _reload();
     return rows.isEmpty ? null : Mappers.date(rows.first['created_at']);

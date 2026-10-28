@@ -9,6 +9,7 @@ import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/sync_repository.dart';
 
 /// S02 Кіру және «Кіру орындалмады» күйі.
 class LoginScreen extends StatefulWidget {
@@ -39,12 +40,17 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_form.currentState!.validate()) return;
 
     setState(() => _loading = true);
-    final AuthError? error;
+    final auth = context.read<AuthRepository>();
+    final sync = context.read<SyncRepository>();
+    AuthError? error;
+    var restored = false;
     try {
-      error = await context.read<AuthRepository>().login(
-        _email.text,
-        _password.text,
-      );
+      error = await auth.login(_email.text, _password.text);
+      // Құрылғыда аккаунт жоқ — бұлттағы көшірмеден қалпына келтіріп көреміз.
+      if (error != null && !await auth.hasAccount(_email.text)) {
+        restored = await sync.restore(_email.text, _password.text);
+        if (restored) error = null;
+      }
     } on AppException catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
@@ -56,7 +62,9 @@ class _LoginScreenState extends State<LoginScreen> {
       _loading = false;
       _failed = error != null;
     });
-    if (error == null) context.go(Routes.home);
+    if (error != null) return;
+    if (restored) showAppSnackBar(context, S.syncRestored);
+    context.go(Routes.home);
   }
 
   @override

@@ -92,6 +92,32 @@ class AuthRepository extends ChangeNotifier {
     return null;
   }
 
+  /// Құрылғыда осы email-мен аккаунт бар ма (бұлттан қалпына келтіру үшін).
+  Future<bool> hasAccount(String email) async => await _row(email) != null;
+
+  /// Серверден қалпына келтірілген аккаунтты құрылғыда жасап, кіреді.
+  /// Пароль осы құрылғыда өз тұзымен қайта хэштеледі.
+  Future<UserProfile> adoptRemote(UserProfile profile, String password) async {
+    final salt = PasswordHasher.newSalt();
+    final id = await dbGuard(
+      () => _db.insert(DbSchema.users, {
+        ...Mappers.userProfileRow(profile),
+        'password_hash': PasswordHasher.hash(password, salt),
+        'password_salt': salt,
+        'created_at': Mappers.ms(DateTime.now()),
+      }),
+      unique: S.emailTaken,
+    );
+    final rows = await _db.query(
+      DbSchema.users,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    final user = Mappers.user(rows.first);
+    await _switchTo(user);
+    return user;
+  }
+
   Future<AuthError?> register({
     required String name,
     required String email,
@@ -198,7 +224,12 @@ class AuthRepository extends ChangeNotifier {
   Future<void> logout() => _switchTo(null);
 
   /// Delete: аккаунт және оған тиесілі барлық жазба (CASCADE).
-  Future<AuthError?> deleteAccount(String password) async {
+  /// [beforeDelete] пароль расталғаннан кейін шақырылады (мысалы, сервердегі
+  /// көшірмені жою); ол қате лақтырса, құрылғыдағы аккаунт қалады.
+  Future<AuthError?> deleteAccount(
+    String password, {
+    Future<void> Function()? beforeDelete,
+  }) async {
     final current = _user;
     if (current == null) return null;
     final row = await _row(current.email);
@@ -210,6 +241,7 @@ class AuthRepository extends ChangeNotifier {
         )) {
       return AuthError.wrongPassword;
     }
+    await beforeDelete?.call();
     await dbGuard(
       () =>
           _db.delete(DbSchema.users, where: 'id = ?', whereArgs: [current.id]),

@@ -19,6 +19,8 @@ class PrivacyScreen extends StatelessWidget {
         SectionDivider(vertical: 28),
         InfoSection(title: S.privacyStoredTitle, body: S.privacyStoredBody),
         SectionDivider(vertical: 28),
+        InfoSection(title: S.privacySyncTitle, body: S.privacySyncBody),
+        SectionDivider(vertical: 28),
         InfoSection(title: S.privacyManageTitle, body: S.privacyManageBody),
         SectionDivider(vertical: 28),
         InfoSection(title: S.privacyOfflineTitle, body: S.privacyOfflineBody),

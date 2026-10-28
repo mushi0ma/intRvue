@@ -9,6 +9,8 @@ import '../../core/utils/formatters.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/settings_repository.dart';
+import '../../data/repositories/sync_repository.dart';
+import 'sync_screen.dart';
 
 /// S15 Баптаулар.
 class SettingsScreen extends StatelessWidget {
@@ -89,6 +91,11 @@ class SettingsScreen extends StatelessWidget {
           title: S.reminders,
           value: reminderLabel(settings.reminders),
           onTap: () => context.push(Routes.reminders),
+        ),
+        SettingsRow(
+          title: S.syncTitle,
+          value: SyncScreen.statusLabel(context.watch<SyncRepository>()),
+          onTap: () => context.push(Routes.sync),
         ),
         SettingsRow(
           title: S.fieldInterviewLanguage,

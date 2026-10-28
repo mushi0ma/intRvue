@@ -53,6 +53,7 @@ abstract final class Routes {
   static const remindersEnabled = '/settings/reminders/enabled';
   static const notificationsDenied = '/settings/notifications-denied';
   static const privacy = '/settings/privacy';
+  static const sync = '/settings/sync';
   static const deleteAccount = '/settings/delete-account';
 
   /// Кірмеген пайдаланушыға ашық маршруттар.

@@ -32,6 +32,7 @@ import '../features/settings/delete_account_screen.dart';
 import '../features/settings/privacy_screen.dart';
 import '../features/settings/reminder_status_screens.dart';
 import '../features/settings/reminders_screen.dart';
+import '../features/settings/sync_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/topics/favorites_screen.dart';
@@ -171,6 +172,7 @@ GoRouter buildRouter(AuthRepository auth, {String initial = Routes.splash}) {
         (_) => const NotificationsDeniedScreen(),
       ),
       route(Routes.privacy, (_) => const PrivacyScreen()),
+      route(Routes.sync, (_) => const SyncScreen()),
       route(Routes.deleteAccount, (_) => const DeleteAccountScreen()),
     ],
   );

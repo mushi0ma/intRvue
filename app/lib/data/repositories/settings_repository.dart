@@ -29,7 +29,9 @@ class SettingsRepository extends ChangeNotifier {
     _themeMode = ThemeMode.values.byName(
       _prefs.getString(_themeKey) ?? ThemeMode.system.name,
     );
-    _systemColors = _prefs.getBool(_systemColorsKey) ?? true;
+    // Әдепкіде бренд түстері: жүйелік палитра intRvue-дің жасыл
+    // бірегейлігін көкке ауыстырып жібереді (эмуляторда тексерілді).
+    _systemColors = _prefs.getBool(_systemColorsKey) ?? false;
     _language = InterfaceLanguage.values.byName(
       _prefs.getString(_languageKey) ?? InterfaceLanguage.kk.name,
     );

@@ -1224,6 +1224,105 @@ class AppLocalizationsKk extends AppLocalizations {
       'Тақырыптар, сессиялар, жауаптар және таңдаулылар құрылғыдағы SQLite қорында сақталады. Қосымша интернетсіз толық жұмыс істейді.';
 
   @override
+  String get syncTitle => 'Бұлттық синхрондау';
+
+  @override
+  String get syncSubtitle =>
+      'Деректер құрылғыда тұрады, сервер — қосымша көшірме.';
+
+  @override
+  String get syncOff => 'Өшірулі';
+
+  @override
+  String get syncIntro =>
+      'Қоссаңыз, өз тақырыптарыңыз, сессиялар мен таңдаулылар intRvue серверіне көшіріледі. Телефонды ауыстырсаңыз немесе қосымшаны қайта орнатсаңыз, сол email мен парольмен кіріп, бәрін қалпына келтіресіз.';
+
+  @override
+  String get syncServer => 'Сервер мекенжайы';
+
+  @override
+  String get syncServerInvalid =>
+      'Мекенжай http:// немесе https:// деп басталуы керек.';
+
+  @override
+  String get syncPassword => 'Аккаунт паролі';
+
+  @override
+  String get syncPasswordHint =>
+      'Серверде аккаунт болмаса, осы парольмен жасалады.';
+
+  @override
+  String get syncConnect => 'Синхрондауды қосу';
+
+  @override
+  String get syncNow => 'Қазір синхрондау';
+
+  @override
+  String get syncDisconnect => 'Ажырату';
+
+  @override
+  String get syncDisconnectTitle => 'Синхрондауды ажырату керек пе?';
+
+  @override
+  String get syncDisconnectBody =>
+      'Құрылғыдағы деректер өзгермейді. Сервердегі көшірме қалады — қайта қосқанда жаңартылады.';
+
+  @override
+  String get syncAccount => 'Аккаунт';
+
+  @override
+  String get syncLast => 'Соңғы синхрондау';
+
+  @override
+  String get syncNever => 'Әлі болған жоқ';
+
+  @override
+  String get syncInProgress => 'Синхрондалуда…';
+
+  @override
+  String get syncDone => 'Синхрондалды.';
+
+  @override
+  String get syncAuto => 'Өзгерістер желі болғанда өздігінен жіберіледі.';
+
+  @override
+  String get syncErrOffline =>
+      'Сервер қолжетімсіз. Деректер құрылғыда сақталды — желі пайда болғанда қайталаймыз.';
+
+  @override
+  String get syncErrCredentials =>
+      'Серверде бұл email басқа парольмен тіркелген.';
+
+  @override
+  String get syncErrUnauthorized =>
+      'Сеанс ескірді. Синхрондауды қайта қосыңыз.';
+
+  @override
+  String get syncErrWeak =>
+      'Сервер бұл парольді қабылдамайды: кемінде 8 таңба, әріп пен сан.';
+
+  @override
+  String get syncErrRateLimited =>
+      'Тым көп әрекет. 15 минуттан кейін қайталаңыз.';
+
+  @override
+  String get syncErrServer => 'Серверде қате болды. Кейінірек қайталаңыз.';
+
+  @override
+  String get syncDeleteRemoteFailed =>
+      'Сервердегі көшірмені жою мүмкін болмады — желіні тексеріңіз. Тек құрылғыдан жою үшін алдымен синхрондауды ажыратыңыз.';
+
+  @override
+  String get syncRestored => 'Деректер бұлттан қалпына келтірілді.';
+
+  @override
+  String get privacySyncTitle => 'Бұлттық көшірме';
+
+  @override
+  String get privacySyncBody =>
+      'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде PBKDF2 хэшімен сақталады.';
+
+  @override
   String get levelBeginner => 'Бастапқы';
 
   @override

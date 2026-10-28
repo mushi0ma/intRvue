@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,7 +7,9 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../data/local/app_database.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/session_repository.dart';
+import '../data/remote/sync_api.dart';
 import '../data/repositories/settings_repository.dart';
+import '../data/repositories/sync_repository.dart';
 import '../data/repositories/topic_repository.dart';
 import '../data/services/reminder_scheduler.dart';
 
@@ -20,6 +23,7 @@ class AppServices {
     this.topics,
     this.sessions,
     this.reminders,
+    this.sync,
   );
 
   final SharedPreferences prefs;
@@ -29,6 +33,7 @@ class AppServices {
   final TopicRepository topics;
   final SessionRepository sessions;
   final ReminderScheduler reminders;
+  final SyncRepository sync;
 
   /// Деректер қорын инициализациялап, соңғы кірген пайдаланушының
   /// деректерін жүктейді. Интернет қажет емес.
@@ -36,6 +41,7 @@ class AppServices {
     DatabaseFactory? factory,
     String? databasePath,
     ReminderScheduler? reminders,
+    SyncApi Function(Uri baseUrl)? syncApi,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final database = await AppDatabase.open(
@@ -47,6 +53,16 @@ class AppServices {
     // Реті маңызды: сессиялар тақырыптардың сұрақтарына сілтейді.
     final auth = AuthRepository(database, prefs, scoped: [topics, sessions]);
     await auth.init();
+    final sync = SyncRepository(
+      prefs: prefs,
+      database: database,
+      auth: auth,
+      scoped: [topics, sessions],
+      watch: [topics, sessions],
+      api: syncApi,
+    );
+    // Желі болмаса үнсіз өтеді — қосымша офлайн іске қосыла береді.
+    if (sync.link != null) unawaited(sync.syncNow());
     return AppServices._(
       prefs,
       database,
@@ -55,6 +71,7 @@ class AppServices {
       topics,
       sessions,
       reminders ?? await LocalReminderScheduler.create(),
+      sync,
     );
   }
 
@@ -67,5 +84,8 @@ class AppServices {
     return null;
   }
 
-  Future<void> dispose() => database.close();
+  Future<void> dispose() async {
+    sync.dispose();
+    await database.close();
+  }
 }

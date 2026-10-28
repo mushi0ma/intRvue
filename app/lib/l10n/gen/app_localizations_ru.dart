@@ -1229,6 +1229,106 @@ class AppLocalizationsRu extends AppLocalizations {
       'Темы, сессии, ответы и избранное хранятся в базе SQLite на устройстве. Приложение полностью работает без интернета.';
 
   @override
+  String get syncTitle => 'Облачная синхронизация';
+
+  @override
+  String get syncSubtitle =>
+      'Данные хранятся на устройстве, сервер — дополнительная копия.';
+
+  @override
+  String get syncOff => 'Выключена';
+
+  @override
+  String get syncIntro =>
+      'Если включить, ваши темы, сессии и избранное копируются на сервер intRvue. При смене телефона или переустановке войдите с тем же email и паролем — всё восстановится.';
+
+  @override
+  String get syncServer => 'Адрес сервера';
+
+  @override
+  String get syncServerInvalid =>
+      'Адрес должен начинаться с http:// или https://.';
+
+  @override
+  String get syncPassword => 'Пароль аккаунта';
+
+  @override
+  String get syncPasswordHint =>
+      'Если аккаунта на сервере нет, он будет создан с этим паролем.';
+
+  @override
+  String get syncConnect => 'Включить синхронизацию';
+
+  @override
+  String get syncNow => 'Синхронизировать сейчас';
+
+  @override
+  String get syncDisconnect => 'Отключить';
+
+  @override
+  String get syncDisconnectTitle => 'Отключить синхронизацию?';
+
+  @override
+  String get syncDisconnectBody =>
+      'Данные на устройстве не изменятся. Копия на сервере останется и обновится при повторном подключении.';
+
+  @override
+  String get syncAccount => 'Аккаунт';
+
+  @override
+  String get syncLast => 'Последняя синхронизация';
+
+  @override
+  String get syncNever => 'Ещё не было';
+
+  @override
+  String get syncInProgress => 'Синхронизация…';
+
+  @override
+  String get syncDone => 'Синхронизировано.';
+
+  @override
+  String get syncAuto =>
+      'Изменения отправляются автоматически, когда есть сеть.';
+
+  @override
+  String get syncErrOffline =>
+      'Сервер недоступен. Данные сохранены на устройстве — повторим, когда появится сеть.';
+
+  @override
+  String get syncErrCredentials =>
+      'На сервере этот email зарегистрирован с другим паролем.';
+
+  @override
+  String get syncErrUnauthorized =>
+      'Сеанс истёк. Подключите синхронизацию заново.';
+
+  @override
+  String get syncErrWeak =>
+      'Сервер не принимает этот пароль: минимум 8 символов, буквы и цифры.';
+
+  @override
+  String get syncErrRateLimited =>
+      'Слишком много попыток. Повторите через 15 минут.';
+
+  @override
+  String get syncErrServer => 'Ошибка на сервере. Повторите позже.';
+
+  @override
+  String get syncDeleteRemoteFailed =>
+      'Не удалось удалить копию на сервере — проверьте сеть. Чтобы удалить только с устройства, сначала отключите синхронизацию.';
+
+  @override
+  String get syncRestored => 'Данные восстановлены из облака.';
+
+  @override
+  String get privacySyncTitle => 'Облачная копия';
+
+  @override
+  String get privacySyncBody =>
+      'Только если вы её включили: данные\nотправляются на сервер intRvue. Пароль\nхранится там как хэш PBKDF2.';
+
+  @override
   String get levelBeginner => 'Начальный';
 
   @override

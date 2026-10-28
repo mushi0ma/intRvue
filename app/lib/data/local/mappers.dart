@@ -109,6 +109,7 @@ abstract final class Mappers {
     'started_at': ms(s.startedAt),
     'current_index': s.currentIndex,
     'finished': s.finished ? 1 : 0,
+    'updated_at': ms(DateTime.now()),
   };
 
   static InterviewSession session(
@@ -147,6 +148,8 @@ abstract final class Mappers {
       'advice': x?.advice,
       'evidence': x?.evidence,
       'missing': x == null ? null : jsonEncode(x.missing),
+      // Синхрондауда «соңғы өзгеріс жеңеді» ережесі осы уақытпен жұмыс істейді.
+      'updated_at': ms(DateTime.now()),
     };
   }
 

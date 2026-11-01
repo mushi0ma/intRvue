@@ -6,6 +6,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../data/local/app_database.dart';
 import '../data/repositories/auth_repository.dart';
+import '../data/repositories/cloud_topics_repository.dart';
 import '../data/repositories/session_repository.dart';
 import '../data/remote/sync_api.dart';
 import '../data/repositories/settings_repository.dart';
@@ -24,6 +25,7 @@ class AppServices {
     this.sessions,
     this.reminders,
     this.sync,
+    this.cloud,
   );
 
   final SharedPreferences prefs;
@@ -34,6 +36,7 @@ class AppServices {
   final SessionRepository sessions;
   final ReminderScheduler reminders;
   final SyncRepository sync;
+  final CloudTopicsRepository cloud;
 
   /// Деректер қорын инициализациялап, соңғы кірген пайдаланушының
   /// деректерін жүктейді. Интернет қажет емес.
@@ -72,6 +75,7 @@ class AppServices {
       sessions,
       reminders ?? await LocalReminderScheduler.create(),
       sync,
+      CloudTopicsRepository(sync: sync, topics: topics),
     );
   }
 
@@ -85,6 +89,7 @@ class AppServices {
   }
 
   Future<void> dispose() async {
+    cloud.dispose();
     sync.dispose();
     await database.close();
   }

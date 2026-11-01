@@ -89,6 +89,17 @@ class SyncRepository extends ChangeNotifier {
 
   SyncApi get _api => _apiFactory(serverUrl);
 
+  /// REST клиенті ағымдағы сервер мекенжайымен.
+  SyncApi get api => _api;
+
+  /// Сервер токенді қабылдамады (401) — қайта қосу керек.
+  Future<void> invalidateLink() async {
+    final uid = _userId;
+    if (uid == null || link == null) return;
+    await _saveLink(uid, null);
+    notifyListeners();
+  }
+
   Future<void> setServerUrl(Uri url) async {
     await _prefs.setString(_serverKey, url.toString());
     notifyListeners();
@@ -288,8 +299,18 @@ class SyncRepository extends ChangeNotifier {
     'interview_language': u.interviewLanguage.name,
   };
 
+  bool _disposed = false;
+
+  /// Сұрау экран жабылғаннан (немесе қосымша тоқтағаннан) кейін аяқталса,
+  /// жойылған объектіге хабар жібермейміз.
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
+
   @override
   void dispose() {
+    _disposed = true;
     _autoTimer?.cancel();
     _auth.removeListener(_onAuthChanged);
     for (final l in _watch) {

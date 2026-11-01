@@ -413,6 +413,271 @@ void main() {
     });
   });
 
+  group('topics resource', () {
+    Map<String, Object?> newTopic({String title = 'Docker негіздері'}) => {
+      'title': title,
+      'summary': 'Image, container, volume',
+      'direction': 'backend',
+      'level': 'junior',
+      'review_points': ['Image', 'Volume'],
+      'questions': [
+        {
+          'text': 'Image мен container айырмашылығы?',
+          'model_answer': 'Image — үлгі, container — іске қосылған данасы.',
+          'concepts': [
+            {
+              'label': 'Image',
+              'keywords': ['image'],
+            },
+          ],
+        },
+      ],
+    };
+
+    test('GET lists only own topics, empty at first', () async {
+      final a = await register('a@example.com');
+      final (status, body) = await call('GET', '/v1/topics', token: a);
+      expect(status, 200);
+      expect(body['topics'], isEmpty);
+
+      final b = await register('b@example.com');
+      await call('POST', '/v1/topics', body: newTopic(), token: b);
+      expect((await call('GET', '/v1/topics', token: a)).$2['topics'], isEmpty);
+      expect(
+        (await call('GET', '/v1/topics', token: b)).$2['topics'],
+        hasLength(1),
+      );
+    });
+
+    test(
+      'POST creates a topic: 201, Location, JSON arrays, ISO dates',
+      () async {
+        final a = await register('a@example.com');
+        final (status, body) = await call(
+          'POST',
+          '/v1/topics',
+          body: newTopic(),
+          token: a,
+        );
+        expect(status, 201, reason: '$body');
+        final id = body['id']! as String;
+        expect(body['title'], 'Docker негіздері');
+        expect(body['review_points'], ['Image', 'Volume']);
+        expect(body['sample_question'], 'Image мен container айырмашылығы?');
+        expect(DateTime.parse(body['updated_at']! as String).isUtc, isTrue);
+        final questions = body['questions']! as List;
+        expect(questions.single, containsPair('position', 0));
+        expect((questions.single as Map)['concepts'], hasLength(1));
+
+        final raw = await http.post(
+          base.resolve('/v1/topics'),
+          headers: {
+            'authorization': 'Bearer $a',
+            'content-type': 'application/json',
+          },
+          body: jsonEncode(newTopic(title: 'Kubernetes')),
+        );
+        expect(raw.statusCode, 201);
+        final location = raw.headers['location']!;
+        expect(location, '/v1/topics/${jsonDecode(raw.body)['id']}');
+        expect((await call('GET', location, token: a)).$1, 200);
+
+        final (getStatus, got) = await call('GET', '/v1/topics/$id', token: a);
+        expect(getStatus, 200);
+        expect(got['title'], body['title']);
+      },
+    );
+
+    test(
+      'POST keeps a client id and rejects duplicates and bad bodies',
+      () async {
+        final a = await register('a@example.com');
+        final first = await call(
+          'POST',
+          '/v1/topics',
+          body: {...newTopic(), 'id': 'u7-100'},
+          token: a,
+        );
+        expect(first.$1, 201);
+        expect(first.$2['id'], 'u7-100');
+
+        final sameId = await call(
+          'POST',
+          '/v1/topics',
+          body: {
+            ...newTopic(title: 'Басқа атау'),
+            'id': 'u7-100',
+          },
+          token: a,
+        );
+        expect(sameId.$1, 409);
+        expect(sameId.$2['error'], 'conflict');
+
+        final sameTitle = await call(
+          'POST',
+          '/v1/topics',
+          body: newTopic(title: 'DOCKER НЕГІЗДЕРІ'),
+          token: a,
+        );
+        expect(sameTitle.$1, 409);
+        expect(sameTitle.$2['error'], 'title_taken');
+
+        for (final bad in [
+          {...newTopic(), 'level': 'senior'},
+          {...newTopic(), 'questions': []},
+          {...newTopic(), 'review_points': 'Image'},
+          {...newTopic(), 'title': 'ab'},
+        ]) {
+          final (status, body) = await call(
+            'POST',
+            '/v1/topics',
+            body: bad,
+            token: a,
+          );
+          expect(status, 400, reason: '$bad → $body');
+          expect(body['error'], 'invalid_request');
+        }
+      },
+    );
+
+    test('PATCH changes only sent fields and bumps updated_at', () async {
+      final a = await register('a@example.com');
+      final created = (await call(
+        'POST',
+        '/v1/topics',
+        body: newTopic(),
+        token: a,
+      )).$2;
+      final id = created['id']! as String;
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+
+      final (status, body) = await call(
+        'PATCH',
+        '/v1/topics/$id',
+        body: {'title': 'Docker және Compose'},
+        token: a,
+      );
+      expect(status, 200, reason: '$body');
+      expect(body['title'], 'Docker және Compose');
+      expect(body['summary'], created['summary']);
+      expect(body['questions'], created['questions']);
+      expect(
+        DateTime.parse(body['updated_at']! as String)
+            .isAfter(DateTime.parse(created['updated_at']! as String)),
+        isTrue,
+      );
+
+      final replaced = await call(
+        'PATCH',
+        '/v1/topics/$id',
+        body: {
+          'questions': [
+            {'text': 'Volume не үшін керек?', 'model_answer': 'Дерек сақтау.'},
+            {'text': 'Compose деген не?', 'model_answer': 'Бірнеше контейнер.'},
+          ],
+        },
+        token: a,
+      );
+      expect(replaced.$1, 200);
+      expect(replaced.$2['questions'], hasLength(2));
+      expect(replaced.$2['sample_question'], 'Volume не үшін керек?');
+
+      expect(
+        (await call('PATCH', '/v1/topics/$id', body: {}, token: a)).$1,
+        400,
+      );
+      expect(
+        (await call(
+          'PATCH',
+          '/v1/topics/$id',
+          body: {'direction': 'devops'},
+          token: a,
+        )).$1,
+        400,
+      );
+      expect(
+        (await call(
+          'PATCH',
+          '/v1/topics/missing',
+          body: {'title': 'Жаңа атау'},
+          token: a,
+        )).$1,
+        404,
+      );
+    });
+
+    test('DELETE removes the topic and leaves a tombstone for sync', () async {
+      final a = await register('a@example.com');
+      final id =
+          (await call(
+                'POST',
+                '/v1/topics',
+                body: newTopic(),
+                token: a,
+              )).$2['id']!
+              as String;
+
+      final b = await register('b@example.com');
+      expect((await call('DELETE', '/v1/topics/$id', token: b)).$1, 404);
+
+      expect((await call('DELETE', '/v1/topics/$id', token: a)).$1, 204);
+      expect((await call('GET', '/v1/topics/$id', token: a)).$1, 404);
+      expect((await call('DELETE', '/v1/topics/$id', token: a)).$1, 404);
+
+      // Басқа құрылғы ескі нұсқасын жіберсе де, тақырып қайта тірілмейді.
+      final (status, snapshot) = await call(
+        'POST',
+        '/v1/sync',
+        body: {
+          'topics': [topic(id, t0)],
+        },
+        token: a,
+      );
+      expect(status, 200);
+      expect(snapshot['topics'], isEmpty);
+      expect(
+        snapshot['deleted'],
+        contains(
+          allOf(containsPair('entity', 'topic'), containsPair('id', id)),
+        ),
+      );
+    });
+
+    test('changes made over REST reach the sync snapshot', () async {
+      final a = await register('a@example.com');
+      final (_, created) = await call(
+        'POST',
+        '/v1/topics',
+        body: newTopic(),
+        token: a,
+      );
+      final (_, snapshot) = await call('POST', '/v1/sync', body: {}, token: a);
+      final synced = (snapshot['topics']! as List).single as Map;
+      expect(synced['id'], created['id']);
+      // Синхрондау пішімі өзгермеген: тізім — JSON мәтін, уақыт — мс.
+      expect(jsonDecode(synced['review_points']! as String), [
+        'Image',
+        'Volume',
+      ]);
+      expect(
+        synced['updated_at'],
+        DateTime.parse(created['updated_at']! as String).millisecondsSinceEpoch,
+      );
+    });
+
+    test('every topic route needs a token', () async {
+      for (final (method, path) in [
+        ('GET', '/v1/topics'),
+        ('GET', '/v1/topics/x'),
+        ('POST', '/v1/topics'),
+        ('PATCH', '/v1/topics/x'),
+        ('DELETE', '/v1/topics/x'),
+      ]) {
+        expect((await call(method, path, body: {})).$1, 401, reason: path);
+      }
+    });
+  });
+
   test('unknown routes and malformed JSON', () async {
     expect((await call('GET', '/v2/nothing')).$1, 404);
     final response = await http.post(

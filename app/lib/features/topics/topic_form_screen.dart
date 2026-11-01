@@ -12,6 +12,7 @@ import '../../data/local/db_errors.dart';
 import '../../data/models/enums.dart';
 import '../../data/models/topic.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/cloud_topics_repository.dart';
 import '../../data/repositories/topic_repository.dart';
 
 /// Пайдаланушы тақырыбын қосу (Create) және өзгерту (Update/Delete).
@@ -123,8 +124,19 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
           ? await _repo.update(_existing!.id, _draft())
           : await _repo.create(_draft());
       if (!mounted) return;
+      // Бұлт қосулы болса — бірден серверге (POST/PATCH). Сәтсіз болса,
+      // тақырып құрылғыда сақталған, синхрондау кейін жібереді.
+      final cloud = context.read<CloudTopicsRepository>();
+      final pushed = cloud.linked ? await cloud.pushSaved(topic) : null;
+      if (!mounted) return;
       _dirty = false;
-      showAppSnackBar(context, _isEdit ? S.topicUpdated : S.topicCreated);
+      final done = _isEdit ? S.topicUpdated : S.topicCreated;
+      showAppSnackBar(
+        context,
+        !cloud.linked
+            ? done
+            : '$done ${pushed == null ? S.cloudSent : S.cloudDeferred}',
+      );
       if (_isEdit) {
         context.popOr(Routes.topics);
       } else {
@@ -150,8 +162,18 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
     try {
       await _repo.delete(_existing!.id);
       if (!mounted) return;
+      final cloud = context.read<CloudTopicsRepository>();
+      final pushed = cloud.linked
+          ? await cloud.pushDeleted(_existing.id)
+          : null;
+      if (!mounted) return;
       _dirty = false;
-      showAppSnackBar(context, S.topicDeleted);
+      showAppSnackBar(
+        context,
+        !cloud.linked
+            ? S.topicDeleted
+            : '${S.topicDeleted} ${pushed == null ? S.cloudSent : S.cloudDeferred}',
+      );
       context.go(Routes.topics);
     } on AppException catch (e) {
       if (mounted) showAppSnackBar(context, e.message);

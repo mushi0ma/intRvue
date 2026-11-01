@@ -2582,6 +2582,192 @@ abstract class AppLocalizations {
   /// **'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде PBKDF2 хэшімен сақталады.'**
   String get privacySyncBody;
 
+  /// No description provided for @syncErrTimeout.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервер тым ұзақ жауап бермеді. Қайталап көріңіз.'**
+  String get syncErrTimeout;
+
+  /// No description provided for @syncErrNotFound.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тақырып серверде жоқ — басқа құрылғыда жойылған болуы мүмкін.'**
+  String get syncErrNotFound;
+
+  /// No description provided for @syncErrTitleTaken.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверде осындай атаулы тақырып бар.'**
+  String get syncErrTitleTaken;
+
+  /// No description provided for @syncErrConflict.
+  ///
+  /// In kk, this message translates to:
+  /// **'Бұл тақырып серверде бұрыннан бар.'**
+  String get syncErrConflict;
+
+  /// No description provided for @syncErrInvalid.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервер деректі қабылдамады. Өрістерді тексеріңіз.'**
+  String get syncErrInvalid;
+
+  /// No description provided for @cloudTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Бұлттағы тақырыптар'**
+  String get cloudTitle;
+
+  /// No description provided for @cloudSubtitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервердегі көшірме: тізімді жаңартып, тақырыпты жіберіп, өзгертіп не жоя аласыз.'**
+  String get cloudSubtitle;
+
+  /// No description provided for @cloudLoading.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверден жүктелуде…'**
+  String get cloudLoading;
+
+  /// No description provided for @cloudEmpty.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверде әзірге өз тақырыптарыңыз жоқ.'**
+  String get cloudEmpty;
+
+  /// No description provided for @cloudAccount.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервердегі аккаунт'**
+  String get cloudAccount;
+
+  /// No description provided for @cloudRegistered.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тіркелген'**
+  String get cloudRegistered;
+
+  /// No description provided for @cloudLoadedAt.
+  ///
+  /// In kk, this message translates to:
+  /// **'Жаңартылды'**
+  String get cloudLoadedAt;
+
+  /// No description provided for @cloudRefresh.
+  ///
+  /// In kk, this message translates to:
+  /// **'Жаңарту'**
+  String get cloudRefresh;
+
+  /// No description provided for @cloudOnServer.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверде'**
+  String get cloudOnServer;
+
+  /// No description provided for @cloudDeviceOnly.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тек осы құрылғыда'**
+  String get cloudDeviceOnly;
+
+  /// No description provided for @cloudSynced.
+  ///
+  /// In kk, this message translates to:
+  /// **'Синхрондалған'**
+  String get cloudSynced;
+
+  /// No description provided for @cloudNewerInCloud.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверде жаңарақ'**
+  String get cloudNewerInCloud;
+
+  /// No description provided for @cloudNewerOnDevice.
+  ///
+  /// In kk, this message translates to:
+  /// **'Құрылғыда жаңарақ'**
+  String get cloudNewerOnDevice;
+
+  /// No description provided for @cloudOnlyRemote.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тек серверде'**
+  String get cloudOnlyRemote;
+
+  /// No description provided for @cloudUpload.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверге жіберу'**
+  String get cloudUpload;
+
+  /// No description provided for @cloudRename.
+  ///
+  /// In kk, this message translates to:
+  /// **'Атауын өзгерту'**
+  String get cloudRename;
+
+  /// No description provided for @cloudRenameField.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервердегі атауы'**
+  String get cloudRenameField;
+
+  /// No description provided for @cloudDelete.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверден жою'**
+  String get cloudDelete;
+
+  /// No description provided for @cloudDeleteTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тақырыпты серверден жою керек пе?'**
+  String get cloudDeleteTitle;
+
+  /// No description provided for @cloudDeleteBody.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тақырып серверден, ал синхрондаудан кейін барлық құрылғыдан жойылады.'**
+  String get cloudDeleteBody;
+
+  /// No description provided for @cloudUploaded.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверге жіберілді.'**
+  String get cloudUploaded;
+
+  /// No description provided for @cloudRenamed.
+  ///
+  /// In kk, this message translates to:
+  /// **'Атауы өзгертілді.'**
+  String get cloudRenamed;
+
+  /// No description provided for @cloudDeleted.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверден жойылды.'**
+  String get cloudDeleted;
+
+  /// No description provided for @cloudSent.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверге де жіберілді.'**
+  String get cloudSent;
+
+  /// No description provided for @cloudDeferred.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверге кейін жіберіледі.'**
+  String get cloudDeferred;
+
+  /// No description provided for @cloudActions.
+  ///
+  /// In kk, this message translates to:
+  /// **'Әрекеттер'**
+  String get cloudActions;
+
   /// No description provided for @levelBeginner.
   ///
   /// In kk, this message translates to:

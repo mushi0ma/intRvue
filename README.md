@@ -1,12 +1,12 @@
 # intRvue
 
 Android-приложение для текстовой подготовки к IT-собеседованиям (интерфейс на казахском и русском).
-Курсовой проект КМ07: практические работы №1–4.
+Курсовой проект КМ07: практические работы №1–5.
 
 | Папка | Что внутри |
 |---|---|
 | `app/` | Flutter-приложение: feature-based структура, Material 3 по Figma, go_router, SQLite, kk/ru |
-| `server/` | Сервер синхронизации на Dart (shelf) + PostgreSQL |
+| `server/` | REST API на Dart (shelf) + PostgreSQL: синхронизация и ресурс тем ([endpoint-ы](server/README.md)) |
 
 ## Быстрый старт
 
@@ -21,7 +21,7 @@ cd app && flutter run                       # эмулятор Android
 ## Проверка
 
 ```bash
-cd app && flutter analyze && flutter test   # 239 тестов (e2e синхронизации — при запущенном PostgreSQL)
-cd server && dart test                      # 12 интеграционных тестов на PostgreSQL
+cd app && flutter analyze && flutter test   # 259 тестов (e2e синхронизации — при запущенном PostgreSQL)
+cd server && dart test                      # 19 интеграционных тестов на PostgreSQL
 ```
 

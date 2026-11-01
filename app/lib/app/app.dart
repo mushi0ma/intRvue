@@ -70,6 +70,7 @@ class _IntRvueAppState extends State<IntRvueApp> {
         ChangeNotifierProvider.value(value: s.topics),
         ChangeNotifierProvider.value(value: s.sessions),
         ChangeNotifierProvider.value(value: s.sync),
+        ChangeNotifierProvider.value(value: s.cloud),
         Provider<ReminderScheduler>.value(value: s.reminders),
       ],
       // Android 12+: жүйе тұсқағаз түстерін береді; басқа жерде — null.

@@ -8,7 +8,9 @@ import 'package:intrvue/app/bootstrap.dart';
 import 'package:intrvue/data/local/app_database.dart';
 import 'package:intrvue/data/models/enums.dart';
 import 'package:intrvue/data/models/topic.dart';
+import 'package:intrvue/data/remote/request_state.dart';
 import 'package:intrvue/data/remote/sync_api.dart';
+import 'package:intrvue/data/repositories/cloud_topics_repository.dart';
 import 'package:intrvue/data/services/reminder_scheduler.dart';
 import 'package:intrvue_server/intrvue_server.dart';
 import 'package:postgres/postgres.dart';
@@ -229,6 +231,150 @@ Future<void> main() async {
       );
       expect(topics.first.first, 0);
       expect(b.topics.all.where((t) => t.isCustom), hasLength(1));
+    });
+
+    // ------------------------------------------ REST ресурстары (практикалық №5)
+
+    Future<(AppServices, String)> linked(String email) async {
+      SharedPreferences.setMockInitialValues({});
+      final s = await device();
+      await s.auth.register(
+        name: 'Ерлан',
+        email: email,
+        password: 'rest2026pass',
+      );
+      expect(await s.sync.connect('rest2026pass'), isNull);
+      return (s, s.sync.link!.token);
+    }
+
+    test(
+      'REST GET: аккаунт пен тақырыптар Dart модельдеріне айналады',
+      () async {
+        final (s, token) = await linked('get@example.com');
+        final custom = await s.topics.create(_topic);
+        expect(await s.sync.syncNow(), isNull);
+        final api = HttpSyncApi(base);
+
+        final account = await api.account(token);
+        expect(account.email, 'get@example.com');
+        expect(account.name, 'Ерлан');
+
+        final topics = await api.topics(token);
+        expect(topics.single.id, custom.id);
+        expect(topics.single.reviewPoints, _topic.reviewPoints);
+        expect(topics.single.questions.single.text, 'Volume не үшін керек?');
+        expect(
+          topics.single.updatedAt!.millisecondsSinceEpoch,
+          s.topics.byId(custom.id).updatedAt!.millisecondsSinceEpoch,
+        );
+        expect((await api.topic(token, custom.id)).title, custom.title);
+        await expectLater(
+          api.topic(token, 'missing'),
+          throwsA(
+            isA<SyncApiException>().having(
+              (e) => e.failure,
+              'failure',
+              SyncFailure.notFound,
+            ),
+          ),
+        );
+      },
+    );
+
+    test('REST POST: құрылғыдағы тақырып серверге жіберіледі', () async {
+      final (s, token) = await linked('post@example.com');
+      final custom = await s.topics.create(_topic);
+      // Авто-синхрондауды күтпей, форма сияқты бірден жібереміз.
+      expect(await s.cloud.pushSaved(custom), isNull);
+      final rows = await db.execute(
+        "SELECT title FROM topics WHERE id = '${custom.id}'",
+      );
+      expect(rows.single.single, 'Docker негіздері');
+
+      // Екінші рет POST — 409, клиентте conflict.
+      final dto = (await HttpSyncApi(base).topics(token)).single;
+      await expectLater(
+        HttpSyncApi(base).createTopic(token, dto),
+        throwsA(
+          isA<SyncApiException>().having(
+            (e) => e.failure,
+            'failure',
+            SyncFailure.conflict,
+          ),
+        ),
+      );
+    });
+
+    test(
+      'REST PATCH: серверде өзгерген атау құрылғыға және экранға келеді',
+      () async {
+        final (s, _) = await linked('patch@example.com');
+        final custom = await s.topics.create(_topic);
+        expect(await s.sync.syncNow(), isNull);
+        expect(await s.cloud.load(), isNull);
+        expect(
+          s.cloud.relationOf(s.cloud.state.data!.topics.single),
+          CloudRelation.synced,
+        );
+
+        var notified = 0;
+        s.topics.addListener(() => notified++);
+        expect(await s.cloud.rename(custom.id, 'Docker және Compose'), isNull);
+
+        // Сервер, жергілікті SQLite және тізім бір нұсқада.
+        final rows = await db.execute(
+          "SELECT title FROM topics WHERE id = '${custom.id}'",
+        );
+        expect(rows.single.single, 'Docker және Compose');
+        expect(s.topics.byId(custom.id).title, 'Docker және Compose');
+        expect(notified, greaterThan(0));
+        final listed = s.cloud.state.data!.topics.single;
+        expect(listed.title, 'Docker және Compose');
+        expect(s.cloud.relationOf(listed), CloudRelation.synced);
+        expect(await s.topics.search('compose'), isNotEmpty);
+      },
+    );
+
+    test(
+      'REST DELETE: серверден жойылған тақырып құрылғыдан да кетеді',
+      () async {
+        final (s, token) = await linked('delete@example.com');
+        final custom = await s.topics.create(_topic);
+        expect(await s.sync.syncNow(), isNull);
+
+        expect(await s.cloud.remove(custom.id), isNull);
+        expect(await HttpSyncApi(base).topics(token), isEmpty);
+        expect(s.topics.tryById(custom.id), isNull);
+        expect(s.cloud.state.data!.topics, isEmpty);
+        // Қайта жою — 404, бірақ мақсатқа жеткендіктен қате емес.
+        expect(await s.cloud.remove(custom.id), isNull);
+      },
+    );
+
+    test('REST: ескірген токен — 401, байланыс үзіледі', () async {
+      final (s, token) = await linked('expired@example.com');
+      await db.execute('DELETE FROM auth_tokens');
+      expect(await s.cloud.load(), SyncFailure.unauthorized);
+      expect(s.sync.link, isNull);
+      // Экран себебін көрсетеді: «Сеанс ескірді».
+      expect(
+        s.cloud.state,
+        isA<RequestFailure<CloudSnapshot>>().having(
+          (f) => f.failure,
+          'failure',
+          SyncFailure.unauthorized,
+        ),
+      );
+      await expectLater(
+        HttpSyncApi(base).topics(token),
+        throwsA(
+          isA<SyncApiException>().having(
+            (e) => e.failure,
+            'failure',
+            SyncFailure.unauthorized,
+          ),
+        ),
+      );
     });
   });
 

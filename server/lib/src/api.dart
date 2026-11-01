@@ -10,6 +10,7 @@ import 'auth_service.dart';
 import 'errors.dart';
 import 'passwords.dart';
 import 'sync_service.dart';
+import 'topics_service.dart';
 
 /// REST API. Барлық жауап — JSON, қате — `{"error", "message"}`.
 ///
@@ -22,15 +23,22 @@ import 'sync_service.dart';
 /// | GET    | /v1/account       | профиль                           |
 /// | DELETE | /v1/account       | аккаунт пен барлық деректі жою    |
 /// | POST   | /v1/sync          | суретті біріктіру → толық сурет   |
+/// | GET    | /v1/topics        | пайдаланушы тақырыптарының тізімі |
+/// | GET    | /v1/topics/{id}   | бір тақырып сұрақтарымен          |
+/// | POST   | /v1/topics        | жаңа тақырып → 201 + Location     |
+/// | PATCH  | /v1/topics/{id}   | тақырыпты ішінара өзгерту         |
+/// | DELETE | /v1/topics/{id}   | тақырыпты жою → 204               |
 class Api {
   Api(this._db, {Passwords? passwords, LoginLimiter? limiter})
     : _auth = AuthService(_db, passwords: passwords),
       _sync = SyncService(_db),
+      _topics = TopicsService(_db),
       _limiter = limiter ?? LoginLimiter();
 
   final Pool _db;
   final AuthService _auth;
   final SyncService _sync;
+  final TopicsService _topics;
   final LoginLimiter _limiter;
 
   static const maxBodyBytes = 4 * 1024 * 1024;
@@ -77,6 +85,34 @@ class Api {
       final id = await _auth.authenticate(r.headers['authorization']);
       return _json(200, await _sync.sync(id, await _body(r)));
     })
+    ..get('/v1/topics', (Request r) async {
+      final id = await _auth.authenticate(r.headers['authorization']);
+      return _json(200, {'topics': await _topics.list(id)});
+    })
+    ..get('/v1/topics/<topic>', (Request r, String topic) async {
+      final id = await _auth.authenticate(r.headers['authorization']);
+      return _json(200, await _topics.get(id, topic));
+    })
+    ..post('/v1/topics', (Request r) async {
+      final id = await _auth.authenticate(r.headers['authorization']);
+      final created = await _topics.create(id, await _body(r));
+      return _json(
+        201,
+        created,
+        headers: {
+          'location': '/v1/topics/${Uri.encodeComponent('${created['id']}')}',
+        },
+      );
+    })
+    ..patch('/v1/topics/<topic>', (Request r, String topic) async {
+      final id = await _auth.authenticate(r.headers['authorization']);
+      return _json(200, await _topics.update(id, topic, await _body(r)));
+    })
+    ..delete('/v1/topics/<topic>', (Request r, String topic) async {
+      final id = await _auth.authenticate(r.headers['authorization']);
+      await _topics.delete(id, topic);
+      return Response(204);
+    })
     ..all('/<ignored|.*>', (Request r) {
       throw const ApiError(404, 'not_found', 'Unknown endpoint.');
     });
@@ -121,10 +157,14 @@ class Api {
     return info is HttpConnectionInfo ? info.remoteAddress.address : 'local';
   }
 
-  static Response _json(int status, Object body) => Response(
+  static Response _json(
+    int status,
+    Object body, {
+    Map<String, String> headers = const {},
+  }) => Response(
     status,
     body: jsonEncode(body),
-    headers: {'content-type': 'application/json; charset=utf-8'},
+    headers: {'content-type': 'application/json; charset=utf-8', ...headers},
   );
 }
 

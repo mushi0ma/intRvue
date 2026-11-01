@@ -1323,6 +1323,104 @@ class AppLocalizationsKk extends AppLocalizations {
       'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде PBKDF2 хэшімен сақталады.';
 
   @override
+  String get syncErrTimeout =>
+      'Сервер тым ұзақ жауап бермеді. Қайталап көріңіз.';
+
+  @override
+  String get syncErrNotFound =>
+      'Тақырып серверде жоқ — басқа құрылғыда жойылған болуы мүмкін.';
+
+  @override
+  String get syncErrTitleTaken => 'Серверде осындай атаулы тақырып бар.';
+
+  @override
+  String get syncErrConflict => 'Бұл тақырып серверде бұрыннан бар.';
+
+  @override
+  String get syncErrInvalid =>
+      'Сервер деректі қабылдамады. Өрістерді тексеріңіз.';
+
+  @override
+  String get cloudTitle => 'Бұлттағы тақырыптар';
+
+  @override
+  String get cloudSubtitle =>
+      'Сервердегі көшірме: тізімді жаңартып, тақырыпты жіберіп, өзгертіп не жоя аласыз.';
+
+  @override
+  String get cloudLoading => 'Серверден жүктелуде…';
+
+  @override
+  String get cloudEmpty => 'Серверде әзірге өз тақырыптарыңыз жоқ.';
+
+  @override
+  String get cloudAccount => 'Сервердегі аккаунт';
+
+  @override
+  String get cloudRegistered => 'Тіркелген';
+
+  @override
+  String get cloudLoadedAt => 'Жаңартылды';
+
+  @override
+  String get cloudRefresh => 'Жаңарту';
+
+  @override
+  String get cloudOnServer => 'Серверде';
+
+  @override
+  String get cloudDeviceOnly => 'Тек осы құрылғыда';
+
+  @override
+  String get cloudSynced => 'Синхрондалған';
+
+  @override
+  String get cloudNewerInCloud => 'Серверде жаңарақ';
+
+  @override
+  String get cloudNewerOnDevice => 'Құрылғыда жаңарақ';
+
+  @override
+  String get cloudOnlyRemote => 'Тек серверде';
+
+  @override
+  String get cloudUpload => 'Серверге жіберу';
+
+  @override
+  String get cloudRename => 'Атауын өзгерту';
+
+  @override
+  String get cloudRenameField => 'Сервердегі атауы';
+
+  @override
+  String get cloudDelete => 'Серверден жою';
+
+  @override
+  String get cloudDeleteTitle => 'Тақырыпты серверден жою керек пе?';
+
+  @override
+  String get cloudDeleteBody =>
+      'Тақырып серверден, ал синхрондаудан кейін барлық құрылғыдан жойылады.';
+
+  @override
+  String get cloudUploaded => 'Серверге жіберілді.';
+
+  @override
+  String get cloudRenamed => 'Атауы өзгертілді.';
+
+  @override
+  String get cloudDeleted => 'Серверден жойылды.';
+
+  @override
+  String get cloudSent => 'Серверге де жіберілді.';
+
+  @override
+  String get cloudDeferred => 'Серверге кейін жіберіледі.';
+
+  @override
+  String get cloudActions => 'Әрекеттер';
+
+  @override
   String get levelBeginner => 'Бастапқы';
 
   @override

@@ -1329,6 +1329,103 @@ class AppLocalizationsRu extends AppLocalizations {
       'Только если вы её включили: данные\nотправляются на сервер intRvue. Пароль\nхранится там как хэш PBKDF2.';
 
   @override
+  String get syncErrTimeout =>
+      'Сервер слишком долго не отвечает. Попробуйте ещё раз.';
+
+  @override
+  String get syncErrNotFound =>
+      'Темы нет на сервере — возможно, её удалили на другом устройстве.';
+
+  @override
+  String get syncErrTitleTaken => 'На сервере уже есть тема с таким названием.';
+
+  @override
+  String get syncErrConflict => 'Эта тема уже есть на сервере.';
+
+  @override
+  String get syncErrInvalid => 'Сервер не принял данные. Проверьте поля.';
+
+  @override
+  String get cloudTitle => 'Темы в облаке';
+
+  @override
+  String get cloudSubtitle =>
+      'Копия на сервере: можно обновить список, отправить, изменить или удалить тему.';
+
+  @override
+  String get cloudLoading => 'Загрузка с сервера…';
+
+  @override
+  String get cloudEmpty => 'На сервере пока нет ваших тем.';
+
+  @override
+  String get cloudAccount => 'Аккаунт на сервере';
+
+  @override
+  String get cloudRegistered => 'Зарегистрирован';
+
+  @override
+  String get cloudLoadedAt => 'Обновлено';
+
+  @override
+  String get cloudRefresh => 'Обновить';
+
+  @override
+  String get cloudOnServer => 'На сервере';
+
+  @override
+  String get cloudDeviceOnly => 'Только на этом устройстве';
+
+  @override
+  String get cloudSynced => 'Синхронизирована';
+
+  @override
+  String get cloudNewerInCloud => 'На сервере новее';
+
+  @override
+  String get cloudNewerOnDevice => 'На устройстве новее';
+
+  @override
+  String get cloudOnlyRemote => 'Только на сервере';
+
+  @override
+  String get cloudUpload => 'Отправить на сервер';
+
+  @override
+  String get cloudRename => 'Переименовать';
+
+  @override
+  String get cloudRenameField => 'Название на сервере';
+
+  @override
+  String get cloudDelete => 'Удалить с сервера';
+
+  @override
+  String get cloudDeleteTitle => 'Удалить тему с сервера?';
+
+  @override
+  String get cloudDeleteBody =>
+      'Тема удалится с сервера, а после синхронизации — со всех устройств.';
+
+  @override
+  String get cloudUploaded => 'Отправлено на сервер.';
+
+  @override
+  String get cloudRenamed => 'Название изменено.';
+
+  @override
+  String get cloudDeleted => 'Удалено с сервера.';
+
+  @override
+  String get cloudSent => 'Также отправлено на сервер.';
+
+  @override
+  String get cloudDeferred => 'На сервер отправим позже.';
+
+  @override
+  String get cloudActions => 'Действия';
+
+  @override
   String get levelBeginner => 'Начальный';
 
   @override

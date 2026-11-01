@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/routes.dart';
@@ -18,10 +19,15 @@ class SyncScreen extends StatefulWidget {
 
   static String failureText(SyncFailure f) => switch (f) {
     SyncFailure.offline => S.syncErrOffline,
+    SyncFailure.timeout => S.syncErrTimeout,
     SyncFailure.invalidCredentials => S.syncErrCredentials,
     SyncFailure.unauthorized => S.syncErrUnauthorized,
     SyncFailure.weakPassword => S.syncErrWeak,
     SyncFailure.rateLimited => S.syncErrRateLimited,
+    SyncFailure.notFound => S.syncErrNotFound,
+    SyncFailure.titleTaken => S.syncErrTitleTaken,
+    SyncFailure.conflict => S.syncErrConflict,
+    SyncFailure.invalidRequest => S.syncErrInvalid,
     SyncFailure.emailTaken || SyncFailure.server => S.syncErrServer,
   };
 
@@ -177,6 +183,12 @@ class _SyncScreenState extends State<SyncScreen> {
             ),
             const SizedBox(height: 24),
             Text(S.syncAuto, style: muted),
+            SectionDivider(vertical: 28),
+            SettingsRow(
+              title: S.cloudTitle,
+              value: sync.serverUrl.authority,
+              onTap: () => context.push(Routes.cloudTopics),
+            ),
           ],
         ],
         actions: link == null

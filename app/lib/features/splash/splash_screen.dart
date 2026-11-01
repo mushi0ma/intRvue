@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/wordmark.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/services/reminder_coordinator.dart';
 
@@ -61,14 +62,9 @@ class _SplashScreenState extends State<SplashScreen>
             const Spacer(flex: 5),
             Semantics(
               header: true,
-              child: Text(
-                S.appName,
-                textAlign: TextAlign.center,
-                style: context.text.displayLarge!.copyWith(
-                  fontSize: 52,
-                  fontWeight: FontWeight.w700,
-                  color: colors.primary,
-                ),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Wordmark(large: true),
               ),
             ),
             const SizedBox(height: 20),

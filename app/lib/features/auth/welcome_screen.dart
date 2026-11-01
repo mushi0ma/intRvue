@@ -17,15 +17,9 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return AppPage(
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 16),
-        child: Text(
-          S.appName,
-          style: context.text.headlineSmall!.copyWith(
-            fontWeight: FontWeight.w700,
-            color: colors.primary,
-          ),
-        ),
+      leading: const Padding(
+        padding: EdgeInsets.only(left: 16),
+        child: Wordmark(),
       ),
       trailing: Padding(
         padding: const EdgeInsets.only(right: 16),

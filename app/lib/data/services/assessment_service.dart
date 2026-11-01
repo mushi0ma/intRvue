@@ -34,16 +34,19 @@ class AssessmentService {
         .where((w) => w.isNotEmpty);
     final sentences = RegExp(r'[.!?](\s|$)').allMatches(answer.trim()).length;
 
+    const top = Assessment.maxPerCriterion;
     final tooShort = words.length < 4;
-    final correctness = tooShort ? 1 : (1 + coverage * 4).round().clamp(1, 5);
-    final completeness = (coverage * 5).round().clamp(0, 5);
+    final correctness = tooShort
+        ? 1
+        : (1 + coverage * (top - 1)).round().clamp(1, top);
+    final completeness = (coverage * top).round().clamp(0, top);
     var clarity = switch (words.length) {
       < 4 => 1,
       < 10 => 2,
       < 20 => 3,
       _ => 4,
     };
-    if (sentences >= 2 && clarity < 5) clarity++;
+    if (sentences >= 2 && clarity < top) clarity++;
 
     final average = (correctness + completeness + clarity) / 3;
     final headline = switch (average) {

@@ -194,12 +194,6 @@ abstract class AppLocalizations {
   /// **'Нобай сақталды'**
   String get draftSaved;
 
-  /// No description provided for @comingSoon.
-  ///
-  /// In kk, this message translates to:
-  /// **'Келесі нұсқада қолжетімді болады.'**
-  String get comingSoon;
-
   /// No description provided for @navHome.
   ///
   /// In kk, this message translates to:
@@ -1292,12 +1286,6 @@ abstract class AppLocalizations {
   /// **'Барлық бағыт'**
   String get allDirections;
 
-  /// No description provided for @allStatuses.
-  ///
-  /// In kk, this message translates to:
-  /// **'Барлығы'**
-  String get allStatuses;
-
   /// No description provided for @allSessions.
   ///
   /// In kk, this message translates to:
@@ -1471,12 +1459,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Алғашқы жаттығуды бастау'**
   String get progressEmptyAction;
-
-  /// No description provided for @weakTopicsTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Әлсіз тақырыптар'**
-  String get weakTopicsTitle;
 
   /// No description provided for @settingsTitle.
   ///
@@ -1760,12 +1742,6 @@ abstract class AppLocalizations {
   /// **'Кемінде бір күн таңдаңыз.'**
   String get remindersPickDay;
 
-  /// No description provided for @remindersSaved.
-  ///
-  /// In kk, this message translates to:
-  /// **'Еске салу сақталды.'**
-  String get remindersSaved;
-
   /// No description provided for @pickTime.
   ///
   /// In kk, this message translates to:
@@ -1879,12 +1855,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Жаңа жаттығу'**
   String get newTraining;
-
-  /// No description provided for @otherDirections.
-  ///
-  /// In kk, this message translates to:
-  /// **'Басқа бағыттар'**
-  String get otherDirections;
 
   /// No description provided for @whatWeReview.
   ///
@@ -2143,12 +2113,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Алдымен аккаунтқа кіріңіз.'**
   String get dbNoUser;
-
-  /// No description provided for @loadError.
-  ///
-  /// In kk, this message translates to:
-  /// **'Деректерді жүктеу мүмкін болмады.'**
-  String get loadError;
 
   /// No description provided for @retry.
   ///
@@ -2780,6 +2744,30 @@ abstract class AppLocalizations {
   /// **'Әрекеттер'**
   String get cloudActions;
 
+  /// No description provided for @syncLiveTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тікелей байланыс'**
+  String get syncLiveTitle;
+
+  /// No description provided for @syncLiveOn.
+  ///
+  /// In kk, this message translates to:
+  /// **'Қосулы: өзгерістер бірден жіберіледі және келеді.'**
+  String get syncLiveOn;
+
+  /// No description provided for @syncLiveConnecting.
+  ///
+  /// In kk, this message translates to:
+  /// **'Қосылуда…'**
+  String get syncLiveConnecting;
+
+  /// No description provided for @syncLiveRetry.
+  ///
+  /// In kk, this message translates to:
+  /// **'Қазір қосылу'**
+  String get syncLiveRetry;
+
   /// No description provided for @levelBeginner.
   ///
   /// In kk, this message translates to:
@@ -3092,12 +3080,6 @@ abstract class AppLocalizations {
   /// **'{n} жауапта толық ашылмаған: {missing}.'**
   String whyMissing(int n, String missing);
 
-  /// No description provided for @filters.
-  ///
-  /// In kk, this message translates to:
-  /// **'Сүзгілер · {n}'**
-  String filters(int n);
-
   /// No description provided for @assessedPoints.
   ///
   /// In kk, this message translates to:
@@ -3127,12 +3109,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Орташа балл: {score}'**
   String averageScore(String score);
-
-  /// No description provided for @catalogSubtitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'{direction} · Дайындық кітапханасы'**
-  String catalogSubtitle(String direction);
 
   /// No description provided for @found.
   ///
@@ -3169,6 +3145,18 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'{n}-сұрақ'**
   String questionN(int n);
+
+  /// No description provided for @syncLiveWaiting.
+  ///
+  /// In kk, this message translates to:
+  /// **'Байланыс үзілді. Деректер құрылғыда сақталады — {seconds} с кейін қайта қосыламыз.'**
+  String syncLiveWaiting(int seconds);
+
+  /// No description provided for @syncRemoteUpdate.
+  ///
+  /// In kk, this message translates to:
+  /// **'Басқа құрылғыдан {n} өзгеріс келді.'**
+  String syncRemoteUpdate(int n);
 }
 
 class _AppLocalizationsDelegate

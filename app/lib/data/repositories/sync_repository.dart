@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/log.dart';
 import '../local/app_database.dart';
 import '../local/db_errors.dart';
 import '../local/sync_store.dart';
 import '../models/enums.dart';
 import '../models/user_profile.dart';
+import '../remote/live_channel.dart';
 import '../remote/sync_api.dart';
 import 'auth_repository.dart';
 import 'user_scoped.dart';
@@ -39,11 +42,48 @@ class SyncLink {
   };
 }
 
+/// Басқа құрылғыдан келген өзгерістер (снекбар үшін).
+class RemoteUpdate {
+  const RemoteUpdate({this.sessions = 0, this.topics = 0});
+  final int sessions;
+  final int topics;
+  bool get isEmpty => sessions == 0 && topics == 0;
+
+  /// Жергілікті сурет пен біріктірілген сурет арасындағы жаңа, өзгерген
+  /// және басқа құрылғыда жойылған сессиялар мен тақырыптар. Біз жіберген
+  /// жазбалар біріктірілген суретте бар, сондықтан жоғалғаны — жойылғаны.
+  static RemoteUpdate between(
+    Map<String, Object?> local,
+    Map<String, Object?> merged,
+  ) {
+    int changed(String key) {
+      final before = {
+        for (final r in (local[key] as List? ?? const []).cast<Map>())
+          r['id']: r['updated_at'],
+      };
+      final after = (merged[key] as List? ?? const []).cast<Map>();
+      final changed = after
+          .where((r) => before[r['id']] != r['updated_at'])
+          .length;
+      final kept = {for (final r in after) r['id']};
+      return changed + before.keys.where((id) => !kept.contains(id)).length;
+    }
+
+    return RemoteUpdate(
+      sessions: changed('sessions'),
+      topics: changed('topics'),
+    );
+  }
+}
+
 /// Бұлттық көшірме: SQLite негізгі қор болып қалады (офлайн толық жұмыс
 /// істейді), сервер — қосымша көшірме және басқа құрылғымен ортақтасу.
 ///
-/// Синхрондау: қолмен, кіргенде және деректер өзгергеннен кейін
-/// [autoSyncDelay] өткенде. Желі болмаса, үнсіз келесі ретке қалдырылады.
+/// Синхрондау: қолмен, кіргенде және деректер өзгергеннен кейін.
+/// Live (WebSocket, практикалық №7) ашық болса — өзгеріс [liveSyncDelay]
+/// ішінде сокет арқылы кетеді, басқа құрылғыдағы өзгеріс бірден келеді.
+/// Live жоқ болса — HTTP, [autoSyncDelay] кейін. Желі болмаса, үнсіз
+/// келесі ретке қалдырылады; live өзі қайта қосылып, қуып жетеді.
 class SyncRepository extends ChangeNotifier {
   SyncRepository({
     required this._prefs,
@@ -52,19 +92,34 @@ class SyncRepository extends ChangeNotifier {
     required this._scoped,
     List<Listenable> watch = const [],
     SyncApi Function(Uri baseUrl)? api,
-  }) : _store = SyncStore(database),
+    LiveChannel? live,
+    String? deviceId,
+  }) : _fixedDevice = deviceId,
+       _store = SyncStore(database),
        _auth = auth,
        _watch = watch,
-       _apiFactory = api ?? ((url) => HttpSyncApi(url)) {
+       _apiFactory = api,
+       // Басқа транспорт берілсе (тесттер) — live тек анық берілгенде.
+       live = live ?? (api == null ? LiveChannel() : LiveChannel.disabled()) {
     _userId = auth.user?.id;
     auth.addListener(_onAuthChanged);
     for (final l in watch) {
       l.addListener(_onDataChanged);
     }
+    _liveSubs = [
+      this.live.changes.listen((_) => unawaited(syncNow())),
+      // (Қайта) қосылды: үзіліс кезіндегі өзгерістерді қуып жету.
+      this.live.connected.listen((_) => unawaited(syncNow())),
+      // Токен қабылданбады: HTTP 401 байланысты өшіреді («Сеанс ескірді»).
+      this.live.unauthorized.listen((_) => unawaited(syncNow())),
+    ];
+    _updateLive();
   }
 
   static const autoSyncDelay = Duration(seconds: 20);
+  static const liveSyncDelay = Duration(seconds: 1);
   static const _serverKey = 'sync.serverUrl';
+  static const _deviceKey = 'sync.deviceId';
   static String _linkKey(int userId) => 'sync.link.$userId';
 
   final SharedPreferences _prefs;
@@ -72,7 +127,28 @@ class SyncRepository extends ChangeNotifier {
   final AuthRepository _auth;
   final List<UserScoped> _scoped;
   final List<Listenable> _watch;
-  final SyncApi Function(Uri) _apiFactory;
+  final SyncApi Function(Uri)? _apiFactory;
+
+  final String? _fixedDevice;
+
+  /// WebSocket байланысы.
+  final LiveChannel live;
+  late final List<StreamSubscription<void>> _liveSubs;
+  final _remoteUpdates = StreamController<RemoteUpdate>.broadcast();
+
+  /// Басқа құрылғыдан жаңа не өзгерген деректер келді.
+  Stream<RemoteUpdate> get remoteUpdates => _remoteUpdates.stream;
+
+  /// Құрылғының тұрақты белгісі: сервер «changed»-ті өзіне қайтармайды.
+  String get deviceId {
+    if (_fixedDevice != null) return _fixedDevice;
+    final saved = _prefs.getString(_deviceKey);
+    if (saved != null) return saved;
+    final r = Random.secure();
+    final id = List.generate(16, (_) => r.nextInt(16).toRadixString(16)).join();
+    unawaited(_prefs.setString(_deviceKey, id));
+    return id;
+  }
 
   int? _userId;
   Future<SyncFailure?>? _running;
@@ -87,7 +163,20 @@ class SyncRepository extends ChangeNotifier {
   Uri get serverUrl =>
       Uri.parse(_prefs.getString(_serverKey) ?? HttpSyncApi.defaultUrl);
 
-  SyncApi get _api => _apiFactory(serverUrl);
+  SyncApi get _api =>
+      _apiFactory?.call(serverUrl) ??
+      HttpSyncApi(serverUrl, deviceId: deviceId);
+
+  /// Байланыс бар болса — live ашық, жоқ болса — жабық.
+  void _updateLive() {
+    if (_disposed) return;
+    final current = link;
+    if (_userId == null || current == null) {
+      live.stop();
+    } else {
+      live.start(base: serverUrl, token: current.token, device: deviceId);
+    }
+  }
 
   /// REST клиенті ағымдағы сервер мекенжайымен.
   SyncApi get api => _api;
@@ -102,6 +191,7 @@ class SyncRepository extends ChangeNotifier {
 
   Future<void> setServerUrl(Uri url) async {
     await _prefs.setString(_serverKey, url.toString());
+    _updateLive();
     notifyListeners();
   }
 
@@ -123,6 +213,7 @@ class SyncRepository extends ChangeNotifier {
     } else {
       await _prefs.setString(_linkKey(userId), jsonEncode(link.toJson()));
     }
+    _updateLive();
   }
 
   /// Қосу: серверде аккаунт болмаса — тіркеледі, болса — кіреді.
@@ -183,7 +274,7 @@ class SyncRepository extends ChangeNotifier {
     try {
       final body = await _store.export(uid);
       body['profile'] = _profileJson(user);
-      final merged = await _api.sync(current.token, body);
+      final merged = await _send(current.token, body);
       // Осы аралықта пайдаланушы ауысса — нәтижені жазбаймыз.
       if (_auth.user?.id != uid) return null;
       _applying = true;
@@ -198,6 +289,14 @@ class SyncRepository extends ChangeNotifier {
       }
       await _saveLink(uid, current.synced(DateTime.now()));
       _lastFailure = null;
+      final update = RemoteUpdate.between(body, merged);
+      if (!update.isEmpty) {
+        Log.info(
+          'sync',
+          'received ${update.sessions} sessions, ${update.topics} topics',
+        );
+        _remoteUpdates.add(update);
+      }
       return null;
     } on SyncApiException catch (e) {
       // Токен ескірсе — қайта қосу керек.
@@ -205,14 +304,29 @@ class SyncRepository extends ChangeNotifier {
       _lastFailure = e.failure;
       return e.failure;
     } on AppException catch (e) {
-      debugPrint('Sync: $e');
+      Log.error('sync', 'failed', e);
       _lastFailure = SyncFailure.server;
       return SyncFailure.server;
     } on Object catch (e) {
-      debugPrint('Sync: $e');
+      Log.error('sync', 'failed', e);
       _lastFailure = SyncFailure.server;
       return SyncFailure.server;
     }
+  }
+
+  /// Live ашық болса — сокет арқылы, әйтпесе (не сокет үзілсе) — HTTP.
+  Future<Map<String, Object?>> _send(
+    String token,
+    Map<String, Object?> body,
+  ) async {
+    if (live.isLive) {
+      try {
+        return await live.sync(body);
+      } on LiveUnavailable catch (e) {
+        Log.warn('sync', 'live unavailable (${e.reason}), using HTTP');
+      }
+    }
+    return _api.sync(token, body);
   }
 
   /// Ажырату: құрылғыдағы деректер мен сервердегі көшірме қалады.
@@ -282,6 +396,7 @@ class SyncRepository extends ChangeNotifier {
     _userId = id;
     _autoTimer?.cancel();
     _lastFailure = null;
+    _updateLive();
     notifyListeners();
     if (link != null) unawaited(syncNow());
   }
@@ -289,7 +404,8 @@ class SyncRepository extends ChangeNotifier {
   void _onDataChanged() {
     if (_applying || link == null) return;
     _autoTimer?.cancel();
-    _autoTimer = Timer(autoSyncDelay, syncNow);
+    // Live ашық: өзгеріс бірден кетеді (бірнеше жазуды бір рет жібереміз).
+    _autoTimer = Timer(live.isLive ? liveSyncDelay : autoSyncDelay, syncNow);
   }
 
   static Map<String, Object?> _profileJson(UserProfile u) => {
@@ -312,6 +428,11 @@ class SyncRepository extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _autoTimer?.cancel();
+    for (final sub in _liveSubs) {
+      unawaited(sub.cancel());
+    }
+    live.dispose();
+    unawaited(_remoteUpdates.close());
     _auth.removeListener(_onAuthChanged);
     for (final l in _watch) {
       l.removeListener(_onDataChanged);

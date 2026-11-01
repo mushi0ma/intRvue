@@ -9,3 +9,4 @@ export 'assessment_bar.dart';
 export 'blocks.dart';
 export 'choice_group.dart';
 export 'feedback.dart';
+export 'wordmark.dart';

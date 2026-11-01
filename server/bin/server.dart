@@ -20,13 +20,20 @@ Future<void> main() async {
   final version = await Schema.migrate(db);
   stdout.writeln('PostgreSQL schema v$version');
 
+  final api = Api(db);
   final handler = const Pipeline()
       .addMiddleware(logRequests())
-      .addHandler(Api(db).handler);
+      .addHandler(api.handler);
   final server = await io.serve(handler, host, port);
   stdout.writeln('intRvue API: http://${server.address.host}:${server.port}');
 
   ProcessSignal.sigint.watch().first.then((_) async {
+    // Клиенттер кідіріспен қайта қосылады.
+    api.live.closeWhere(
+      (_) => true,
+      code: LiveHub.restartCode,
+      reason: 'restart',
+    );
     await server.close();
     await db.close();
     exit(0);

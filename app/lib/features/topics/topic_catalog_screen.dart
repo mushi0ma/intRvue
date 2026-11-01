@@ -276,7 +276,6 @@ class _SortButton extends StatelessWidget {
       initialValue: value,
       onSelected: onChanged,
       position: PopupMenuPosition.under,
-      color: colors.surface,
       itemBuilder: (context) => [
         for (final s in TopicSort.values)
           PopupMenuItem(value: s, child: Text(s.label)),

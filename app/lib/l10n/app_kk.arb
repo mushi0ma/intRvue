@@ -16,7 +16,6 @@
   "aiDisclaimer": "ЖИ бағасы — оқу ұсынымы.",
   "notHiringDecision": "Бұл жұмысқа қабылдау шешімі емес.",
   "draftSaved": "Нобай сақталды",
-  "comingSoon": "Келесі нұсқада қолжетімді болады.",
   "navHome": "Басты бет",
   "navHistory": "Тарих",
   "navProgress": "Прогресс",
@@ -199,7 +198,6 @@
   "historyTitle": "Жаттығу тарихы",
   "historySubtitle": "Сақталған сессияларды қайта қараңыз.",
   "allDirections": "Барлық бағыт",
-  "allStatuses": "Барлығы",
   "allSessions": "Барлық сессия",
   "periodLabel": "Кезең",
   "periodAll": "Барлық уақыт",
@@ -229,7 +227,6 @@
   "progressEmptyBody": "Бір жаттығуды аяқтаңыз.\nОсы бағыт пен деңгейдегі\nбалл динамикасы осында көрінеді.",
   "progressEmptyHint": "Дайындықты 5 сұрақтан бастаңыз.\nУақыт шектеуі жоқ.",
   "progressEmptyAction": "Алғашқы жаттығуды бастау",
-  "weakTopicsTitle": "Әлсіз тақырыптар",
   "settingsTitle": "Баптаулар",
   "settingsSubtitle": "Дайындықты өзіңізге бейімдеңіз.",
   "profileLink": "Профиль",
@@ -277,7 +274,6 @@
   "notificationsOffBody": "Android хабарламаларына рұқсат берілмеген. Еске салу жіберілмейді. Жаттығуды бұғаттамаймыз.",
   "openAndroidSettings": "Android баптауларын ашу",
   "remindersPickDay": "Кемінде бір күн таңдаңыз.",
-  "remindersSaved": "Еске салу сақталды.",
   "pickTime": "Уақытты таңдау",
   "privacySubtitle": "Деректеріңіз қалай қолданылатыны.",
   "privacyAiTitle": "ЖИ-ге не жіберіледі",
@@ -297,7 +293,6 @@
   "catalogTitle": "Тақырыптар",
   "searchTopics": "Тақырып іздеу",
   "newTraining": "Жаңа жаттығу",
-  "otherDirections": "Басқа бағыттар",
   "whatWeReview": "Нені қайталаймыз?",
   "sampleQuestion": "Үлгі сұрақ",
   "addFavorite": "Таңдаулыға қосу",
@@ -341,7 +336,6 @@
   "dbClosed": "Деректер қоры жабық. Қосымшаны қайта ашыңыз.",
   "dbGeneric": "Деректерді сақтау мүмкін болмады. Қайталап көріңіз.",
   "dbNoUser": "Алдымен аккаунтқа кіріңіз.",
-  "loadError": "Деректерді жүктеу мүмкін болмады.",
   "retry": "Қайталау",
   "startupErrorTitle": "Деректер қоры ашылмады",
   "startupErrorBody": "Құрылғыдағы деректерді оқу мүмкін болмады. Қайталап көріңіз — сақталған деректеріңіз жойылмайды.",
@@ -447,6 +441,10 @@
   "cloudSent": "Серверге де жіберілді.",
   "cloudDeferred": "Серверге кейін жіберіледі.",
   "cloudActions": "Әрекеттер",
+  "syncLiveTitle": "Тікелей байланыс",
+  "syncLiveOn": "Қосулы: өзгерістер бірден жіберіледі және келеді.",
+  "syncLiveConnecting": "Қосылуда…",
+  "syncLiveRetry": "Қазір қосылу",
   "levelBeginner": "Бастапқы",
   "levelJunior": "Junior",
   "levelMiddle": "Middle",
@@ -637,14 +635,6 @@
       }
     }
   },
-  "filters": "Сүзгілер · {n}",
-  "@filters": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "assessedPoints": "Бағаланды · {total} / 15",
   "@assessedPoints": {
     "placeholders": {
@@ -684,14 +674,6 @@
   "@averageScore": {
     "placeholders": {
       "score": {
-        "type": "String"
-      }
-    }
-  },
-  "catalogSubtitle": "{direction} · Дайындық кітапханасы",
-  "@catalogSubtitle": {
-    "placeholders": {
-      "direction": {
         "type": "String"
       }
     }
@@ -744,6 +726,22 @@
   },
   "questionN": "{n}-сұрақ",
   "@questionN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLiveWaiting": "Байланыс үзілді. Деректер құрылғыда сақталады — {seconds} с кейін қайта қосыламыз.",
+  "@syncLiveWaiting": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "syncRemoteUpdate": "Басқа құрылғыдан {n} өзгеріс келді.",
+  "@syncRemoteUpdate": {
     "placeholders": {
       "n": {
         "type": "int"

@@ -2,7 +2,7 @@ import '../models/enums.dart';
 import '../models/topic.dart';
 
 /// Демонстрациялық тақырыптар каталогы. Барлық мәтін — синтетикалық үлгі.
-const mockTopics = <Topic>[
+const seedTopics = <Topic>[
   // Mobile
   Topic(
     id: 'dart-basics',

@@ -5,9 +5,12 @@ import 'dart:io';
 import 'package:postgres/postgres.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:shelf_web_socket/shelf_web_socket.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'auth_service.dart';
 import 'errors.dart';
+import 'live_hub.dart';
 import 'passwords.dart';
 import 'sync_service.dart';
 import 'topics_service.dart';
@@ -28,18 +31,27 @@ import 'topics_service.dart';
 /// | POST   | /v1/topics        | жаңа тақырып → 201 + Location     |
 /// | PATCH  | /v1/topics/{id}   | тақырыпты ішінара өзгерту         |
 /// | DELETE | /v1/topics/{id}   | тақырыпты жою → 204               |
+/// | GET    | /v1/live          | WebSocket: синхрондау + «changed» |
+///
+/// `X-Intrvue-Device` тақырыбы құрылғыны атайды: деректер өзгергенде
+/// `changed` хабарламасы өзгерісті жіберген құрылғыға қайтарылмайды.
 class Api {
-  Api(this._db, {Passwords? passwords, LoginLimiter? limiter})
+  Api(this._db, {Passwords? passwords, LoginLimiter? limiter, LiveHub? live})
     : _auth = AuthService(_db, passwords: passwords),
       _sync = SyncService(_db),
       _topics = TopicsService(_db),
-      _limiter = limiter ?? LoginLimiter();
+      _limiter = limiter ?? LoginLimiter(),
+      live = live ?? LiveHub();
 
   final Pool _db;
   final AuthService _auth;
   final SyncService _sync;
   final TopicsService _topics;
   final LoginLimiter _limiter;
+  final LiveHub live;
+
+  static const deviceHeader = 'x-intrvue-device';
+  static const livePing = Duration(seconds: 20);
 
   static const maxBodyBytes = 4 * 1024 * 1024;
 
@@ -69,7 +81,10 @@ class Api {
     })
     ..post('/v1/auth/logout', (Request r) async {
       await _auth.authenticate(r.headers['authorization']);
-      await _auth.logout(r.headers['authorization']!.substring(7).trim());
+      final token = r.headers['authorization']!.substring(7).trim();
+      await _auth.logout(token);
+      final hash = AuthService.hashToken(token);
+      live.closeWhere((c) => c.tokenHash == hash);
       return Response(204);
     })
     ..get('/v1/account', (Request r) async {
@@ -79,11 +94,38 @@ class Api {
     ..delete('/v1/account', (Request r) async {
       final id = await _auth.authenticate(r.headers['authorization']);
       await _auth.deleteAccount(id);
+      live
+        ..closeWhere((c) => c.account == id)
+        ..forget(id);
       return Response(204);
     })
     ..post('/v1/sync', (Request r) async {
       final id = await _auth.authenticate(r.headers['authorization']);
-      return _json(200, await _sync.sync(id, await _body(r)));
+      final snapshot = await _sync.sync(id, await _body(r));
+      live.publish(
+        id,
+        LiveHub.fingerprint(snapshot),
+        except: r.headers[deviceHeader],
+      );
+      return _json(200, snapshot);
+    })
+    ..get('/v1/live', (Request r) async {
+      // Токен upgrade-ке дейін тексеріледі: жарамсыз болса — кәдімгі 401.
+      final header = r.headers['authorization'];
+      final id = await _auth.authenticate(header);
+      final device = r.headers[deviceHeader];
+      final tokenHash = AuthService.hashToken(header!.substring(7).trim());
+      return webSocketHandler(
+        (WebSocketChannel channel, _) => _serveLive(
+          LiveClient(
+            account: id,
+            device: device,
+            tokenHash: tokenHash,
+            channel: channel,
+          ),
+        ),
+        pingInterval: livePing,
+      )(r);
     })
     ..get('/v1/topics', (Request r) async {
       final id = await _auth.authenticate(r.headers['authorization']);
@@ -96,6 +138,7 @@ class Api {
     ..post('/v1/topics', (Request r) async {
       final id = await _auth.authenticate(r.headers['authorization']);
       final created = await _topics.create(id, await _body(r));
+      await _changed(id, r);
       return _json(
         201,
         created,
@@ -106,20 +149,113 @@ class Api {
     })
     ..patch('/v1/topics/<topic>', (Request r, String topic) async {
       final id = await _auth.authenticate(r.headers['authorization']);
-      return _json(200, await _topics.update(id, topic, await _body(r)));
+      final updated = await _topics.update(id, topic, await _body(r));
+      await _changed(id, r);
+      return _json(200, updated);
     })
     ..delete('/v1/topics/<topic>', (Request r, String topic) async {
       final id = await _auth.authenticate(r.headers['authorization']);
       await _topics.delete(id, topic);
+      await _changed(id, r);
       return Response(204);
     })
     ..all('/<ignored|.*>', (Request r) {
       throw const ApiError(404, 'not_found', 'Unknown endpoint.');
     });
 
+  /// REST арқылы өзгергеннен кейін басқа құрылғыларға хабарлау.
+  Future<void> _changed(int account, Request r) async {
+    final snapshot = await _db.runTx((tx) => _sync.snapshot(tx, account));
+    live.publish(
+      account,
+      LiveHub.fingerprint(snapshot),
+      except: r.headers[deviceHeader],
+    );
+  }
+
+  /// Бір WebSocket байланысы. Клиент → сервер:
+  ///   {"type":"ping"}                         → {"type":"pong"}
+  ///   {"type":"sync","id":n,"body":{…}}       → {"type":"synced","id":n,"snapshot":{…}}
+  /// Сервер → клиент: {"type":"ready"}, {"type":"changed"},
+  ///   {"type":"error","id":n,"error":"…","message":"…"}.
+  void _serveLive(LiveClient client) {
+    live.add(client);
+    stdout.writeln(
+      'live: account ${client.account} connected '
+      '(${live.connections(client.account)} open)',
+    );
+    client.send({'type': 'ready'});
+    client.channel.stream.listen(
+      (raw) => _onLiveMessage(client, raw),
+      onDone: () {
+        live.remove(client);
+        stdout.writeln('live: account ${client.account} disconnected');
+      },
+      onError: (Object e) => live.remove(client),
+      cancelOnError: true,
+    );
+  }
+
+  Future<void> _onLiveMessage(LiveClient client, Object? raw) async {
+    Object? id;
+    try {
+      final message = raw is String ? jsonDecode(raw) : null;
+      if (message is! Map<String, Object?>) {
+        throw const ApiError.badRequest('Message must be a JSON object.');
+      }
+      id = message['id'];
+      switch (message['type']) {
+        case 'ping':
+          client.send({'type': 'pong'});
+        case 'sync':
+          final body = message['body'];
+          if (body is! Map<String, Object?>) {
+            throw const ApiError.badRequest('"body" must be an object.');
+          }
+          final snapshot = await _sync.sync(client.account, body);
+          client.send({'type': 'synced', 'id': id, 'snapshot': snapshot});
+          live.publish(
+            client.account,
+            LiveHub.fingerprint(snapshot),
+            except: client.device,
+          );
+        default:
+          throw const ApiError.badRequest('Unknown message type.');
+      }
+    } on ApiError catch (e) {
+      // status — HTTP-дегідей: клиент қатені бір кесте бойынша түсіндіреді.
+      client.send({
+        'type': 'error',
+        'id': id,
+        'status': e.status,
+        ...e.toJson(),
+      });
+    } on FormatException {
+      client.send({
+        'type': 'error',
+        'id': id,
+        'status': 400,
+        'error': 'invalid_request',
+        'message': 'Invalid JSON.',
+      });
+    } catch (e, stack) {
+      stderr.writeln('live: $e\n$stack');
+      client.send({
+        'type': 'error',
+        'id': id,
+        'status': 500,
+        'error': 'internal',
+        'message': 'Server error.',
+      });
+    }
+  }
+
   static Handler _errors(Handler inner) => (request) async {
     try {
       return await inner(request);
+    } on HijackException {
+      // WebSocket upgrade: байланысты shelf_web_socket өзі басқарады.
+      rethrow;
     } on ApiError catch (e) {
       return _json(e.status, e.toJson());
     } on ServerException catch (e) {

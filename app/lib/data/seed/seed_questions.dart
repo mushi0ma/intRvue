@@ -1,7 +1,7 @@
 import '../models/question.dart';
 
 /// Демонстрациялық сұрақтар банкі. Әр тақырыпқа үш сұрақтан.
-const mockQuestions = <Question>[
+const seedQuestions = <Question>[
   // Dart негіздері
   Question(
     id: 'dart-1',

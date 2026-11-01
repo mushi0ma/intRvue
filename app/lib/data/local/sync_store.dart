@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../../core/log.dart';
 import 'app_database.dart';
 import 'db_schema.dart';
 import 'mappers.dart';
@@ -310,7 +310,7 @@ class SyncStore {
       await txn.execute('RELEASE sync_record');
       return n;
     } on DatabaseException catch (e) {
-      debugPrint('Sync skip: $e');
+      Log.warn('sync', 'skipped record: $e');
       await txn.execute('ROLLBACK TO sync_record');
       await txn.execute('RELEASE sync_record');
       return 0;

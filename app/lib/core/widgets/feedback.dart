@@ -93,7 +93,6 @@ class FilterDropdown<T> extends StatelessWidget {
       initialValue: value,
       onSelected: onChanged,
       position: PopupMenuPosition.under,
-      color: colors.surface,
       itemBuilder: (context) => [
         for (final v in values)
           PopupMenuItem(

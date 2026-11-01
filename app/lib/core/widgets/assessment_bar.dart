@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../data/models/assessment.dart';
 import '../theme/app_colors.dart';
 
 /// Бір бағалау өлшемі: атауы, «4 / 5» мәні және 7 dp жолақ.
@@ -9,7 +10,7 @@ class AssessmentBar extends StatelessWidget {
     super.key,
     required this.label,
     required this.value,
-    this.max = 5,
+    this.max = Assessment.maxPerCriterion,
     this.onBlock = false,
   });
 

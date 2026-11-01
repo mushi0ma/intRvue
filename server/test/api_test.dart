@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -678,6 +679,164 @@ void main() {
     });
   });
 
+  group('live (WebSocket)', () {
+    /// Ашық сокет және келген хабарламалар.
+    Future<_Live> connect(String token, {String? device}) async {
+      final ws = await WebSocket.connect(
+        base.replace(scheme: 'ws', path: '/v1/live').toString(),
+        headers: {
+          'authorization': 'Bearer $token',
+          'x-intrvue-device': ?device,
+        },
+      );
+      final live = _Live(ws);
+      addTearDown(ws.close);
+      expect((await live.next('ready'))['type'], 'ready');
+      return live;
+    }
+
+    test('token is checked before the upgrade', () async {
+      await expectLater(
+        WebSocket.connect(
+          base.replace(scheme: 'ws', path: '/v1/live').toString(),
+        ),
+        throwsA(isA<WebSocketException>()),
+      );
+      await expectLater(
+        WebSocket.connect(
+          base.replace(scheme: 'ws', path: '/v1/live').toString(),
+          headers: {'authorization': 'Bearer nope'},
+        ),
+        throwsA(isA<WebSocketException>()),
+      );
+    });
+
+    test('sync over the socket: other device is told, origin is not', () async {
+      final token = await register('live@example.com');
+      final a = await connect(token, device: 'phone-a');
+      final b = await connect(token, device: 'phone-b');
+
+      a.send({
+        'type': 'sync',
+        'id': 1,
+        'body': {
+          'topics': [topic('live-1', t0)],
+        },
+      });
+      final synced = await a.next('synced');
+      expect(synced['id'], 1);
+      final snapshot = synced['snapshot']! as Map;
+      expect((snapshot['topics']! as List).single['id'], 'live-1');
+
+      expect((await b.next('changed'))['type'], 'changed');
+      await a.expectSilent('changed');
+
+      // Нақты өзгеріс жоқ — ешкімге хабар жоқ (шексіз цикл болмайды).
+      b.send({'type': 'sync', 'id': 2, 'body': <String, Object?>{}});
+      expect((await b.next('synced'))['id'], 2);
+      await a.expectSilent('changed');
+    });
+
+    test('HTTP sync and REST writes reach open sockets', () async {
+      final token = await register('rest-live@example.com');
+      final a = await connect(token, device: 'phone-a');
+
+      final request = http.Request('POST', base.resolve('/v1/sync'))
+        ..headers['content-type'] = 'application/json'
+        ..headers['authorization'] = 'Bearer $token'
+        ..headers['x-intrvue-device'] = 'tablet'
+        ..body = jsonEncode({
+          'sessions': [session('s-live', t0)],
+        });
+      expect((await request.send()).statusCode, 200);
+      await a.next('changed');
+
+      final (status, _) = await call(
+        'POST',
+        '/v1/topics',
+        token: token,
+        body: {
+          'title': 'Kafka',
+          'summary': 'Хабар кезегі',
+          'direction': 'backend',
+          'level': 'middle',
+          'review_points': ['Partition'],
+          'questions': [
+            {
+              'text': 'Partition деген не?',
+              'model_answer': 'Топиктің реттелген бөлігі.',
+              'concepts': [
+                {
+                  'label': 'Partition',
+                  'keywords': ['partition'],
+                },
+              ],
+            },
+          ],
+        },
+      );
+      expect(status, 201);
+      await a.next('changed');
+    });
+
+    test('accounts are isolated', () async {
+      final mine = await register('mine@example.com');
+      final other = await register('other@example.com');
+      final watcher = await connect(other, device: 'x');
+      final writer = await connect(mine, device: 'y');
+      writer.send({
+        'type': 'sync',
+        'id': 1,
+        'body': {
+          'topics': [topic('iso-1', t0)],
+        },
+      });
+      await writer.next('synced');
+      await watcher.expectSilent('changed');
+    });
+
+    test(
+      'ping, bad messages and invalid payloads keep the socket open',
+      () async {
+        final token = await register('ping@example.com');
+        final a = await connect(token);
+        a.send({'type': 'ping'});
+        await a.next('pong');
+
+        a.ws.add('{oops');
+        expect((await a.next('error'))['error'], 'invalid_request');
+
+        a.send({'type': 'dance', 'id': 7});
+        final unknown = await a.next('error');
+        expect(unknown['id'], 7);
+        expect(unknown['error'], 'invalid_request');
+        expect(unknown['status'], 400);
+
+        a.send({
+          'type': 'sync',
+          'id': 8,
+          'body': {
+            'deleted': [
+              {'entity': 'planet', 'id': 'x', 'deleted_at': t0},
+            ],
+          },
+        });
+        expect((await a.next('error'))['id'], 8);
+
+        a.send({'type': 'ping'});
+        await a.next('pong');
+      },
+    );
+
+    test('logout closes sockets of that token', () async {
+      final token = await register('bye@example.com');
+      final a = await connect(token);
+      expect((await call('POST', '/v1/auth/logout', token: token)).$1, 204);
+      await a.done.timeout(const Duration(seconds: 3));
+      expect(a.ws.closeCode, 4401);
+    });
+  });
+
   test('unknown routes and malformed JSON', () async {
     expect((await call('GET', '/v2/nothing')).$1, 404);
     final response = await http.post(
@@ -686,4 +845,42 @@ void main() {
     );
     expect(response.statusCode, 400);
   });
+}
+
+/// Сокет хабарламаларын жинайды; тест керек түрін күтеді.
+class _Live {
+  _Live(this.ws) {
+    ws.listen((raw) {
+      final m = (jsonDecode(raw as String) as Map).cast<String, Object?>();
+      _received.add(m);
+      _arrived.add(null);
+    }, onDone: _done.complete);
+  }
+
+  final WebSocket ws;
+  final _received = <Map<String, Object?>>[];
+  final _arrived = StreamController<void>.broadcast();
+  final _done = Completer<void>();
+
+  Future<void> get done => _done.future;
+
+  void send(Map<String, Object?> m) => ws.add(jsonEncode(m));
+
+  /// Келесі [type] хабарламасы (бұрын келгені де есепке алынады).
+  Future<Map<String, Object?>> next(String type) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 3));
+    while (true) {
+      final i = _received.indexWhere((m) => m['type'] == type);
+      if (i >= 0) return _received.removeAt(i);
+      final left = deadline.difference(DateTime.now());
+      if (left.isNegative) throw TimeoutException('no "$type" message');
+      await _arrived.stream.first.timeout(left, onTimeout: () {});
+    }
+  }
+
+  /// [type] хабарламасы келмегенін тексеру.
+  Future<void> expectSilent(String type) async {
+    await Future<void>.delayed(const Duration(milliseconds: 400));
+    expect(_received.where((m) => m['type'] == type), isEmpty);
+  }
 }

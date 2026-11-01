@@ -5,12 +5,15 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intrvue/app/bootstrap.dart';
+import 'package:intrvue/core/log.dart';
 import 'package:intrvue/data/local/app_database.dart';
 import 'package:intrvue/data/models/enums.dart';
 import 'package:intrvue/data/models/topic.dart';
+import 'package:intrvue/data/remote/live_channel.dart';
 import 'package:intrvue/data/remote/request_state.dart';
 import 'package:intrvue/data/remote/sync_api.dart';
 import 'package:intrvue/data/repositories/cloud_topics_repository.dart';
+import 'package:intrvue/data/repositories/sync_repository.dart';
 import 'package:intrvue/data/services/reminder_scheduler.dart';
 import 'package:intrvue_server/intrvue_server.dart';
 import 'package:postgres/postgres.dart';
@@ -32,6 +35,15 @@ const _topic = TopicDraft(
     ),
   ],
 );
+
+/// Шарт орындалғанша күту (нақты уақыт).
+Future<void> _until(bool Function() test, String reason) async {
+  final deadline = DateTime.now().add(const Duration(seconds: 10));
+  while (!test()) {
+    if (DateTime.now().isAfter(deadline)) fail('timeout: $reason');
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+  }
+}
 
 Future<bool> _postgresAvailable(String url) async {
   try {
@@ -193,6 +205,104 @@ Future<void> main() async {
       // Іздеу бағандары қайта есептелді.
       final found = await a.topics.search('compose');
       expect(found.map((t) => t.id), contains(topic.id));
+    });
+
+    /// Live (WebSocket) қосылған «құрылғы»: жеке белгісімен.
+    Future<AppServices> liveDevice(String id, Uri server) async {
+      final s = await AppServices.start(
+        factory: databaseFactoryFfiNoIsolate,
+        databasePath: inMemoryDatabasePath,
+        reminders: const NoopReminderScheduler(),
+        syncApi: (_) => HttpSyncApi(server, deviceId: id),
+        live: LiveChannel(backoff: (_) => const Duration(milliseconds: 100)),
+        deviceId: id,
+      );
+      addTearDown(s.dispose);
+      await s.sync.setServerUrl(server);
+      return s;
+    }
+
+    Future<(AppServices, AppServices)> livePair(
+      String email,
+      Uri server,
+    ) async {
+      final a = await liveDevice('device-a', server);
+      await a.auth.register(name: 'Live', email: email, password: 'qwerty2026');
+      expect(await a.sync.connect('qwerty2026'), isNull);
+      final b = await liveDevice('device-b', server);
+      expect(await b.sync.restore(email, 'qwerty2026'), isTrue);
+      await _until(
+        () => a.sync.live.isLive && b.sync.live.isLive,
+        'both devices live',
+      );
+      await _until(
+        () => !a.sync.syncing && !b.sync.syncing,
+        'catch-up finished',
+      );
+      return (a, b);
+    }
+
+    test(
+      'live: бір құрылғыдағы өзгеріс екіншісіне сокет арқылы бірден жетеді',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        Log.clear();
+        final (a, b) = await livePair('live@example.com', base);
+        final arrived = b.sync.remoteUpdates.firstWhere((u) => u.topics > 0);
+
+        final started = DateTime.now();
+        final topic = await a.topics.create(_topic);
+        final update = await arrived.timeout(const Duration(seconds: 10));
+
+        // Күтілетін нәтиже: B-де тақырып пайда болды, HTTP-ге көшпеді,
+        // 20 с-тық HTTP кідірісін күтпеді.
+        expect(update.topics, 1);
+        expect(b.topics.tryById(topic.id)?.title, 'Docker негіздері');
+        expect(
+          DateTime.now().difference(started),
+          lessThan(SyncRepository.autoSyncDelay),
+        );
+        expect(
+          Log.recent.where((e) => e.message.contains('using HTTP')),
+          isEmpty,
+        );
+      },
+    );
+
+    test('live: сервер үзілсе — қайта қосылып, үзіліс кезіндегі өзгерісті жеткізеді', () async {
+      SharedPreferences.setMockInitialValues({});
+      final api = Api(db, passwords: const Passwords(iterations: 1000));
+      var http = await io.serve(api.handler, '127.0.0.1', 0);
+      final port = http.port;
+      final server = Uri.parse('http://127.0.0.1:$port');
+      addTearDown(() => http.close(force: true));
+      final (a, b) = await livePair('restart@example.com', server);
+
+      // Сервер «өшті»: жаңа қосылу жоқ, ашық сокеттер жабылды.
+      await http.close(force: true);
+      api.live.closeWhere(
+        (_) => true,
+        code: LiveHub.restartCode,
+        reason: 'restart',
+      );
+      await _until(
+        () =>
+            a.sync.live.status != LiveStatus.live &&
+            b.sync.live.status != LiveStatus.live,
+        'both lost connection',
+      );
+
+      // Үзіліс кезінде A-да жаңа тақырып: тек құрылғыда сақталады.
+      final topic = await a.topics.create(_topic);
+      expect(b.topics.tryById(topic.id), isNull);
+
+      final arrived = b.sync.remoteUpdates.firstWhere((u) => u.topics > 0);
+      http = await io.serve(api.handler, '127.0.0.1', port);
+      await arrived.timeout(const Duration(seconds: 10));
+
+      expect(a.sync.live.isLive, isTrue);
+      expect(b.sync.live.isLive, isTrue);
+      expect(b.topics.tryById(topic.id)?.title, 'Docker негіздері');
     });
 
     test('серверде басқа пароль — қосылмайды, деректер өзгермейді', () async {

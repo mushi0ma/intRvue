@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../core/constants/app_strings.dart';
+import '../../core/log.dart';
 
 /// Пайдаланушыға көрсетуге болатын қате: мәтіні қазақша.
 class AppException implements Exception {
@@ -26,7 +26,7 @@ Future<T> dbGuard<T>(
   } on AppException {
     rethrow;
   } on DatabaseException catch (e, stack) {
-    debugPrint('SQLite: $e\n$stack');
+    Log.error('sqlite', '$e', stack);
     final text = e.toString();
     if (e.isUniqueConstraintError()) {
       throw AppException(unique ?? S.dbDuplicate, e);
@@ -37,7 +37,7 @@ Future<T> dbGuard<T>(
     if (e.isDatabaseClosedError()) throw AppException(S.dbClosed, e);
     throw AppException(S.dbGeneric, e);
   } catch (e, stack) {
-    debugPrint('Data error: $e\n$stack');
+    Log.error('data', '$e', stack);
     throw AppException(S.dbGeneric, e);
   }
 }

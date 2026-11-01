@@ -48,7 +48,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return PopScope(
       canPop: _index == 0,
       onPopInvokedWithResult: (didPop, _) {
@@ -71,14 +70,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       child: Row(
                         children: [
                           if (_index == 0)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16),
-                              child: Text(
-                                S.appName,
-                                style: context.text.headlineSmall!.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: colors.primary,
-                                ),
+                            const Flexible(
+                              child: Padding(
+                                padding: EdgeInsets.only(left: 16),
+                                child: Wordmark(),
                               ),
                             )
                           else

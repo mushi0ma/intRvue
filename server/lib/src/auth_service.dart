@@ -85,7 +85,7 @@ class AuthService {
 
   Future<void> logout(String token) => _db.execute(
     Sql.named('DELETE FROM auth_tokens WHERE token_hash = @h'),
-    parameters: {'h': _hashToken(token)},
+    parameters: {'h': hashToken(token)},
   );
 
   /// Токенді тексеріп, аккаунт id-ін қайтарады.
@@ -98,7 +98,7 @@ class AuthService {
       Sql.named('''
         SELECT account_id FROM auth_tokens
         WHERE token_hash = @h AND expires_at > now()'''),
-      parameters: {'h': _hashToken(header.substring(prefix.length).trim())},
+      parameters: {'h': hashToken(header.substring(prefix.length).trim())},
     );
     if (rows.isEmpty) throw const ApiError.unauthorized();
     return rows.first.first! as int;
@@ -176,7 +176,7 @@ class AuthService {
         INSERT INTO auth_tokens (token_hash, account_id, expires_at)
         VALUES (@h, @id, @expires)'''),
       parameters: {
-        'h': _hashToken(token),
+        'h': hashToken(token),
         'id': accountId,
         'expires': DateTime.now().toUtc().add(tokenLifetime),
       },
@@ -184,6 +184,6 @@ class AuthService {
     return token;
   }
 
-  static String _hashToken(String token) =>
+  static String hashToken(String token) =>
       sha256.convert(utf8.encode(token)).toString();
 }

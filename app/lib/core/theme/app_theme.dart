@@ -155,6 +155,16 @@ abstract final class AppTheme {
         ),
         insetPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
       ),
+      // Мәзір фоннан ажырауы керек: қараңғы тақырыпта бет пен мәзір бір
+      // түсті болса, шекарасы көрінбейді.
+      popupMenuTheme: PopupMenuThemeData(
+        color: isDark ? colors.surfaceContainerHigh : colors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: colors.outlineVariant),
+          borderRadius: BorderRadius.circular(AppRadius.field),
+        ),
+      ),
       dialogTheme: DialogThemeData(
         backgroundColor: isDark ? colors.surfaceContainerHigh : colors.surface,
         surfaceTintColor: Colors.transparent,

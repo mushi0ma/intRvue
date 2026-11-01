@@ -114,8 +114,15 @@ SyncFailure failureFor(int status, Object? code) => switch ((status, code)) {
 };
 
 class HttpSyncApi implements SyncApi {
-  HttpSyncApi(this.baseUrl, {http.Client? client, this.timeout = _timeout})
-    : _client = client ?? http.Client();
+  HttpSyncApi(
+    this.baseUrl, {
+    http.Client? client,
+    this.timeout = _timeout,
+    this.deviceId,
+  }) : _client = client ?? http.Client();
+
+  /// Сервер «changed» хабарламасын осы құрылғыға қайтармайды.
+  static const deviceHeader = 'x-intrvue-device';
 
   /// Эмулятордан компьютердегі серверге: 10.0.2.2. Басқа мекенжай:
   /// `flutter run --dart-define=INTRVUE_API=http://192.168.1.10:8787`
@@ -128,6 +135,7 @@ class HttpSyncApi implements SyncApi {
   @override
   final Uri baseUrl;
   final Duration timeout;
+  final String? deviceId;
   final http.Client _client;
 
   @override
@@ -245,6 +253,7 @@ class HttpSyncApi implements SyncApi {
     final request = http.Request(method, baseUrl.resolve(path))
       ..headers['accept'] = 'application/json';
     if (token != null) request.headers['authorization'] = 'Bearer $token';
+    if (deviceId != null) request.headers[deviceHeader] = deviceId!;
     if (body != null) {
       request.headers['content-type'] = 'application/json; charset=utf-8';
       request.body = jsonEncode(body);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,7 @@ import '../../core/utils/formatters.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
+import '../../data/remote/live_channel.dart';
 import '../../data/remote/sync_api.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/sync_repository.dart';
@@ -189,8 +192,8 @@ class _SyncScreenState extends State<SyncScreen> {
                 body: SyncScreen.statusLabel(sync),
               ),
             ),
-            const SizedBox(height: 24),
-            Text(S.syncAuto, style: muted),
+            SectionDivider(vertical: 28),
+            const LiveStatusSection(),
             SectionDivider(vertical: 28),
             SettingsRow(
               title: S.cloudTitle,
@@ -219,6 +222,78 @@ class _SyncScreenState extends State<SyncScreen> {
                 ),
               ],
       ),
+    );
+  }
+}
+
+/// Тікелей (WebSocket) байланыс күйі: қосулы / қосылуда / үзілді + кері
+/// санақ және «Қазір қосылу». Үзілу қате емес: деректер құрылғыда қалады.
+class LiveStatusSection extends StatefulWidget {
+  const LiveStatusSection({super.key});
+
+  @override
+  State<LiveStatusSection> createState() => _LiveStatusSectionState();
+}
+
+class _LiveStatusSectionState extends State<LiveStatusSection> {
+  Timer? _tick;
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
+
+  // Кері санақ тек күту кезінде жаңарады.
+  void _ticker(bool waiting) {
+    if (waiting && _tick == null) {
+      _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) setState(() {});
+      });
+    } else if (!waiting) {
+      _tick?.cancel();
+      _tick = null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final live = context.read<SyncRepository>().live;
+    return ListenableBuilder(
+      listenable: live,
+      builder: (context, _) {
+        final status = live.status;
+        _ticker(status == LiveStatus.waiting);
+        final at = live.retryAt;
+        final seconds = at == null
+            ? 0
+            : (at.difference(DateTime.now()).inMilliseconds / 1000)
+                  .ceil()
+                  .clamp(0, 999);
+        final body = switch (status) {
+          LiveStatus.live => S.syncLiveOn,
+          LiveStatus.connecting => S.syncLiveConnecting,
+          LiveStatus.waiting => S.syncLiveWaiting(seconds),
+          LiveStatus.off => S.syncAuto,
+        };
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Semantics(
+              liveRegion: status != LiveStatus.waiting,
+              child: InfoSection(title: S.syncLiveTitle, body: body),
+            ),
+            if (status == LiveStatus.waiting)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: AppButton.text(
+                  label: S.syncLiveRetry,
+                  onPressed: live.retryNow,
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

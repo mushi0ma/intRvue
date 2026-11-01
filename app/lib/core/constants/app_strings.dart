@@ -29,7 +29,6 @@ abstract final class S {
   static String get aiDisclaimer => _l.aiDisclaimer;
   static String get notHiringDecision => _l.notHiringDecision;
   static String get draftSaved => _l.draftSaved;
-  static String get comingSoon => _l.comingSoon;
   static String get navHome => _l.navHome;
   static String get navHistory => _l.navHistory;
   static String get navProgress => _l.navProgress;
@@ -212,7 +211,6 @@ abstract final class S {
   static String get historyTitle => _l.historyTitle;
   static String get historySubtitle => _l.historySubtitle;
   static String get allDirections => _l.allDirections;
-  static String get allStatuses => _l.allStatuses;
   static String get allSessions => _l.allSessions;
   static String get periodLabel => _l.periodLabel;
   static String get periodAll => _l.periodAll;
@@ -242,7 +240,6 @@ abstract final class S {
   static String get progressEmptyBody => _l.progressEmptyBody;
   static String get progressEmptyHint => _l.progressEmptyHint;
   static String get progressEmptyAction => _l.progressEmptyAction;
-  static String get weakTopicsTitle => _l.weakTopicsTitle;
   static String get settingsTitle => _l.settingsTitle;
   static String get settingsSubtitle => _l.settingsSubtitle;
   static String get profileLink => _l.profileLink;
@@ -290,7 +287,6 @@ abstract final class S {
   static String get notificationsOffBody => _l.notificationsOffBody;
   static String get openAndroidSettings => _l.openAndroidSettings;
   static String get remindersPickDay => _l.remindersPickDay;
-  static String get remindersSaved => _l.remindersSaved;
   static String get pickTime => _l.pickTime;
   static String get privacySubtitle => _l.privacySubtitle;
   static String get privacyAiTitle => _l.privacyAiTitle;
@@ -310,7 +306,6 @@ abstract final class S {
   static String get catalogTitle => _l.catalogTitle;
   static String get searchTopics => _l.searchTopics;
   static String get newTraining => _l.newTraining;
-  static String get otherDirections => _l.otherDirections;
   static String get whatWeReview => _l.whatWeReview;
   static String get sampleQuestion => _l.sampleQuestion;
   static String get addFavorite => _l.addFavorite;
@@ -354,7 +349,6 @@ abstract final class S {
   static String get dbClosed => _l.dbClosed;
   static String get dbGeneric => _l.dbGeneric;
   static String get dbNoUser => _l.dbNoUser;
-  static String get loadError => _l.loadError;
   static String get retry => _l.retry;
   static String get startupErrorTitle => _l.startupErrorTitle;
   static String get startupErrorBody => _l.startupErrorBody;
@@ -460,6 +454,10 @@ abstract final class S {
   static String get cloudSent => _l.cloudSent;
   static String get cloudDeferred => _l.cloudDeferred;
   static String get cloudActions => _l.cloudActions;
+  static String get syncLiveTitle => _l.syncLiveTitle;
+  static String get syncLiveOn => _l.syncLiveOn;
+  static String get syncLiveConnecting => _l.syncLiveConnecting;
+  static String get syncLiveRetry => _l.syncLiveRetry;
   static String get levelBeginner => _l.levelBeginner;
   static String get levelJunior => _l.levelJunior;
   static String get levelMiddle => _l.levelMiddle;
@@ -523,15 +521,12 @@ abstract final class S {
   static String recommendScore(String score) => _l.recommendScore(score);
   static String whyLowest(int n) => _l.whyLowest(n);
   static String whyMissing(int n, String missing) => _l.whyMissing(n, missing);
-  static String filters(int n) => _l.filters(n);
   static String assessedPoints(int total) => _l.assessedPoints(total);
   static String savedAnswerHeader(int n, int total) =>
       _l.savedAnswerHeader(n, total);
   static String lastSessions(int n) => _l.lastSessions(n);
   static String completeSessions(int n) => _l.completeSessions(n);
   static String averageScore(String score) => _l.averageScore(score);
-  static String catalogSubtitle(String direction) =>
-      _l.catalogSubtitle(direction);
   static String found(int n) => _l.found(n);
   static String averageShort(String score) => _l.averageShort(score);
   static String topicCount(int n) => _l.topicCount(n);
@@ -540,4 +535,6 @@ abstract final class S {
   static String reminderWeakBody(String topic, String score) =>
       _l.reminderWeakBody(topic, score);
   static String questionN(int n) => _l.questionN(n);
+  static String syncLiveWaiting(int seconds) => _l.syncLiveWaiting(seconds);
+  static String syncRemoteUpdate(int n) => _l.syncRemoteUpdate(n);
 }

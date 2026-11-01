@@ -1,9 +1,9 @@
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
-import '../mock/mock_questions.dart';
-import '../mock/mock_sessions.dart';
-import '../mock/mock_topics.dart';
+import '../seed/seed_questions.dart';
+import '../seed/demo_sessions.dart';
+import '../seed/seed_topics.dart';
 import '../models/interview_session.dart';
 import '../models/user_profile.dart';
 import 'db_schema.dart';
@@ -76,12 +76,12 @@ class AppDatabase {
   static Future<void> _seed(Database db) async {
     await db.transaction((txn) async {
       final created = DateTime(2026, 10, 1);
-      for (final topic in mockTopics) {
+      for (final topic in seedTopics) {
         final row = Mappers.topicRow(topic)
           ..['created_at'] = Mappers.ms(created)
           ..['updated_at'] = Mappers.ms(created);
         await txn.insert(DbSchema.topics, row);
-        final questions = mockQuestions.where((q) => q.topicId == topic.id);
+        final questions = seedQuestions.where((q) => q.topicId == topic.id);
         var position = 0;
         for (final q in questions) {
           await txn.insert(
@@ -101,7 +101,7 @@ class AppDatabase {
         'created_at': Mappers.ms(created),
       });
 
-      for (final session in [...buildMockHistory(), buildMockActiveSession()]) {
+      for (final session in [...buildDemoHistory(), buildDemoActiveSession()]) {
         await insertSession(txn, session, userId);
       }
       await txn.insert(DbSchema.favorites, {

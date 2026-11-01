@@ -8,6 +8,7 @@ import '../data/local/app_database.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/cloud_topics_repository.dart';
 import '../data/repositories/session_repository.dart';
+import '../data/remote/live_channel.dart';
 import '../data/remote/sync_api.dart';
 import '../data/repositories/settings_repository.dart';
 import '../data/repositories/sync_repository.dart';
@@ -48,6 +49,8 @@ class AppServices {
     String? databasePath,
     ReminderScheduler? reminders,
     SyncApi Function(Uri baseUrl)? syncApi,
+    LiveChannel? live,
+    String? deviceId,
     DateTime Function()? clock,
   }) async {
     final prefs = await SharedPreferences.getInstance();
@@ -67,6 +70,8 @@ class AppServices {
       scoped: [topics, sessions],
       watch: [topics, sessions],
       api: syncApi,
+      live: live,
+      deviceId: deviceId,
     );
     // Желі болмаса үнсіз өтеді — қосымша офлайн іске қосыла береді.
     if (sync.link != null) unawaited(sync.syncNow());

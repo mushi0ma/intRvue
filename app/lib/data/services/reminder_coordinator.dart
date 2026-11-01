@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
+import '../../core/log.dart';
 import '../repositories/auth_repository.dart';
 import '../repositories/session_repository.dart';
 import '../repositories/settings_repository.dart';
@@ -40,9 +39,6 @@ class ReminderCoordinator {
   /// Соңғы жоспарланған кесте; `off` — бәрі өшірілген; null — белгісіз.
   String? _scheduled;
 
-  @visibleForTesting
-  String? get scheduledSignature => _scheduled;
-
   /// Тыңдауды бастап, кестені бірден сәйкестендіреді (қайта іске қосқанда:
   /// сақталған сессия мен деректер бойынша). Ұзақ күтпейміз — қосымша
   /// хабарламасыз да іске қосылуы керек.
@@ -53,7 +49,7 @@ class ReminderCoordinator {
     try {
       await refresh().timeout(const Duration(seconds: 2));
     } catch (e) {
-      debugPrint('reminders: initial schedule skipped: $e');
+      Log.warn('reminders', 'initial schedule skipped: $e');
     }
   }
 
@@ -70,7 +66,7 @@ class ReminderCoordinator {
   // Фондағы жаңарту: қате журналға жазылады, келесі өзгерісте қайталанады.
   void _background() => unawaited(
     refresh().catchError(
-      (Object e) => debugPrint('reminders: schedule failed: $e'),
+      (Object e) => Log.error('reminders', 'schedule failed', e),
     ),
   );
 

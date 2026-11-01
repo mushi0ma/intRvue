@@ -346,7 +346,7 @@ class SyncService {
       'deleted': [
         for (final d in await rows('''
           SELECT entity, entity_id, deleted_at FROM tombstones
-          WHERE account_id = @a'''))
+          WHERE account_id = @a ORDER BY entity, entity_id'''))
           {
             'entity': d['entity'],
             'id': d['entity_id'],

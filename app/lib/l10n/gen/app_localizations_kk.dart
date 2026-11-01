@@ -58,9 +58,6 @@ class AppLocalizationsKk extends AppLocalizations {
   String get draftSaved => 'Нобай сақталды';
 
   @override
-  String get comingSoon => 'Келесі нұсқада қолжетімді болады.';
-
-  @override
   String get navHome => 'Басты бет';
 
   @override
@@ -635,9 +632,6 @@ class AppLocalizationsKk extends AppLocalizations {
   String get allDirections => 'Барлық бағыт';
 
   @override
-  String get allStatuses => 'Барлығы';
-
-  @override
   String get allSessions => 'Барлық сессия';
 
   @override
@@ -728,9 +722,6 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get progressEmptyAction => 'Алғашқы жаттығуды бастау';
-
-  @override
-  String get weakTopicsTitle => 'Әлсіз тақырыптар';
 
   @override
   String get settingsTitle => 'Баптаулар';
@@ -882,9 +873,6 @@ class AppLocalizationsKk extends AppLocalizations {
   String get remindersPickDay => 'Кемінде бір күн таңдаңыз.';
 
   @override
-  String get remindersSaved => 'Еске салу сақталды.';
-
-  @override
   String get pickTime => 'Уақытты таңдау';
 
   @override
@@ -944,9 +932,6 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get newTraining => 'Жаңа жаттығу';
-
-  @override
-  String get otherDirections => 'Басқа бағыттар';
 
   @override
   String get whatWeReview => 'Нені қайталаймыз?';
@@ -1082,9 +1067,6 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get dbNoUser => 'Алдымен аккаунтқа кіріңіз.';
-
-  @override
-  String get loadError => 'Деректерді жүктеу мүмкін болмады.';
 
   @override
   String get retry => 'Қайталау';
@@ -1427,6 +1409,18 @@ class AppLocalizationsKk extends AppLocalizations {
   String get cloudActions => 'Әрекеттер';
 
   @override
+  String get syncLiveTitle => 'Тікелей байланыс';
+
+  @override
+  String get syncLiveOn => 'Қосулы: өзгерістер бірден жіберіледі және келеді.';
+
+  @override
+  String get syncLiveConnecting => 'Қосылуда…';
+
+  @override
+  String get syncLiveRetry => 'Қазір қосылу';
+
+  @override
   String get levelBeginner => 'Бастапқы';
 
   @override
@@ -1618,11 +1612,6 @@ class AppLocalizationsKk extends AppLocalizations {
   }
 
   @override
-  String filters(int n) {
-    return 'Сүзгілер · $n';
-  }
-
-  @override
   String assessedPoints(int total) {
     return 'Бағаланды · $total / 15';
   }
@@ -1645,11 +1634,6 @@ class AppLocalizationsKk extends AppLocalizations {
   @override
   String averageScore(String score) {
     return 'Орташа балл: $score';
-  }
-
-  @override
-  String catalogSubtitle(String direction) {
-    return '$direction · Дайындық кітапханасы';
   }
 
   @override
@@ -1680,5 +1664,15 @@ class AppLocalizationsKk extends AppLocalizations {
   @override
   String questionN(int n) {
     return '$n-сұрақ';
+  }
+
+  @override
+  String syncLiveWaiting(int seconds) {
+    return 'Байланыс үзілді. Деректер құрылғыда сақталады — $seconds с кейін қайта қосыламыз.';
+  }
+
+  @override
+  String syncRemoteUpdate(int n) {
+    return 'Басқа құрылғыдан $n өзгеріс келді.';
   }
 }

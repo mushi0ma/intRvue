@@ -38,10 +38,16 @@ class _IntRvueAppState extends State<IntRvueApp> {
   );
 
   StreamSubscription<String>? _reminderTaps;
+  late final AppLifecycleListener _lifecycle;
 
   @override
   void initState() {
     super.initState();
+    // Қосымша қайта ашылды: үзілген live-байланысты кідіріссіз қалпына
+    // келтіріп, үзіліс кезіндегі өзгерістерді қуып жетеміз.
+    _lifecycle = AppLifecycleListener(
+      onResume: widget.services.sync.live.retryNow,
+    );
     // Ашық қосымшада басылған еске салу: сол сәттегі деректерге сай экран.
     _reminderTaps = widget.services.reminderCoordinator.openRequests.listen(
       _openFromReminder,
@@ -58,6 +64,7 @@ class _IntRvueAppState extends State<IntRvueApp> {
   @override
   void dispose() {
     _reminderTaps?.cancel();
+    _lifecycle.dispose();
     router.dispose();
     super.dispose();
   }

@@ -58,9 +58,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get draftSaved => 'Черновик сохранён';
 
   @override
-  String get comingSoon => 'Будет доступно в следующей версии.';
-
-  @override
   String get navHome => 'Главная';
 
   @override
@@ -636,9 +633,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get allDirections => 'Все направления';
 
   @override
-  String get allStatuses => 'Все';
-
-  @override
   String get allSessions => 'Все сессии';
 
   @override
@@ -730,9 +724,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get progressEmptyAction => 'Начать первую тренировку';
-
-  @override
-  String get weakTopicsTitle => 'Слабые темы';
 
   @override
   String get settingsTitle => 'Настройки';
@@ -885,9 +876,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get remindersPickDay => 'Выберите хотя бы один день.';
 
   @override
-  String get remindersSaved => 'Напоминания сохранены.';
-
-  @override
   String get pickTime => 'Выберите время';
 
   @override
@@ -948,9 +936,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get newTraining => 'Новая тренировка';
-
-  @override
-  String get otherDirections => 'Другие направления';
 
   @override
   String get whatWeReview => 'Что повторяем?';
@@ -1086,9 +1071,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dbNoUser => 'Сначала войдите в аккаунт.';
-
-  @override
-  String get loadError => 'Не удалось загрузить данные.';
 
   @override
   String get retry => 'Повторить';
@@ -1432,6 +1414,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get cloudActions => 'Действия';
 
   @override
+  String get syncLiveTitle => 'Прямое соединение';
+
+  @override
+  String get syncLiveOn => 'Включено: изменения уходят и приходят сразу.';
+
+  @override
+  String get syncLiveConnecting => 'Подключение…';
+
+  @override
+  String get syncLiveRetry => 'Подключиться сейчас';
+
+  @override
   String get levelBeginner => 'Начальный';
 
   @override
@@ -1639,11 +1633,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String filters(int n) {
-    return 'Фильтры · $n';
-  }
-
-  @override
   String assessedPoints(int total) {
     return 'Оценено · $total / 15';
   }
@@ -1682,11 +1671,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String averageScore(String score) {
     return 'Средний балл: $score';
-  }
-
-  @override
-  String catalogSubtitle(String direction) {
-    return '$direction · Библиотека подготовки';
   }
 
   @override
@@ -1733,5 +1717,23 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String questionN(int n) {
     return 'Вопрос $n';
+  }
+
+  @override
+  String syncLiveWaiting(int seconds) {
+    return 'Связь прервалась. Данные сохраняются на устройстве — переподключимся через $seconds с.';
+  }
+
+  @override
+  String syncRemoteUpdate(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'С другого устройства пришло $n изменения.',
+      many: 'С другого устройства пришло $n изменений.',
+      few: 'С другого устройства пришло $n изменения.',
+      one: 'С другого устройства пришло $n изменение.',
+    );
+    return '$_temp0';
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/log.dart';
 import '../models/topic.dart';
 import '../remote/dto.dart';
 import '../remote/request_state.dart';
@@ -206,10 +207,10 @@ class CloudTopicsRepository extends ChangeNotifier {
       return null;
     } on SyncApiException catch (e) {
       if (e.failure == SyncFailure.unauthorized) await _sync.invalidateLink();
-      debugPrint('Cloud: $e');
+      Log.warn('cloud', '$e');
       return e.failure;
     } on Object catch (e) {
-      debugPrint('Cloud: unexpected $e');
+      Log.error('cloud', 'unexpected', e);
       return SyncFailure.server;
     }
   }

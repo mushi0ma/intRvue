@@ -2,10 +2,10 @@ import '../models/assessment.dart';
 import '../models/enums.dart';
 import '../models/interview_session.dart';
 import '../models/question.dart';
-import 'mock_questions.dart';
+import 'seed_questions.dart';
 
 /// Тарих пен прогресс үшін синтетикалық сессиялар (дизайндағы мысалдар).
-List<InterviewSession> buildMockHistory() {
+List<InterviewSession> buildDemoHistory() {
   return [
     _session(
       id: 's-1019',
@@ -56,7 +56,7 @@ List<InterviewSession> buildMockHistory() {
 }
 
 /// Үзіліске қойылған белсенді сессия: 2 / 5 сұрақ, нобай сақталған.
-InterviewSession buildMockActiveSession() {
+InterviewSession buildDemoActiveSession() {
   final session = InterviewSession(
     id: 's-active',
     direction: Direction.mobile,
@@ -129,7 +129,7 @@ InterviewSession _incompleteSession() {
   return session;
 }
 
-Question _q(String id) => mockQuestions.firstWhere((q) => q.id == id);
+Question _q(String id) => seedQuestions.firstWhere((q) => q.id == id);
 
 void _assess(AnswerRecord record, int total) {
   // 12 → 4 / 3 / 5 — дизайндағы сақталған жауап мысалы.

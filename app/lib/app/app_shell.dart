@@ -1,16 +1,46 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../core/constants/app_strings.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
+import '../core/widgets/feedback.dart';
+import '../data/repositories/sync_repository.dart';
 
 /// Төрт негізгі бөлім: Басты бет, Тарих, Прогресс, Баптаулар.
 /// Тар экранда — NavigationBar, кең экранда (≥ 600) — NavigationRail.
-class AppShell extends StatelessWidget {
+/// Басқа құрылғыдан деректер келсе — қысқа хабарлама.
+class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
+
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  StreamSubscription<RemoteUpdate>? _remote;
+
+  StatefulNavigationShell get navigationShell => widget.navigationShell;
+
+  @override
+  void initState() {
+    super.initState();
+    _remote = context.read<SyncRepository>().remoteUpdates.listen((u) {
+      if (!mounted) return;
+      showAppSnackBar(context, S.syncRemoteUpdate(u.sessions + u.topics));
+    });
+  }
+
+  @override
+  void dispose() {
+    _remote?.cancel();
+    super.dispose();
+  }
 
   static List<(IconData, IconData, String)> get _destinations => [
     (Icons.grid_view_outlined, Icons.grid_view_rounded, S.navHome),

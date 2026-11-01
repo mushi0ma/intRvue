@@ -47,10 +47,18 @@ class SyncScreen extends StatefulWidget {
 class _SyncScreenState extends State<SyncScreen> {
   final _form = GlobalKey<FormState>();
   final _password = TextEditingController();
-  late final _server = TextEditingController(
-    text: context.read<SyncRepository>().serverUrl.toString(),
-  );
+  // initState-те жасалады: lazy болса, байланыс бар кезде өріс көрсетілмейді
+  // және бірінші рет dispose-та (context жарамсыз кезде) оқылар еді.
+  late final TextEditingController _server;
   bool _connecting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _server = TextEditingController(
+      text: context.read<SyncRepository>().serverUrl.toString(),
+    );
+  }
 
   /// Сервер мекенжайы — техникалық баптау, әдепкіде жасырын.
   bool _editServer = false;

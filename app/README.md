@@ -14,8 +14,7 @@ flutter test           # валидация, навигация және экр�
 
 Демо аккаунт: `aidana@example.com` / `intrvue2026`. Жаңа аккаунт тіркеуге де болады.
 Деректер құрылғыдағы SQLite қорында (`intrvue.db`, `sqflite`) сақталады, интернет қажет емес.
-ЖИ бағасы — жергілікті имитация. Деректер моделі мен CRUD сипаттамасы:
-`../deliverables/practical-4/README.md`.
+ЖИ бағасы — жергілікті имитация.
 
 ## Құрылым (feature-based)
 
@@ -78,8 +77,7 @@ lib/
 ## Figma-мен салыстыру
 
 `flutter test --update-goldens test/screens_golden_test.dart` әр экранды 412 × 892
-өлшемде салады (`test/goldens/light|dark|adaptive`). Figma | Flutter жұптары:
-`../deliverables/figma-vs-flutter/`.
+өлшемде салады (`test/goldens/light|dark|adaptive`).
 
 ## Локализация (kk / ru)
 

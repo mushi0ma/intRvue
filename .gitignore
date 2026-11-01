@@ -4,10 +4,14 @@
 .omp/
 .agents/
 .impeccable/
-.claude/*
-!.claude/skills/
-.claude/skills/*
-!.claude/skills/flutter-ui-critique/
+.idea/
+
+# Тек жергілікті: дизайн көздері, отчёттар, агент баптаулары
+.claude/
+deliverables/
+design/
+PRODUCT.md
+DESIGN.md
 
 # Office құлыптары, ОЖ қоқысы
 .~lock.*#

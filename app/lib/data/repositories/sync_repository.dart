@@ -52,26 +52,36 @@ class RemoteUpdate {
   /// Жергілікті сурет пен біріктірілген сурет арасындағы жаңа, өзгерген
   /// және басқа құрылғыда жойылған сессиялар мен тақырыптар. Біз жіберген
   /// жазбалар біріктірілген суретте бар, сондықтан жоғалғаны — жойылғаны.
+  ///
+  /// [ownTopics] — осы құрылғы REST арқылы жіберген тақырыптар: id →
+  /// сервер қойған `updated_at` (мс), жойылғаны — null. Сервер уақыты
+  /// жергіліктіден жаңа болғанымен, бұл өзгеріс басқа құрылғыдан емес.
   static RemoteUpdate between(
     Map<String, Object?> local,
-    Map<String, Object?> merged,
-  ) {
-    int changed(String key) {
+    Map<String, Object?> merged, {
+    Map<String, int?> ownTopics = const {},
+  }) {
+    int changed(String key, Map<String, int?> own) {
       final before = {
         for (final r in (local[key] as List? ?? const []).cast<Map>())
           r['id']: r['updated_at'],
       };
       final after = (merged[key] as List? ?? const []).cast<Map>();
-      final changed = after
-          .where((r) => before[r['id']] != r['updated_at'])
-          .length;
+      final changed = after.where((r) {
+        final id = r['id'];
+        if (before[id] == r['updated_at']) return false;
+        return !(own.containsKey(id) && own[id] == r['updated_at']);
+      }).length;
       final kept = {for (final r in after) r['id']};
-      return changed + before.keys.where((id) => !kept.contains(id)).length;
+      final removed = before.keys.where(
+        (id) => !kept.contains(id) && !(own.containsKey(id) && own[id] == null),
+      );
+      return changed + removed.length;
     }
 
     return RemoteUpdate(
-      sessions: changed('sessions'),
-      topics: changed('topics'),
+      sessions: changed('sessions', const {}),
+      topics: changed('topics', ownTopics),
     );
   }
 }
@@ -149,6 +159,14 @@ class SyncRepository extends ChangeNotifier {
     unawaited(_prefs.setString(_deviceKey, id));
     return id;
   }
+
+  /// REST арқылы осы құрылғыдан жіберілген тақырыптар ([RemoteUpdate.between]).
+  final _ownTopics = <String, int?>{};
+
+  /// Тақырыпты осы құрылғы REST арқылы жіберді (не жойды: [serverUpdatedAt]
+  /// null). Келесі синхрондауда ол «басқа құрылғыдан келді» деп саналмайды.
+  void markOwnTopic(String id, DateTime? serverUpdatedAt) =>
+      _ownTopics[id] = serverUpdatedAt?.millisecondsSinceEpoch;
 
   int? _userId;
   Future<SyncFailure?>? _running;
@@ -289,7 +307,17 @@ class SyncRepository extends ChangeNotifier {
       }
       await _saveLink(uid, current.synced(DateTime.now()));
       _lastFailure = null;
-      final update = RemoteUpdate.between(body, merged);
+      final own = Map.of(_ownTopics);
+      final update = RemoteUpdate.between(body, merged, ownTopics: own);
+      // Суретте көрінген нұсқалар енді керек емес.
+      final present = {
+        for (final r in (merged['topics'] as List? ?? const []).cast<Map>())
+          r['id']: r['updated_at'],
+      };
+      own.forEach((id, at) {
+        final seen = at == null ? !present.containsKey(id) : present[id] == at;
+        if (seen) _ownTopics.remove(id);
+      });
       if (!update.isEmpty) {
         Log.info(
           'sync',
@@ -396,6 +424,7 @@ class SyncRepository extends ChangeNotifier {
     _userId = id;
     _autoTimer?.cancel();
     _lastFailure = null;
+    _ownTopics.clear();
     _updateLive();
     notifyListeners();
     if (link != null) unawaited(syncNow());

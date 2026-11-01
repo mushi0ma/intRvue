@@ -89,7 +89,8 @@ void main() {
     });
 
     for (final (failure, text) in [
-      (SyncFailure.offline, () => S.syncErrOffline),
+      // Бұл экран кейін өзі қайталамайды — «сақталды, қайталаймыз» демейді.
+      (SyncFailure.offline, () => S.cloudOffline),
       (SyncFailure.timeout, () => S.syncErrTimeout),
       (SyncFailure.server, () => S.syncErrServer),
     ]) {

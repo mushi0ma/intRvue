@@ -96,5 +96,22 @@ void main() {
       expect(u.sessions, 1);
       expect(u.topics, 1);
     });
+
+    test('BUG-8.02: өзіміз REST арқылы жіберген нұсқа саналмайды', () {
+      final local = snap([], [('t1', 5), ('t2', 5), ('t3', 5)]);
+      // t1 — POST/PATCH (сервер уақыты 9), t2 — DELETE, t3 — басқа құрылғы.
+      final merged = snap([], [('t1', 9), ('t3', 7)]);
+      final u = RemoteUpdate.between(
+        local,
+        merged,
+        ownTopics: {'t1': 9, 't2': null},
+      );
+      expect(u.topics, 1);
+      // Сервердегі уақыт біз жібергеннен өзгеше — бұл бөтен өзгеріс.
+      expect(
+        RemoteUpdate.between(local, merged, ownTopics: {'t1': 8}).topics,
+        3,
+      );
+    });
   });
 }

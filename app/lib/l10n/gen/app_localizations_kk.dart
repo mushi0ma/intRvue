@@ -242,7 +242,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get aiConsentLater =>
-      'ЖИ-ге жауап жіберуге келісім\nалғашқы жаттығу алдында сұралады.';
+      'Жауапты бағалауға келісім\nалғашқы жаттығу алдында сұралады.';
 
   @override
   String get createAccount => 'Аккаунт ашу';
@@ -398,14 +398,14 @@ class AppLocalizationsKk extends AppLocalizations {
   String get paramsStart => 'Жаттығуды бастау';
 
   @override
-  String get consentTitle => 'Жауапты ЖИ-ге\nжіберуге келісім';
+  String get consentTitle => 'Жауапты бағалауға\nкелісім';
 
   @override
-  String get consentWhatTitle => 'Бағалау үшін не жіберіледі?';
+  String get consentWhatTitle => 'Бағалауға не қолданылады?';
 
   @override
   String get consentWhatBody =>
-      'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Атыңыз, email және\nпароліңіз ЖИ-ге жіберілмейді.';
+      'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Қазір бағалау — құрылғыдағы\nдемо: жауап ешқайда жіберілмейді.';
 
   @override
   String get consentAdviceTitle => 'Баға — оқу ұсынымы';
@@ -422,7 +422,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get preparingBody =>
-      'ЖИ сұрақтарды құрастырып жатыр.\nҚайта басудың қажеті жоқ.';
+      'Таңдалған тақырыптардан\nсұрақтарды іріктеп жатырмыз.';
 
   @override
   String get preparingMotto => 'Бір сұрақтан, бір қадамнан.';
@@ -442,7 +442,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get preparingHint =>
-      '30 секундта жауап келмесе,\nқайта сұрау ұсынылады.';
+      'Сұрақтар құрылғыдағы каталогтан\nалынады — интернет қажет емес.';
 
   @override
   String get activeTitle => 'Бір сессия\nаяқталмаған';
@@ -821,6 +821,13 @@ class AppLocalizationsKk extends AppLocalizations {
   String get remindersSave => 'Сақтау және рұқсат беру';
 
   @override
+  String get remindersPermissionGrantedTitle => 'Хабарламаларға рұқсат бар';
+
+  @override
+  String get remindersPermissionGrantedBody =>
+      'Таңдалған күндері осы уақытта еске саламыз. Өшірсеңіз, хабарламалар тоқтайды.';
+
+  @override
   String get remindersTurnedOff => 'Еске салу өшірілді.';
 
   @override
@@ -879,18 +886,18 @@ class AppLocalizationsKk extends AppLocalizations {
   String get privacySubtitle => 'Деректеріңіз қалай қолданылатыны.';
 
   @override
-  String get privacyAiTitle => 'ЖИ-ге не жіберіледі';
+  String get privacyAiTitle => 'Бағалауға не қолданылады';
 
   @override
   String get privacyAiBody =>
-      'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Атыңыз, email және\nпароліңіз жіберілмейді.';
+      'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Қазір бағалау — құрылғыдағы\nдемо: жауап ешқайда жіберілмейді.';
 
   @override
   String get privacyStoredTitle => 'Не сақталады';
 
   @override
   String get privacyStoredBody =>
-      'Жауаптар, бағалар және прогресс\nаккаунтта сақталады. Нобай тек\nқұрылғыда тұрады.';
+      'Жауаптар, нобайлар, бағалар және\nпрогресс құрылғыда сақталады;\nсинхрондау қосулы болса — серверде де.';
 
   @override
   String get privacyManageTitle => 'Деректерді басқару';
@@ -907,7 +914,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get deleteAccountBody =>
-      'Сессиялар мен прогресс жойылады.\nКіру дереу тоқтайды; негізгі дерек\n24 сағат ішінде, резервтік көшірме\n30 күн ішінде тазартылады.';
+      'Сессиялар, тақырыптар мен прогресс\nқұрылғыдан бірден жойылады.\nСинхрондау қосулы болса —\nсерверден де.';
 
   @override
   String get deleteAccountPassword => 'Растау үшін пароль';
@@ -1308,7 +1315,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get privacySyncBody =>
-      'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде PBKDF2 хэшімен сақталады.';
+      'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде де, құрылғыда да PBKDF2\nхэшімен сақталады.';
 
   @override
   String get syncErrTimeout =>
@@ -1370,6 +1377,10 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get cloudOnlyRemote => 'Тек серверде';
+
+  @override
+  String get cloudOffline =>
+      'Сервер қолжетімсіз. Желі пайда болғанда қайталап көріңіз — құрылғыдағы тақырыптар өзгермеді.';
 
   @override
   String get cloudUpload => 'Серверге жіберу';

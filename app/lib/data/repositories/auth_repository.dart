@@ -81,12 +81,25 @@ class AuthRepository extends ChangeNotifier {
   Future<AuthError?> login(String email, String password) async {
     final row = await _row(email);
     if (row == null ||
-        !PasswordHasher.verify(
+        !await PasswordHasher.verify(
           password,
           row['password_salt']! as String,
           row['password_hash']! as String,
         )) {
       return AuthError.wrongCredentials;
+    }
+    // Ескі хэш (SHA-256) — пароль дұрыс болғанда PBKDF2-ге көшіреміз.
+    if (PasswordHasher.needsRehash(row['password_hash']! as String)) {
+      final salt = PasswordHasher.newSalt();
+      final hash = await PasswordHasher.hash(password, salt);
+      await dbGuard(
+        () => _db.update(
+          DbSchema.users,
+          {'password_hash': hash, 'password_salt': salt},
+          where: 'id = ?',
+          whereArgs: [row['id']],
+        ),
+      );
     }
     await _switchTo(Mappers.user(row));
     return null;
@@ -99,10 +112,11 @@ class AuthRepository extends ChangeNotifier {
   /// Пароль осы құрылғыда өз тұзымен қайта хэштеледі.
   Future<UserProfile> adoptRemote(UserProfile profile, String password) async {
     final salt = PasswordHasher.newSalt();
+    final hash = await PasswordHasher.hash(password, salt);
     final id = await dbGuard(
       () => _db.insert(DbSchema.users, {
         ...Mappers.userProfileRow(profile),
-        'password_hash': PasswordHasher.hash(password, salt),
+        'password_hash': hash,
         'password_salt': salt,
         'created_at': Mappers.ms(DateTime.now()),
       }),
@@ -124,12 +138,13 @@ class AuthRepository extends ChangeNotifier {
     required String password,
   }) async {
     final salt = PasswordHasher.newSalt();
+    final hash = await PasswordHasher.hash(password, salt);
     final profile = UserProfile(name: name.trim(), email: email.trim());
     try {
       final id = await dbGuard(
         () => _db.insert(DbSchema.users, {
           ...Mappers.userProfileRow(profile),
-          'password_hash': PasswordHasher.hash(password, salt),
+          'password_hash': hash,
           'password_salt': salt,
           'created_at': Mappers.ms(DateTime.now()),
         }),
@@ -183,14 +198,12 @@ class AuthRepository extends ChangeNotifier {
     );
     if (rows.isEmpty) return AuthError.resetLinkInvalid;
     final salt = PasswordHasher.newSalt();
+    final hash = await PasswordHasher.hash(newPassword, salt);
     await dbGuard(
       () => _db.transaction((txn) async {
         await txn.update(
           DbSchema.users,
-          {
-            'password_hash': PasswordHasher.hash(newPassword, salt),
-            'password_salt': salt,
-          },
+          {'password_hash': hash, 'password_salt': salt},
           where: 'id = ?',
           whereArgs: [rows.first['user_id']],
         );
@@ -234,7 +247,7 @@ class AuthRepository extends ChangeNotifier {
     if (current == null) return null;
     final row = await _row(current.email);
     if (row == null ||
-        !PasswordHasher.verify(
+        !await PasswordHasher.verify(
           password,
           row['password_salt']! as String,
           row['password_hash']! as String,

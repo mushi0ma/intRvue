@@ -10,11 +10,13 @@ import 'package:go_router/go_router.dart';
 import 'package:intrvue/app/app.dart';
 import 'package:intrvue/app/routes.dart';
 import 'package:intrvue/core/constants/app_strings.dart';
+import 'package:intrvue/data/models/enums.dart';
 import 'package:intrvue/data/models/interview_session.dart';
 import 'package:intrvue/data/repositories/settings_repository.dart';
 import 'package:intrvue/data/services/reminder_coordinator.dart';
 import 'package:intrvue/data/services/reminder_plan.dart';
 import 'package:intrvue/data/services/reminder_scheduler.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/test_app.dart';
@@ -316,12 +318,46 @@ void main() {
       await pumpApp(tester, location: Routes.reminders, reminders: fake);
       await tester.tap(find.byType(Switch));
       await tester.pump();
-      await tester.tap(find.text(S.remindersSave));
+      // Рұқсат бұрыннан бар — батырма жай «Сақтау» (BUG-8.05).
+      await tester.tap(find.text(S.save));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
       expect(find.text(S.remindersEnabledTitle), findsOneWidget);
       expect(fake.scheduled, isNotEmpty);
       expect(fake.scheduled.last.title, isNot(isEmpty));
+    });
+
+    testWidgets('BUG-8.06: тіл ауысса — хабарлама мәтіні жаңа тілде', (
+      tester,
+    ) async {
+      final fake = FakeScheduler();
+      await pumpApp(tester, location: Routes.reminders, reminders: fake);
+      await tester.tap(find.byType(Switch));
+      await tester.pump();
+      await tester.tap(find.text(S.save));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+      final kk = fake.scheduled.last;
+
+      final context = tester.element(find.byType(Scaffold).last);
+      final coordinator = context.read<ReminderCoordinator>();
+      await tester.runAsync(
+        () => context.read<SettingsRepository>().setAppearance(
+          ThemeMode.light,
+          InterfaceLanguage.ru,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump();
+
+      // Күтілетін: кесте орыс мәтінімен қайта жазылды.
+      // Түзетуге дейін: қазақша мәтін қалатын (жоспар ескі тілде құрылды).
+      final ru = coordinator.currentPlan();
+      expect(ru.title, isNot(kk.title));
+      expect(fake.scheduled.last.title, ru.title);
+      expect(fake.scheduled.last.body, ru.body);
     });
 
     testWidgets(

@@ -35,11 +35,15 @@ class _CloudTopicsScreenState extends State<CloudTopicsScreen> {
   Future<void> _run(Future<SyncFailure?> action, String done) async {
     final failure = await action;
     if (!mounted) return;
-    showAppSnackBar(
-      context,
-      failure == null ? done : SyncScreen.failureText(failure),
-    );
+    showAppSnackBar(context, failure == null ? done : _failureText(failure));
   }
+
+  /// Бұл экранда кейінге қалдырылған қайталау жоқ: офлайн хабарламасы
+  /// «сақталды, қайталаймыз» демейді.
+  static String _failureText(SyncFailure failure) =>
+      failure == SyncFailure.offline
+      ? S.cloudOffline
+      : SyncScreen.failureText(failure);
 
   Future<void> _rename(TopicDto topic) async {
     final title = await showDialog<String>(
@@ -85,7 +89,7 @@ class _CloudTopicsScreenState extends State<CloudTopicsScreen> {
       subtitle: S.cloudSubtitle,
       body: [
         if (state case RequestFailure(:final failure)) ...[
-          InfoBanner(title: SyncScreen.failureText(failure)),
+          InfoBanner(title: _failureText(failure)),
           const SizedBox(height: 24),
         ],
         if (data == null && (loading || state is RequestIdle))

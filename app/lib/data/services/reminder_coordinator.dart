@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:ui' show Locale;
 
+import '../../core/constants/app_strings.dart';
 import '../../core/log.dart';
 import '../repositories/auth_repository.dart';
 import '../repositories/session_repository.dart';
@@ -111,11 +113,16 @@ class ReminderCoordinator {
       _scheduled = null;
       return;
     }
+    // Мәтін баптаудағы тілде: тіл ауысқан сәтте S әлі ескі тілде болуы
+    // мүмкін — қосымша келесі кадрда ғана қайта құрылады (BUG-8.06).
+    final language = _settings.language.name;
+    S.use(Locale(language));
     final plan = currentPlan();
     final now = _clock();
     final days = settings.days.toList()..sort();
     final signature =
-        '${plan.signature()}|$days|${settings.time.hour}:${settings.time.minute}'
+        '$language|${plan.signature()}|$days|'
+        '${settings.time.hour}:${settings.time.minute}'
         '|${plan.skipToday ? '${now.year}-${now.month}-${now.day}' : ''}';
     if (signature == _scheduled) return;
     await _scheduler.scheduleWeekly(

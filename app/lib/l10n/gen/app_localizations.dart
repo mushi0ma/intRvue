@@ -551,7 +551,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiConsentLater.
   ///
   /// In kk, this message translates to:
-  /// **'ЖИ-ге жауап жіберуге келісім\nалғашқы жаттығу алдында сұралады.'**
+  /// **'Жауапты бағалауға келісім\nалғашқы жаттығу алдында сұралады.'**
   String get aiConsentLater;
 
   /// No description provided for @createAccount.
@@ -845,19 +845,19 @@ abstract class AppLocalizations {
   /// No description provided for @consentTitle.
   ///
   /// In kk, this message translates to:
-  /// **'Жауапты ЖИ-ге\nжіберуге келісім'**
+  /// **'Жауапты бағалауға\nкелісім'**
   String get consentTitle;
 
   /// No description provided for @consentWhatTitle.
   ///
   /// In kk, this message translates to:
-  /// **'Бағалау үшін не жіберіледі?'**
+  /// **'Бағалауға не қолданылады?'**
   String get consentWhatTitle;
 
   /// No description provided for @consentWhatBody.
   ///
   /// In kk, this message translates to:
-  /// **'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Атыңыз, email және\nпароліңіз ЖИ-ге жіберілмейді.'**
+  /// **'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Қазір бағалау — құрылғыдағы\nдемо: жауап ешқайда жіберілмейді.'**
   String get consentWhatBody;
 
   /// No description provided for @consentAdviceTitle.
@@ -887,7 +887,7 @@ abstract class AppLocalizations {
   /// No description provided for @preparingBody.
   ///
   /// In kk, this message translates to:
-  /// **'ЖИ сұрақтарды құрастырып жатыр.\nҚайта басудың қажеті жоқ.'**
+  /// **'Таңдалған тақырыптардан\nсұрақтарды іріктеп жатырмыз.'**
   String get preparingBody;
 
   /// No description provided for @preparingMotto.
@@ -923,7 +923,7 @@ abstract class AppLocalizations {
   /// No description provided for @preparingHint.
   ///
   /// In kk, this message translates to:
-  /// **'30 секундта жауап келмесе,\nқайта сұрау ұсынылады.'**
+  /// **'Сұрақтар құрылғыдағы каталогтан\nалынады — интернет қажет емес.'**
   String get preparingHint;
 
   /// No description provided for @activeTitle.
@@ -1646,6 +1646,18 @@ abstract class AppLocalizations {
   /// **'Сақтау және рұқсат беру'**
   String get remindersSave;
 
+  /// No description provided for @remindersPermissionGrantedTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Хабарламаларға рұқсат бар'**
+  String get remindersPermissionGrantedTitle;
+
+  /// No description provided for @remindersPermissionGrantedBody.
+  ///
+  /// In kk, this message translates to:
+  /// **'Таңдалған күндері осы уақытта еске саламыз. Өшірсеңіз, хабарламалар тоқтайды.'**
+  String get remindersPermissionGrantedBody;
+
   /// No description provided for @remindersTurnedOff.
   ///
   /// In kk, this message translates to:
@@ -1757,13 +1769,13 @@ abstract class AppLocalizations {
   /// No description provided for @privacyAiTitle.
   ///
   /// In kk, this message translates to:
-  /// **'ЖИ-ге не жіберіледі'**
+  /// **'Бағалауға не қолданылады'**
   String get privacyAiTitle;
 
   /// No description provided for @privacyAiBody.
   ///
   /// In kk, this message translates to:
-  /// **'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Атыңыз, email және\nпароліңіз жіберілмейді.'**
+  /// **'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Қазір бағалау — құрылғыдағы\nдемо: жауап ешқайда жіберілмейді.'**
   String get privacyAiBody;
 
   /// No description provided for @privacyStoredTitle.
@@ -1775,7 +1787,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyStoredBody.
   ///
   /// In kk, this message translates to:
-  /// **'Жауаптар, бағалар және прогресс\nаккаунтта сақталады. Нобай тек\nқұрылғыда тұрады.'**
+  /// **'Жауаптар, нобайлар, бағалар және\nпрогресс құрылғыда сақталады;\nсинхрондау қосулы болса — серверде де.'**
   String get privacyStoredBody;
 
   /// No description provided for @privacyManageTitle.
@@ -1805,7 +1817,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountBody.
   ///
   /// In kk, this message translates to:
-  /// **'Сессиялар мен прогресс жойылады.\nКіру дереу тоқтайды; негізгі дерек\n24 сағат ішінде, резервтік көшірме\n30 күн ішінде тазартылады.'**
+  /// **'Сессиялар, тақырыптар мен прогресс\nқұрылғыдан бірден жойылады.\nСинхрондау қосулы болса —\nсерверден де.'**
   String get deleteAccountBody;
 
   /// No description provided for @deleteAccountPassword.
@@ -2555,7 +2567,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySyncBody.
   ///
   /// In kk, this message translates to:
-  /// **'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде PBKDF2 хэшімен сақталады.'**
+  /// **'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде де, құрылғыда да PBKDF2\nхэшімен сақталады.'**
   String get privacySyncBody;
 
   /// No description provided for @syncErrTimeout.
@@ -2671,6 +2683,12 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Тек серверде'**
   String get cloudOnlyRemote;
+
+  /// No description provided for @cloudOffline.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервер қолжетімсіз. Желі пайда болғанда қайталап көріңіз — құрылғыдағы тақырыптар өзгермеді.'**
+  String get cloudOffline;
 
   /// No description provided for @cloudUpload.
   ///

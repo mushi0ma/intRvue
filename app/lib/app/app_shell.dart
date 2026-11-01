@@ -59,6 +59,18 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Системный «Артқа» басқа бөлімнен алдымен Басты бетке қайтарады,
+    // қосымшадан тек Басты беттен шығады (BUG-8.01).
+    return PopScope(
+      canPop: navigationShell.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) navigationShell.goBranch(0);
+      },
+      child: _layout(context),
+    );
+  }
+
+  Widget _layout(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= AppSpacing.railBreakpoint;
 
     if (wide) {

@@ -115,19 +115,22 @@ class CloudTopicsRepository extends ChangeNotifier {
   // -------------------------------------------------- POST / PATCH / DELETE
 
   /// POST: құрылғыдағы тақырыпты серверге жіберу.
-  Future<SyncFailure?> upload(String topicId) => _mutate(topicId, (api, t) {
-    final topic = _topics.byId(topicId);
-    return api.createTopic(
-      t,
-      TopicDto.fromModel(topic, _topics.questionsFor(topicId)),
-    );
-  });
+  Future<SyncFailure?> upload(String topicId) =>
+      _mutate(topicId, (api, t) async {
+        final topic = _topics.byId(topicId);
+        final saved = await api.createTopic(
+          t,
+          TopicDto.fromModel(topic, _topics.questionsFor(topicId)),
+        );
+        _sync.markOwnTopic(topicId, saved.updatedAt);
+      });
 
   /// PATCH: тек атауын өзгерту.
-  Future<SyncFailure?> rename(String topicId, String title) => _mutate(
-    topicId,
-    (api, t) => api.updateTopic(t, topicId, {'title': title}),
-  );
+  Future<SyncFailure?> rename(String topicId, String title) =>
+      _mutate(topicId, (api, t) async {
+        final saved = await api.updateTopic(t, topicId, {'title': title});
+        _sync.markOwnTopic(topicId, saved.updatedAt);
+      });
 
   /// DELETE: серверден жою. Келесі синхрондауда құрылғыдан да жойылады.
   /// Серверде бұрыннан жоқ болса (404) — мақсатқа жеттік деп санаймыз.
@@ -138,6 +141,7 @@ class CloudTopicsRepository extends ChangeNotifier {
         } on SyncApiException catch (e) {
           if (e.failure != SyncFailure.notFound) rethrow;
         }
+        _sync.markOwnTopic(topicId, null);
       });
 
   // ------------------------------------------- Форма: сақталғанды бірден жіберу
@@ -151,13 +155,15 @@ class CloudTopicsRepository extends ChangeNotifier {
     final api = _sync.api;
     final dto = TopicDto.fromModel(topic, _topics.questionsFor(topic.id));
     return _guard(() async {
+      TopicDto saved;
       try {
-        await api.updateTopic(token, topic.id, dto.toPatchJson());
+        saved = await api.updateTopic(token, topic.id, dto.toPatchJson());
       } on SyncApiException catch (e) {
         // Серверде әлі жоқ — жаңасын жасаймыз.
         if (e.failure != SyncFailure.notFound) rethrow;
-        await api.createTopic(token, dto);
+        saved = await api.createTopic(token, dto);
       }
+      _sync.markOwnTopic(topic.id, saved.updatedAt);
     });
   }
 
@@ -172,6 +178,7 @@ class CloudTopicsRepository extends ChangeNotifier {
       } on SyncApiException catch (e) {
         if (e.failure != SyncFailure.notFound) rethrow;
       }
+      _sync.markOwnTopic(topicId, null);
     });
   }
 

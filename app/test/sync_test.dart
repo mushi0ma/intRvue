@@ -461,6 +461,31 @@ Future<void> main() async {
       },
     );
 
+    test(
+      'BUG-8.02: өз REST өзгерісіміз «басқа құрылғыдан» деп хабарланбайды',
+      () async {
+        final (s, _) = await linked('own@example.com');
+        final updates = <RemoteUpdate>[];
+        final sub = s.sync.remoteUpdates.listen(updates.add);
+        addTearDown(sub.cancel);
+
+        // Форма: жасалды → бірден POST → синхрондау.
+        final custom = await s.topics.create(_topic);
+        expect(await s.cloud.pushSaved(custom), isNull);
+        expect(await s.sync.syncNow(), isNull);
+        // Бұлт экраны: PATCH және DELETE (ішінде синхрондау бар).
+        expect(await s.cloud.rename(custom.id, 'Docker және Compose'), isNull);
+        expect(s.topics.byId(custom.id).title, 'Docker және Compose');
+        expect(await s.cloud.remove(custom.id), isNull);
+        expect(s.topics.tryById(custom.id), isNull);
+        await Future<void>.delayed(Duration.zero);
+
+        // Күтілетін нәтиже: ешбір «Басқа құрылғыдан N өзгеріс» жоқ.
+        // Түзетуге дейін: 3 хабар (POST, PATCH, DELETE).
+        expect(updates, isEmpty);
+      },
+    );
+
     test('REST: ескірген токен — 401, байланыс үзіледі', () async {
       final (s, token) = await linked('expired@example.com');
       await db.execute('DELETE FROM auth_tokens');

@@ -154,6 +154,21 @@ void main() {
     expect(find.text(S.homeNextTitle), findsOneWidget);
   });
 
+  testWidgets('BUG-8.01: жүйелік «Артқа» бөлімнен Басты бетке қайтарады', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/home');
+    await tapText(tester, S.navSettings);
+    expect(find.text(S.settingsSubtitle), findsOneWidget);
+
+    // Түзетуге дейін: маршрут жабылып, қосымша жабылатын (true емес → шығу).
+    final handled = await tester.binding.handlePopRoute();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(handled, isTrue);
+    expect(find.text(S.homeNextTitle), findsOneWidget);
+    expect(find.text(S.settingsSubtitle), findsNothing);
+  });
+
   testWidgets('Толық жаттығу сессиясы: 5 сұрақ → қорытынды → ұсыныс', (
     tester,
   ) async {
@@ -322,13 +337,85 @@ void main() {
     expect(find.text('HTML және CSS'), findsOneWidget);
   });
 
+  testWidgets('BUG-8.03: «Еске салуды қосу» жазуын басу ауыстырады', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/settings/reminders');
+    bool value() => tester.widget<Switch>(find.byType(Switch)).value;
+    expect(value(), isFalse);
+    // Түзетуге дейін: тек ауыстырғыштың өзі басылатын, жазу — жоқ.
+    await tester.tap(find.text(S.remindersEnable));
+    await tester.pump();
+    expect(value(), isTrue);
+    await tester.tap(find.text(S.remindersEnable));
+    await tester.pump();
+    expect(value(), isFalse);
+  });
+
+  testWidgets('BUG-8.04: уақытты мәтінмен енгізу 24 сағаттық пішімде', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/settings/reminders');
+    // Жүйе 12 сағаттық (тест әдепкісі), қосымша тілі — kk.
+    expect(tester.binding.platformDispatcher.alwaysUse24HourFormat, isFalse);
+    Future<void> openInput(String time) async {
+      await tester.ensureVisible(find.text(time));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(time));
+      await tester.pumpAndSettle();
+      final l = MaterialLocalizations.of(tester.element(find.byType(Dialog)));
+      await tester.tap(find.byTooltip(l.inputTimeModeButtonLabel));
+      await tester.pumpAndSettle();
+    }
+
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+    await openInput('19:00');
+
+    final fields = find.descendant(
+      of: find.byType(Dialog),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(fields.at(0), '02');
+    await tester.enterText(fields.at(1), '46');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Иә'));
+    await tester.pumpAndSettle();
+    // Түзетуге дейін: 14:46 (сағат 12 сағаттық «PM» ретінде оқылды).
+    expect(find.text('02:46'), findsOneWidget);
+
+    // Кешкі сағат та мәтінмен енгізіледі (бұрын «19» қабылданбайтын).
+    await openInput('02:46');
+    await tester.enterText(fields.at(0), '21');
+    await tester.enterText(fields.at(1), '30');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Иә'));
+    await tester.pumpAndSettle();
+    expect(find.text('21:30'), findsOneWidget);
+  });
+
   testWidgets('Еске салу: рұқсат бар → «Еске салу қосулы»', (tester) async {
     await pumpApp(tester, location: '/settings/reminders');
     await tester.tap(find.byType(Switch));
     await tester.pump();
-    await tapText(tester, S.remindersSave);
+    await tapText(tester, S.save);
     expect(find.text(S.remindersEnabledTitle), findsOneWidget);
     expect(find.textContaining('Дс'), findsOneWidget);
+  });
+
+  testWidgets('BUG-8.05: рұқсат бар болса — «рұқсат қажет» деп жазылмайды', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/settings/reminders');
+    await tester.tap(find.byType(Switch));
+    await tester.pump();
+    // Күтілетін: рұқсат туралы дұрыс күй, батырма — жай «Сақтау».
+    // Түзетуге дейін: «Хабарламаға рұқсат қажет», «Сақтау және рұқсат беру».
+    expect(find.text(S.remindersPermissionGrantedTitle), findsOneWidget);
+    expect(find.text(S.remindersPermissionTitle), findsNothing);
+    expect(find.text(S.remindersSave), findsNothing);
+    await tapText(tester, S.save);
+    expect(find.text(S.remindersEnabledTitle), findsOneWidget);
   });
 
   testWidgets('Еске салу: рұқсат жоқ → «Хабарламалар өшірулі»', (tester) async {

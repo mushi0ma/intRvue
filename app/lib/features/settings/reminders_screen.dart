@@ -29,11 +29,48 @@ class _RemindersScreenState extends State<RemindersScreen> {
   String? _error;
   bool _saving = false;
 
+  /// Android рұқсаты: null — әлі тексерілген жоқ. Баптаулардан оралғанда
+  /// қайта тексеріледі (BUG-8.05: рұқсат бар кезде де «қажет» деп тұратын).
+  bool? _permitted;
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(onResume: _checkPermission);
+    _checkPermission();
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkPermission() async {
+    final permitted = await context.read<ReminderScheduler>().isPermitted();
+    if (mounted && permitted != _permitted) {
+      setState(() => _permitted = permitted);
+    }
+  }
+
   Future<void> _pickTime() async {
     final picked = await showTimePicker(
       context: context,
       initialTime: _time,
       helpText: S.pickTime,
+      // Flutter мәтін режимінде сағатты жүйелік 12/24 баптауымен оқиды, ал
+      // циферблат — тіл пішімімен. kk/ru — 24 сағат: «02» 14:00 болмауы
+      // үшін пішімді тілден аламыз (BUG-8.04).
+      builder: (context, child) {
+        final format = MaterialLocalizations.of(context).timeOfDayFormat();
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            alwaysUse24HourFormat: hourFormat(of: format) != HourFormat.h,
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) setState(() => _time = picked);
   }
@@ -75,6 +112,11 @@ class _RemindersScreenState extends State<RemindersScreen> {
     }
   }
 
+  void _setEnabled(bool v) => setState(() {
+    _enabled = v;
+    _error = null;
+  });
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -88,20 +130,22 @@ class _RemindersScreenState extends State<RemindersScreen> {
       subtitle: S.remindersSubtitle,
       headerGap: 36,
       body: [
+        // Бүкіл жол басылады — тек ауыстырғыш емес (BUG-8.03).
         MergeSemantics(
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(S.remindersEnable, style: context.text.titleMedium),
-              ),
-              Switch(
-                value: _enabled,
-                onChanged: (v) => setState(() {
-                  _enabled = v;
-                  _error = null;
-                }),
-              ),
-            ],
+          child: InkWell(
+            onTap: () => _setEnabled(!_enabled),
+            borderRadius: BorderRadius.circular(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    S.remindersEnable,
+                    style: context.text.titleMedium,
+                  ),
+                ),
+                Switch(value: _enabled, onChanged: _setEnabled),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 28),
@@ -150,14 +194,20 @@ class _RemindersScreenState extends State<RemindersScreen> {
           suffixIcon: Icon(Icons.schedule, color: colors.onSurfaceVariant),
         ),
         const SizedBox(height: 40),
-        InfoSection(
-          title: S.remindersPermissionTitle,
-          body: S.remindersPermissionBody,
-        ),
+        if (_permitted ?? false)
+          InfoSection(
+            title: S.remindersPermissionGrantedTitle,
+            body: S.remindersPermissionGrantedBody,
+          )
+        else
+          InfoSection(
+            title: S.remindersPermissionTitle,
+            body: S.remindersPermissionBody,
+          ),
       ],
       actions: [
         AppButton(
-          label: _enabled ? S.remindersSave : S.save,
+          label: _enabled && !(_permitted ?? false) ? S.remindersSave : S.save,
           loading: _saving,
           onPressed: _save,
         ),

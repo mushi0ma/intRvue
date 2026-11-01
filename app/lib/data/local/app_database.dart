@@ -74,6 +74,8 @@ class AppDatabase {
 
   /// Кірістірілген каталог және «Айдана» демо аккаунтының тарихы.
   static Future<void> _seed(Database db) async {
+    final salt = PasswordHasher.newSalt();
+    final hash = await PasswordHasher.hash(demoPassword, salt);
     await db.transaction((txn) async {
       final created = DateTime(2026, 10, 1);
       for (final topic in seedTopics) {
@@ -91,12 +93,11 @@ class AppDatabase {
         }
       }
 
-      final salt = PasswordHasher.newSalt();
       final userId = await txn.insert(DbSchema.users, {
         ...Mappers.userProfileRow(
           const UserProfile(name: 'Айдана', email: demoEmail),
         ),
-        'password_hash': PasswordHasher.hash(demoPassword, salt),
+        'password_hash': hash,
         'password_salt': salt,
         'created_at': Mappers.ms(created),
       });

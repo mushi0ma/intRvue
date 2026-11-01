@@ -242,7 +242,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get aiConsentLater =>
-      'Согласие на отправку ответов ИИ\nзапрашивается перед первой тренировкой.';
+      'Согласие на оценку ответов\nзапрашивается перед первой тренировкой.';
 
   @override
   String get createAccount => 'Создать аккаунт';
@@ -399,14 +399,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paramsStart => 'Начать тренировку';
 
   @override
-  String get consentTitle => 'Согласие на отправку\nответа ИИ';
+  String get consentTitle => 'Согласие на оценку\nответа';
 
   @override
-  String get consentWhatTitle => 'Что отправляется на оценку?';
+  String get consentWhatTitle => 'Что используется для оценки?';
 
   @override
   String get consentWhatBody =>
-      'Вопрос, ваш ответ и параметры\nтренировки. Имя, email и пароль\nИИ не передаются.';
+      'Вопрос, ваш ответ и параметры\nтренировки. Сейчас оценка — демо\nна устройстве: ответ никуда не отправляется.';
 
   @override
   String get consentAdviceTitle => 'Оценка — учебная рекомендация';
@@ -422,8 +422,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get preparingTitle => 'Готовим\nвопросы';
 
   @override
-  String get preparingBody =>
-      'ИИ составляет вопросы.\nНажимать повторно не нужно.';
+  String get preparingBody => 'Подбираем вопросы\nиз выбранных тем.';
 
   @override
   String get preparingMotto => 'Один вопрос — один шаг.';
@@ -443,7 +442,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get preparingHint =>
-      'Если ответа не будет 30 секунд,\nпредложим повторить запрос.';
+      'Вопросы берутся из каталога\nна устройстве — интернет не нужен.';
 
   @override
   String get activeTitle => 'Есть незавершённая\nсессия';
@@ -824,6 +823,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get remindersSave => 'Сохранить и разрешить';
 
   @override
+  String get remindersPermissionGrantedTitle => 'Уведомления разрешены';
+
+  @override
+  String get remindersPermissionGrantedBody =>
+      'Напомним в выбранные дни в это время. Если выключить, уведомления прекратятся.';
+
+  @override
   String get remindersTurnedOff => 'Напоминания выключены.';
 
   @override
@@ -882,18 +888,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get privacySubtitle => 'Как используются ваши данные.';
 
   @override
-  String get privacyAiTitle => 'Что отправляется ИИ';
+  String get privacyAiTitle => 'Что используется для оценки';
 
   @override
   String get privacyAiBody =>
-      'Вопрос, ваш ответ и параметры\nтренировки. Имя, email и пароль\nне передаются.';
+      'Вопрос, ваш ответ и параметры\nтренировки. Сейчас оценка — демо\nна устройстве: ответ никуда не отправляется.';
 
   @override
   String get privacyStoredTitle => 'Что хранится';
 
   @override
   String get privacyStoredBody =>
-      'Ответы, оценки и прогресс\nхранятся в аккаунте. Черновик —\nтолько на устройстве.';
+      'Ответы, черновики, оценки и прогресс\nхранятся на устройстве; при включённой\nсинхронизации — и на сервере.';
 
   @override
   String get privacyManageTitle => 'Управление данными';
@@ -910,7 +916,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get deleteAccountBody =>
-      'Сессии и прогресс будут удалены.\nВход прекратится сразу; основные данные\nбудут стёрты в течение 24 часов, резервная\nкопия — в течение 30 дней.';
+      'Сессии, темы и прогресс\nудаляются с устройства сразу.\nЕсли включена синхронизация —\nи с сервера.';
 
   @override
   String get deleteAccountPassword => 'Пароль для подтверждения';
@@ -1314,7 +1320,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get privacySyncBody =>
-      'Только если вы её включили: данные\nотправляются на сервер intRvue. Пароль\nхранится там как хэш PBKDF2.';
+      'Только если вы её включили: данные\nотправляются на сервер intRvue. Пароль\nи там, и на устройстве хранится\nкак хэш PBKDF2.';
 
   @override
   String get syncErrTimeout =>
@@ -1375,6 +1381,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cloudOnlyRemote => 'Только на сервере';
+
+  @override
+  String get cloudOffline =>
+      'Сервер недоступен. Повторите, когда появится сеть, — темы на устройстве не изменились.';
 
   @override
   String get cloudUpload => 'Отправить на сервер';

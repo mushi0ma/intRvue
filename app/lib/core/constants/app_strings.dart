@@ -271,6 +271,10 @@ abstract final class S {
   static String get remindersPermissionTitle => _l.remindersPermissionTitle;
   static String get remindersPermissionBody => _l.remindersPermissionBody;
   static String get remindersSave => _l.remindersSave;
+  static String get remindersPermissionGrantedTitle =>
+      _l.remindersPermissionGrantedTitle;
+  static String get remindersPermissionGrantedBody =>
+      _l.remindersPermissionGrantedBody;
   static String get remindersTurnedOff => _l.remindersTurnedOff;
   static String get remindersScheduleFailed => _l.remindersScheduleFailed;
   static String get reminderNotificationTitle => _l.reminderNotificationTitle;
@@ -442,6 +446,7 @@ abstract final class S {
   static String get cloudNewerInCloud => _l.cloudNewerInCloud;
   static String get cloudNewerOnDevice => _l.cloudNewerOnDevice;
   static String get cloudOnlyRemote => _l.cloudOnlyRemote;
+  static String get cloudOffline => _l.cloudOffline;
   static String get cloudUpload => _l.cloudUpload;
   static String get cloudRename => _l.cloudRename;
   static String get cloudRenameField => _l.cloudRenameField;

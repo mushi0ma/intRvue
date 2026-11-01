@@ -58,6 +58,10 @@ FUNCS = [
      plural_ru('n', 'Найдена {n} тема', 'Найдено {n} темы', 'Найдено {n} тем')),
     ('averageShort', [('score', 'String')], 'орт. {score}', 'ср. {score}'),
     ('topicCount', [('n', 'int')], '{n} тақырып', plural_ru('n', '{n} тема', '{n} темы', '{n} тем')),
+    ('reminderResumeBody', [('track', 'String'), ('progress', 'String')],
+     '{track} · {progress}. Тоқтаған жерден жалғастырыңыз.', '{track} · {progress}. Продолжите с того же места.'),
+    ('reminderWeakBody', [('topic', 'String'), ('score', 'String')],
+     '«{topic}» соңғы сессияда {score} / 100. Бір сұрақтан бастайық.', '«{topic}»: {score} / 100 в последней сессии. Начнём с одного вопроса.'),
     ('questionN', [('n', 'int')], '{n}-сұрақ', 'Вопрос {n}'),
 ]
 

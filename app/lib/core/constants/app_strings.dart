@@ -278,6 +278,8 @@ abstract final class S {
   static String get remindersScheduleFailed => _l.remindersScheduleFailed;
   static String get reminderNotificationTitle => _l.reminderNotificationTitle;
   static String get reminderNotificationBody => _l.reminderNotificationBody;
+  static String get reminderResumeTitle => _l.reminderResumeTitle;
+  static String get reminderWeakTitle => _l.reminderWeakTitle;
   static String get remindersEnabledTitle => _l.remindersEnabledTitle;
   static String get remindersEnabledSubtitle => _l.remindersEnabledSubtitle;
   static String get remindersEnabledBody => _l.remindersEnabledBody;
@@ -533,5 +535,9 @@ abstract final class S {
   static String found(int n) => _l.found(n);
   static String averageShort(String score) => _l.averageShort(score);
   static String topicCount(int n) => _l.topicCount(n);
+  static String reminderResumeBody(String track, String progress) =>
+      _l.reminderResumeBody(track, progress);
+  static String reminderWeakBody(String topic, String score) =>
+      _l.reminderWeakBody(topic, score);
   static String questionN(int n) => _l.questionN(n);
 }

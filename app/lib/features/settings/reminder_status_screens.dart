@@ -7,6 +7,7 @@ import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/repositories/settings_repository.dart';
+import '../../data/services/reminder_coordinator.dart';
 import '../../data/services/reminder_scheduler.dart';
 import 'settings_screen.dart';
 
@@ -54,9 +55,47 @@ class RemindersEnabledScreen extends StatelessWidget {
 }
 
 /// «Хабарламаға рұқсат жоқ» (Figma 7:220): жаттығу бұғатталмайды,
-/// рұқсатты Android баптауларында беруге болады.
-class NotificationsDeniedScreen extends StatelessWidget {
+/// рұқсатты Android баптауларында беруге болады. Баптаулардан оралғанда
+/// рұқсат қайта тексеріледі: берілсе — кесте жоспарланып, «қосулы» экраны.
+class NotificationsDeniedScreen extends StatefulWidget {
   const NotificationsDeniedScreen({super.key});
+
+  @override
+  State<NotificationsDeniedScreen> createState() =>
+      _NotificationsDeniedScreenState();
+}
+
+class _NotificationsDeniedScreenState extends State<NotificationsDeniedScreen> {
+  late final AppLifecycleListener _lifecycle;
+  bool _checking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(onResume: _recheck);
+  }
+
+  Future<void> _recheck() async {
+    if (_checking) return;
+    _checking = true;
+    try {
+      final scheduler = context.read<ReminderScheduler>();
+      final coordinator = context.read<ReminderCoordinator>();
+      if (!await scheduler.isPermitted()) return;
+      await coordinator.refresh(force: true);
+      if (mounted) context.pushReplacement(Routes.remindersEnabled);
+    } catch (_) {
+      if (mounted) showAppSnackBar(context, S.remindersScheduleFailed);
+    } finally {
+      _checking = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

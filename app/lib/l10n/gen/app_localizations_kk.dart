@@ -844,6 +844,12 @@ class AppLocalizationsKk extends AppLocalizations {
       'Бір сұрақтан бастаңыз — бес минут жеткілікті.';
 
   @override
+  String get reminderResumeTitle => 'Сессия аяқталмаған';
+
+  @override
+  String get reminderWeakTitle => 'Әлсіз тақырыпты қайталайық';
+
+  @override
   String get remindersEnabledTitle => 'Еске салу қосулы';
 
   @override
@@ -1659,6 +1665,16 @@ class AppLocalizationsKk extends AppLocalizations {
   @override
   String topicCount(int n) {
     return '$n тақырып';
+  }
+
+  @override
+  String reminderResumeBody(String track, String progress) {
+    return '$track · $progress. Тоқтаған жерден жалғастырыңыз.';
+  }
+
+  @override
+  String reminderWeakBody(String topic, String score) {
+    return '«$topic» соңғы сессияда $score / 100. Бір сұрақтан бастайық.';
   }
 
   @override

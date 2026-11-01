@@ -1688,6 +1688,18 @@ abstract class AppLocalizations {
   /// **'Бір сұрақтан бастаңыз — бес минут жеткілікті.'**
   String get reminderNotificationBody;
 
+  /// No description provided for @reminderResumeTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сессия аяқталмаған'**
+  String get reminderResumeTitle;
+
+  /// No description provided for @reminderWeakTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Әлсіз тақырыпты қайталайық'**
+  String get reminderWeakTitle;
+
   /// No description provided for @remindersEnabledTitle.
   ///
   /// In kk, this message translates to:
@@ -3139,6 +3151,18 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'{n} тақырып'**
   String topicCount(int n);
+
+  /// No description provided for @reminderResumeBody.
+  ///
+  /// In kk, this message translates to:
+  /// **'{track} · {progress}. Тоқтаған жерден жалғастырыңыз.'**
+  String reminderResumeBody(String track, String progress);
+
+  /// No description provided for @reminderWeakBody.
+  ///
+  /// In kk, this message translates to:
+  /// **'«{topic}» соңғы сессияда {score} / 100. Бір сұрақтан бастайық.'**
+  String reminderWeakBody(String topic, String score);
 
   /// No description provided for @questionN.
   ///

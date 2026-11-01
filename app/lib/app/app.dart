@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_strings.dart';
 import '../core/theme/app_theme.dart';
 import '../data/repositories/settings_repository.dart';
+import '../data/services/reminder_coordinator.dart';
 import '../data/services/reminder_scheduler.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'bootstrap.dart';
@@ -34,8 +37,27 @@ class _IntRvueAppState extends State<IntRvueApp> {
     initial: widget.initialLocation,
   );
 
+  StreamSubscription<String>? _reminderTaps;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ашық қосымшада басылған еске салу: сол сәттегі деректерге сай экран.
+    _reminderTaps = widget.services.reminderCoordinator.openRequests.listen(
+      _openFromReminder,
+    );
+  }
+
+  void _openFromReminder(String route) {
+    final here = router.state.uri.path;
+    if (here == Routes.splash) return; // Splash өзі launch маршрутын ашады.
+    if (here == Uri.parse(route).path) return;
+    router.push(route);
+  }
+
   @override
   void dispose() {
+    _reminderTaps?.cancel();
     router.dispose();
     super.dispose();
   }
@@ -72,6 +94,7 @@ class _IntRvueAppState extends State<IntRvueApp> {
         ChangeNotifierProvider.value(value: s.sync),
         ChangeNotifierProvider.value(value: s.cloud),
         Provider<ReminderScheduler>.value(value: s.reminders),
+        Provider<ReminderCoordinator>.value(value: s.reminderCoordinator),
       ],
       // Android 12+: жүйе тұсқағаз түстерін береді; басқа жерде — null.
       child: DynamicColorBuilder(

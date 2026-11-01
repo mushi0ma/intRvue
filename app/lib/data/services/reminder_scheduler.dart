@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart' show TimeOfDay;
@@ -16,12 +17,21 @@ abstract interface class ReminderScheduler {
   Future<bool> requestPermission();
 
   /// Таңдалған апта күндері [time]-да апта сайын қайталанатын хабарламалар.
+  /// [notBefore] берілсе, одан ерте келетін бірінші хабарлама өткізіледі
+  /// (мысалы, бүгін жаттығу болса — ертеңнен бастап).
   Future<void> scheduleWeekly({
     required Set<int> days,
     required TimeOfDay time,
     required String title,
     required String body,
+    DateTime? notBefore,
   });
+
+  /// Қосымша ашық тұрғанда басылған хабарламалар.
+  Stream<void> get taps;
+
+  /// Қосымша хабарламаны басу арқылы іске қосылды ма. Бір рет қана true.
+  Future<bool> takeLaunchTap();
 
   Future<void> cancelAll();
 
@@ -52,12 +62,28 @@ class LocalReminderScheduler implements ReminderScheduler {
       // Белгісіз аймақ: UTC-мен қаламыз, уақыт сағатпен жылжуы мүмкін.
     }
     final plugin = FlutterLocalNotificationsPlugin();
+    final taps = StreamController<void>.broadcast();
     await plugin.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
+      onDidReceiveNotificationResponse: (_) => taps.add(null),
     );
-    return LocalReminderScheduler._(plugin);
+    return LocalReminderScheduler._(plugin).._taps = taps;
+  }
+
+  late final StreamController<void> _taps;
+  bool _launchTaken = false;
+
+  @override
+  Stream<void> get taps => _taps.stream;
+
+  @override
+  Future<bool> takeLaunchTap() async {
+    if (_launchTaken) return false;
+    _launchTaken = true;
+    final details = await _plugin?.getNotificationAppLaunchDetails();
+    return details?.didNotificationLaunchApp ?? false;
   }
 
   AndroidFlutterLocalNotificationsPlugin? get _android => _plugin
@@ -69,9 +95,12 @@ class LocalReminderScheduler implements ReminderScheduler {
   Future<bool> isPermitted() async =>
       await _android?.areNotificationsEnabled() ?? false;
 
+  // permission_handler: Android 13+ жүйелік терезе; екі рет бас тартылса,
+  // терезе енді шықпайды → false → «рұқсат жоқ» экраны баптауларды ашады.
+  // Android 12 және ескісінде терезе жоқ — баптауда қосулы болса, granted.
   @override
   Future<bool> requestPermission() async =>
-      await _android?.requestNotificationsPermission() ?? false;
+      (await Permission.notification.request()).isGranted;
 
   @override
   Future<void> scheduleWeekly({
@@ -79,6 +108,7 @@ class LocalReminderScheduler implements ReminderScheduler {
     required TimeOfDay time,
     required String title,
     required String body,
+    DateTime? notBefore,
   }) async {
     await cancelAll();
     const details = NotificationDetails(
@@ -94,13 +124,20 @@ class LocalReminderScheduler implements ReminderScheduler {
         id: _id(weekday),
         title: title,
         body: body,
-        scheduledDate: nextInstance(tz.TZDateTime.now(tz.local), weekday, time),
+        scheduledDate: nextInstance(_from(notBefore), weekday, time),
         notificationDetails: details,
         // Дәл уақытқа арнайы рұқсат керек емес; бірнеше минут ауытқуы мүмкін.
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       );
     }
+  }
+
+  static tz.TZDateTime _from(DateTime? notBefore) {
+    final now = tz.TZDateTime.now(tz.local);
+    if (notBefore == null) return now;
+    final limit = tz.TZDateTime.from(notBefore, tz.local);
+    return limit.isAfter(now) ? limit : now;
   }
 
   /// [now]-нан кейінгі ең жақын [weekday] (1 = дүйсенбі) күні [time].
@@ -152,7 +189,14 @@ class NoopReminderScheduler implements ReminderScheduler {
     required TimeOfDay time,
     required String title,
     required String body,
+    DateTime? notBefore,
   }) async {}
+
+  @override
+  Stream<void> get taps => const Stream.empty();
+
+  @override
+  Future<bool> takeLaunchTap() async => false;
 
   @override
   Future<void> cancelAll() async {}

@@ -264,6 +264,8 @@
   "remindersScheduleFailed": "Хабарламаны жоспарлау мүмкін болмады. Қайталап көріңіз.",
   "reminderNotificationTitle": "Дайындыққа уақыт",
   "reminderNotificationBody": "Бір сұрақтан бастаңыз — бес минут жеткілікті.",
+  "reminderResumeTitle": "Сессия аяқталмаған",
+  "reminderWeakTitle": "Әлсіз тақырыпты қайталайық",
   "remindersEnabledTitle": "Еске салу қосулы",
   "remindersEnabledSubtitle": "Хабарламаларға рұқсат берілген.",
   "remindersEnabledBody": "Құрылғының жергілікті уақытымен дайындықты еске саламыз.",

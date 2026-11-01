@@ -12,6 +12,7 @@ import '../data/remote/sync_api.dart';
 import '../data/repositories/settings_repository.dart';
 import '../data/repositories/sync_repository.dart';
 import '../data/repositories/topic_repository.dart';
+import '../data/services/reminder_coordinator.dart';
 import '../data/services/reminder_scheduler.dart';
 
 /// Қосымшаның барлық тәуелділігі: деректер қоры және репозиторийлер.
@@ -26,6 +27,7 @@ class AppServices {
     this.reminders,
     this.sync,
     this.cloud,
+    this.reminderCoordinator,
   );
 
   final SharedPreferences prefs;
@@ -37,6 +39,7 @@ class AppServices {
   final ReminderScheduler reminders;
   final SyncRepository sync;
   final CloudTopicsRepository cloud;
+  final ReminderCoordinator reminderCoordinator;
 
   /// Деректер қорын инициализациялап, соңғы кірген пайдаланушының
   /// деректерін жүктейді. Интернет қажет емес.
@@ -45,6 +48,7 @@ class AppServices {
     String? databasePath,
     ReminderScheduler? reminders,
     SyncApi Function(Uri baseUrl)? syncApi,
+    DateTime Function()? clock,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     final database = await AppDatabase.open(
@@ -66,16 +70,29 @@ class AppServices {
     );
     // Желі болмаса үнсіз өтеді — қосымша офлайн іске қосыла береді.
     if (sync.link != null) unawaited(sync.syncNow());
+    final settings = SettingsRepository(prefs);
+    final scheduler = reminders ?? await LocalReminderScheduler.create();
+    // Қайта іске қосылғанда кестені сақталған сессия мен деректерге сәйкестейді.
+    final coordinator = ReminderCoordinator(
+      auth: auth,
+      settings: settings,
+      sessions: sessions,
+      topics: topics,
+      scheduler: scheduler,
+      clock: clock,
+    );
+    await coordinator.start();
     return AppServices._(
       prefs,
       database,
       auth,
-      SettingsRepository(prefs),
+      settings,
       topics,
       sessions,
-      reminders ?? await LocalReminderScheduler.create(),
+      scheduler,
       sync,
       CloudTopicsRepository(sync: sync, topics: topics),
+      coordinator,
     );
   }
 
@@ -89,6 +106,7 @@ class AppServices {
   }
 
   Future<void> dispose() async {
+    reminderCoordinator.dispose();
     cloud.dispose();
     sync.dispose();
     await database.close();

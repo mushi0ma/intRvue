@@ -6,6 +6,7 @@ import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/services/reminder_coordinator.dart';
 
 /// S00 Splash: логотип және 1,5 с жүктелу жолағы.
 /// Кейін: онбординг → таныстыру → немесе бірден басты бет.
@@ -25,15 +26,19 @@ class _SplashScreenState extends State<SplashScreen>
     duration: SplashScreen.duration,
   )..forward().whenComplete(_next);
 
-  void _next() {
+  Future<void> _next() async {
     if (!mounted) return;
     final auth = context.read<AuthRepository>();
+    // Қосымшаны еске салу хабарламасы ашса — басты беттің үстінен сол экран.
+    final launch = await context.read<ReminderCoordinator>().takeLaunchRoute();
+    if (!mounted) return;
     final target = auth.isLoggedIn
         ? Routes.home
         : auth.onboardingSeen
         ? Routes.welcome
         : Routes.onboarding;
     context.go(target);
+    if (launch != null) context.push(launch);
   }
 
   @override

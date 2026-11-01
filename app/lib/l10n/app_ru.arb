@@ -265,6 +265,8 @@
   "remindersScheduleFailed": "Не удалось запланировать уведомление. Попробуйте ещё раз.",
   "reminderNotificationTitle": "Время для подготовки",
   "reminderNotificationBody": "Начните с одного вопроса — хватит пяти минут.",
+  "reminderResumeTitle": "Сессия не завершена",
+  "reminderWeakTitle": "Повторим слабую тему",
   "remindersEnabledTitle": "Напоминания включены",
   "remindersEnabledSubtitle": "Разрешение на уведомления получено.",
   "remindersEnabledBody": "Будем напоминать о подготовке по местному времени устройства.",
@@ -507,5 +509,7 @@
   "found": "{n, plural, one{Найдена {n} тема} few{Найдено {n} темы} many{Найдено {n} тем} other{Найдено {n} темы}}",
   "averageShort": "ср. {score}",
   "topicCount": "{n, plural, one{{n} тема} few{{n} темы} many{{n} тем} other{{n} темы}}",
+  "reminderResumeBody": "{track} · {progress}. Продолжите с того же места.",
+  "reminderWeakBody": "«{topic}»: {score} / 100 в последней сессии. Начнём с одного вопроса.",
   "questionN": "Вопрос {n}"
 }

@@ -9,6 +9,7 @@ import '../../core/utils/formatters.dart';
 import '../../core/widgets/widgets.dart';
 import '../../app/routes.dart';
 import '../../data/repositories/settings_repository.dart';
+import '../../data/services/reminder_coordinator.dart';
 import '../../data/services/reminder_scheduler.dart';
 
 /// «Дайындыққа уақыт»: апта күндері мен уақыт. Сақтағанда Android
@@ -43,6 +44,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
       return;
     }
     final scheduler = context.read<ReminderScheduler>();
+    final coordinator = context.read<ReminderCoordinator>();
     setState(() => _saving = true);
     try {
       await _settings.setReminders(
@@ -63,12 +65,8 @@ class _RemindersScreenState extends State<RemindersScreen> {
         context.pushReplacement(Routes.notificationsDenied);
         return;
       }
-      await scheduler.scheduleWeekly(
-        days: _days,
-        time: _time,
-        title: S.reminderNotificationTitle,
-        body: S.reminderNotificationBody,
-      );
+      // Мәтін мен кесте деректерден: аяқталмаған сессия, әлсіз тақырып.
+      await coordinator.refresh(force: true);
       if (mounted) context.pushReplacement(Routes.remindersEnabled);
     } catch (_) {
       if (!mounted) return;

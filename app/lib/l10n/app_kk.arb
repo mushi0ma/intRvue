@@ -265,6 +265,8 @@
   "remindersScheduleFailed": "Хабарламаны жоспарлау мүмкін болмады. Қайталап көріңіз.",
   "reminderNotificationTitle": "Дайындыққа уақыт",
   "reminderNotificationBody": "Бір сұрақтан бастаңыз — бес минут жеткілікті.",
+  "reminderResumeTitle": "Сессия аяқталмаған",
+  "reminderWeakTitle": "Әлсіз тақырыпты қайталайық",
   "remindersEnabledTitle": "Еске салу қосулы",
   "remindersEnabledSubtitle": "Хабарламаларға рұқсат берілген.",
   "remindersEnabledBody": "Құрылғының жергілікті уақытымен дайындықты еске саламыз.",
@@ -715,6 +717,28 @@
     "placeholders": {
       "n": {
         "type": "int"
+      }
+    }
+  },
+  "reminderResumeBody": "{track} · {progress}. Тоқтаған жерден жалғастырыңыз.",
+  "@reminderResumeBody": {
+    "placeholders": {
+      "track": {
+        "type": "String"
+      },
+      "progress": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderWeakBody": "«{topic}» соңғы сессияда {score} / 100. Бір сұрақтан бастайық.",
+  "@reminderWeakBody": {
+    "placeholders": {
+      "topic": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
       }
     }
   },

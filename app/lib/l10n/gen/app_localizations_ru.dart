@@ -847,6 +847,12 @@ class AppLocalizationsRu extends AppLocalizations {
       'Начните с одного вопроса — хватит пяти минут.';
 
   @override
+  String get reminderResumeTitle => 'Сессия не завершена';
+
+  @override
+  String get reminderWeakTitle => 'Повторим слабую тему';
+
+  @override
   String get remindersEnabledTitle => 'Напоминания включены';
 
   @override
@@ -1712,6 +1718,16 @@ class AppLocalizationsRu extends AppLocalizations {
       one: '$n тема',
     );
     return '$_temp0';
+  }
+
+  @override
+  String reminderResumeBody(String track, String progress) {
+    return '$track · $progress. Продолжите с того же места.';
+  }
+
+  @override
+  String reminderWeakBody(String topic, String score) {
+    return '«$topic»: $score / 100 в последней сессии. Начнём с одного вопроса.';
   }
 
   @override

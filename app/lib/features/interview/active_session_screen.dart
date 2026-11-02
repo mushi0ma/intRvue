@@ -80,3 +80,46 @@ class ActiveSessionScreen extends StatelessWidget {
     );
   }
 }
+
+/// B5: аяқталмаған сессия бар кезде жаңасын бастау — диалог.
+/// true — ерте аяқтап, жаңасын бастау; false — жалғастыру; null — жабылды.
+Future<bool?> showActiveConflictDialog(BuildContext context) =>
+    showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(S.activeTitle),
+        content: Text('${S.activeBody} ${S.activeWarning}'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(S.activeFinishAndNew),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(S.activeResumeShort),
+          ),
+        ],
+      ),
+    );
+
+/// Жаңа жаттығуды ашу. Аяқталмаған сессия болса — алдымен B5 диалогы:
+/// жалғастыру сессияға апарады, аяқтау оны «Толық емес» етіп сақтайды.
+/// [then] — диалогтан кейін (не сессия жоқ болса) не істеу.
+Future<void> resolveActiveThen(BuildContext context, VoidCallback then) async {
+  final sessions = context.read<SessionRepository>();
+  if (sessions.active == null) return then();
+  final finish = await showActiveConflictDialog(context);
+  if (finish == null || !context.mounted) return;
+  if (!finish) {
+    sessions.pending = null;
+    context.go(Routes.interview);
+    return;
+  }
+  try {
+    await sessions.finishActive();
+  } on AppException catch (e) {
+    if (context.mounted) showAppSnackBar(context, e.message);
+    return;
+  }
+  if (context.mounted) then();
+}

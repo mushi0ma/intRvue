@@ -17,6 +17,7 @@ import '../../data/repositories/session_repository.dart';
 import '../../data/repositories/settings_repository.dart';
 import '../../data/repositories/topic_repository.dart';
 import '../../data/services/reminder_coordinator.dart';
+import '../interview/active_session_screen.dart';
 import '../topics/topic_detail_screen.dart';
 
 /// B Басты бет (Figma v2 Home, B1, B2).
@@ -503,7 +504,10 @@ class _LastResult extends StatelessWidget {
                 child: AppButton(
                   label: S.homeStartAction,
                   icon: AppIcons.add,
-                  onPressed: () => context.push(Routes.practiceTopics),
+                  onPressed: () => resolveActiveThen(
+                    context,
+                    () => context.push(Routes.practiceTopics),
+                  ),
                 ),
               ),
               Expanded(
@@ -547,7 +551,10 @@ class _FirstRun extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           AppButton.accent(
             label: S.homeStartAction,
-            onPressed: () => context.push(Routes.practiceTopics),
+            onPressed: () => resolveActiveThen(
+              context,
+              () => context.push(Routes.practiceTopics),
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           const Divider(),

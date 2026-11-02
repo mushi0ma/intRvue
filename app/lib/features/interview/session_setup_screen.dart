@@ -13,6 +13,7 @@ import '../../data/models/enums.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/repositories/session_repository.dart';
 import '../../data/repositories/topic_repository.dart';
+import 'active_session_screen.dart';
 
 /// D1/D2 Жаңа жаттығу — бір экранда: бағыт, деңгей, тақырыптар, сұрақ
 /// саны, тіл және бағалауға келісім. Бұрынғы S07 (тақырып), S08
@@ -71,6 +72,10 @@ class _SessionSetupScreenState extends State<SessionSetupScreen> {
 
   Future<void> _start() async {
     final topics = context.read<TopicRepository>().byDirection(_direction);
+    // B5: аяқталмаған сессия — диалог (жалғастыру не ерте аяқтау).
+    var proceed = false;
+    await resolveActiveThen(context, () => proceed = true);
+    if (!proceed || !mounted) return;
     setState(() => _starting = true);
     if (!_sessions.consentGiven) await _sessions.giveConsent();
     if (!mounted) return;
@@ -86,9 +91,7 @@ class _SessionSetupScreenState extends State<SessionSetupScreen> {
       questionCount: _count,
     );
     setState(() => _starting = false);
-    context.push(
-      _sessions.active != null ? Routes.activeConflict : Routes.preparing,
-    );
+    context.push(Routes.preparing);
   }
 
   @override
@@ -100,6 +103,10 @@ class _SessionSetupScreenState extends State<SessionSetupScreen> {
     // Басқа бағыттың тақырыптары таңдаулыда қалмайды.
     final chosen = topics.where((t) => _selected.contains(t.id)).length;
     final ready = chosen > 0 && _consent;
+    final repo = context.read<TopicRepository>();
+    final available = topics
+        .where((t) => _selected.contains(t.id))
+        .fold(0, (n, t) => n + repo.questionsFor(t.id).length);
 
     return AppPage(
       leading: Row(
@@ -185,17 +192,15 @@ class _SessionSetupScreenState extends State<SessionSetupScreen> {
           spacing: AppSpacing.smd,
           children: [
             Expanded(
-              flex: 2,
               child: ChoiceGroup<int>(
                 label: S.paramsCount,
-                values: const [5, 10],
+                values: const [3, 5, 10],
                 selected: _count,
                 labelOf: (n) => '$n',
                 onChanged: (c) => setState(() => _count = c),
               ),
             ),
             Expanded(
-              flex: 3,
               child: ChoiceGroup<InterviewLanguage>(
                 label: S.paramsLanguageShort,
                 values: InterviewLanguage.values,
@@ -206,6 +211,15 @@ class _SessionSetupScreenState extends State<SessionSetupScreen> {
             ),
           ],
         ),
+        // Сұрақтар тақырыптар арасында кезектеседі; банкте аз болса —
+        // сессия қысқарады, оны алдын ала айтамыз.
+        if (chosen > 0 && available < _count) ...[
+          const SizedBox(height: AppSpacing.sm),
+          InfoBanner(
+            kind: BannerKind.info,
+            title: S.paramsFewQuestions(available),
+          ),
+        ],
         const SizedBox(height: AppSpacing.lg),
         ReviewGutter(
           flagged: !_consent,

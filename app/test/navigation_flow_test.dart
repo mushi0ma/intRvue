@@ -226,6 +226,63 @@ void main() {
     expect(find.text(S.topicsPickSubtitle), findsNothing);
   });
 
+  testWidgets(
+    'B5: аяқталмаған сессия — диалог, «Жалғастыру» сессияға апарады',
+    (tester) async {
+      await pumpApp(tester, location: '/home');
+      final sessions = repo<SessionRepository>(tester);
+      final active = sessions.active!.id;
+      await tapText(tester, S.homeStartAction);
+      expect(find.text(S.activeTitle), findsOneWidget);
+      await tapText(tester, S.activeResumeShort);
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(sessions.active?.id, active);
+      expect(find.text(S.activeTitle), findsNothing);
+      expect(find.text(S.submitAnswer), findsOneWidget);
+    },
+  );
+
+  testWidgets('B5: «Аяқтап, жаңасын бастау» — ескісі толық емес, 3 сұрақ', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/home');
+    final sessions = repo<SessionRepository>(tester);
+    final old = sessions.active!.id;
+    await tapText(tester, S.homeStartAction);
+    await tester.runAsync(() async {
+      await tester.tap(find.text(S.activeFinishAndNew));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+    });
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(sessions.active, isNull);
+    expect(sessions.byId(old)?.isComplete, isFalse);
+    expect(find.text(S.topicsPickTitle), findsOneWidget);
+
+    await tapText(tester, '3');
+    await tapText(tester, S.consentCheck);
+    await tapText(tester, S.paramsStart);
+    // Ескісі жабылды — екінші рет диалог шықпайды.
+    expect(find.text(S.activeTitle), findsNothing);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('1 / 3'), findsOneWidget);
+    expect(sessions.active?.questionCount, 3);
+  });
+
+  testWidgets('D1: таңдалған тақырыптарда сұрақ аз — алдын ала ескерту', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/practice/topics?direction=mobile');
+    await tapText(tester, 'Flutter виджеттері');
+    final topics = repo<TopicRepository>(tester);
+    final n = topics.questionsFor('dart-basics').length;
+    await tapText(tester, '10');
+    expect(n, lessThan(10));
+    expect(find.text(S.paramsFewQuestions(n)), findsOneWidget);
+    await tapText(tester, '3');
+    expect(find.text(S.paramsFewQuestions(n)), findsNothing);
+  });
+
   testWidgets('Толық жаттығу сессиясы: 5 сұрақ → қорытынды → ұсыныс', (
     tester,
   ) async {
@@ -282,6 +339,38 @@ void main() {
     await tapText(tester, S.reviewAnswers);
     expect(find.text(S.sessionAnswers), findsOneWidget);
     expect(find.text(S.skippedPoints), findsOneWidget);
+  });
+
+  testWidgets('E2: тарих сүзгі парағы — күй, кезең, тазарту', (tester) async {
+    await pumpApp(tester, location: '/history');
+    final all = repo<SessionRepository>(tester).history.length;
+    Finder rows() => find.byTooltip(S.sessionActions);
+    expect(rows(), findsNWidgets(all));
+
+    // Толық емес сессиялар ғана.
+    await tapText(tester, S.filterTitle);
+    expect(find.text(S.statusFilter), findsWidgets);
+    await tester.tap(find.text(S.statusIncomplete).last);
+    await tester.pump();
+    await tapText(tester, S.apply);
+    final incomplete = repo<SessionRepository>(tester).history
+        .where((s) => !s.isComplete)
+        .length;
+    expect(incomplete, greaterThan(0));
+    expect(rows(), findsNWidgets(incomplete));
+
+    // Соңғы 7 күн: демо сессиялар — қазан айында, тізім бос.
+    await tapText(tester, S.filterTitle);
+    await tester.tap(find.text(S.period7));
+    await tester.pump();
+    await tapText(tester, S.apply);
+    expect(rows(), findsNothing);
+    expect(find.text(S.historyEmptyTitle), findsOneWidget);
+
+    // Тазарту — бәрі қайтады.
+    await tapText(tester, S.filterTitle);
+    await tapText(tester, S.filterClear);
+    expect(rows(), findsNWidgets(all));
   });
 
   testWidgets('Тарих: сессияны ашу және жою', (tester) async {
@@ -422,7 +511,7 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester, location: '/settings/reminders');
-    bool value() => tester.widget<Switch>(find.byType(Switch)).value;
+    bool value() => tester.widget<Switch>(find.byType(Switch).first).value;
     expect(value(), isFalse);
     // Түзетуге дейін: тек ауыстырғыштың өзі басылатын, жазу — жоқ.
     await tester.tap(find.text(S.remindersEnable));
@@ -449,7 +538,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pump();
     await openInput('19:00');
 
@@ -477,7 +566,7 @@ void main() {
 
   testWidgets('Еске салу: рұқсат бар → «Еске салу қосулы»', (tester) async {
     await pumpApp(tester, location: '/settings/reminders');
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pump();
     await tapText(tester, S.save);
     expect(find.text(S.remindersEnabledTitle), findsOneWidget);
@@ -488,7 +577,7 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester, location: '/settings/reminders');
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pump();
     // Күтілетін: рұқсат туралы дұрыс күй, батырма — жай «Сақтау».
     // Түзетуге дейін: «Хабарламаға рұқсат қажет», «Сақтау және рұқсат беру».
@@ -505,7 +594,7 @@ void main() {
       location: '/settings/reminders',
       reminders: const NoopReminderScheduler(permitted: false),
     );
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pump();
     await tapText(tester, S.remindersSave);
     expect(find.text(S.notificationsOffTitle), findsOneWidget);

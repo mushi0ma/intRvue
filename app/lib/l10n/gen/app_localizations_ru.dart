@@ -1598,6 +1598,44 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deleteNothingRemoved => 'Ничего не удалено: сервер не ответил.';
 
   @override
+  String get cloudStatusSynced => 'На сервере';
+
+  @override
+  String get cloudStatusPending => 'Не отправлено';
+
+  @override
+  String get cloudStatusRemote => 'С другого устройства';
+
+  @override
+  String get activeResumeShort => 'Продолжить';
+
+  @override
+  String get remindersSkipToday => 'Пропустить, если уже занимался';
+
+  @override
+  String get remindersSkipTodayHint =>
+      'В день завершённой сессии не напоминаем';
+
+  @override
+  String get remindersUnfinished => 'Незавершённая сессия';
+
+  @override
+  String get remindersUnfinishedHint =>
+      'Если остался черновик, напоминание предложит продолжить';
+
+  @override
+  String get filterTitle => 'Фильтр';
+
+  @override
+  String get filterClear => 'Сбросить';
+
+  @override
+  String get period7 => '7 дней';
+
+  @override
+  String get period30 => '30 дней';
+
+  @override
   String get levelBeginner => 'Начальный';
 
   @override
@@ -1762,6 +1800,19 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String greeting(String name) {
     return 'Привет, $name!';
+  }
+
+  @override
+  String paramsFewQuestions(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'В выбранных темах всего $n вопроса — сессия будет короче.',
+      many: 'В выбранных темах всего $n вопросов — сессия будет короче.',
+      few: 'В выбранных темах всего $n вопроса — сессия будет короче.',
+      one: 'В выбранных темах всего $n вопрос — сессия будет короче.',
+    );
+    return '$_temp0';
   }
 
   @override

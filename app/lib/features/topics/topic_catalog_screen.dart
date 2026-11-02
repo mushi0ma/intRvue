@@ -15,6 +15,7 @@ import '../../data/local/db_errors.dart';
 import '../../data/models/enums.dart';
 import '../../data/models/topic.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/sync_repository.dart';
 import '../../data/repositories/topic_repository.dart';
 
 /// S16 Тақырыптар каталогы (List): іздеу, сүзгі, сұрыптау, таңдаулы.
@@ -260,6 +261,9 @@ class TopicItemRow extends StatelessWidget {
         if (item.averageScore != null)
           S.averageShort(Fmt.score(item.averageScore!)),
       ].join(' · '),
+      metaTrailing: _CloudStatus(
+        context.watch<SyncRepository>().cloudStatusOf(topic),
+      ),
       onTap: onTap,
       trailing: IconButton(
         tooltip: item.isFavorite ? S.removeFavorite : S.addFavorite,
@@ -268,6 +272,45 @@ class TopicItemRow extends StatelessWidget {
         icon: Icon(AppIcons.bookmark, color: colors.onSurface),
         selectedIcon: Icon(AppIcons.bookmark, fill: 1, color: colors.onSurface),
       ),
+    );
+  }
+}
+
+/// Өз тақырыбының бұлттағы күйі (Figma C2). Синхрондау өшірулі — бос.
+class _CloudStatus extends StatelessWidget {
+  const _CloudStatus(this.status);
+
+  final TopicCloudStatus? status;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    final (icon, label, color) = switch (status) {
+      null => (null, null, null),
+      TopicCloudStatus.synced => (
+        AppIcons.cloudDone,
+        S.cloudStatusSynced,
+        p.success,
+      ),
+      TopicCloudStatus.pending => (
+        AppIcons.cloudUpload,
+        S.cloudStatusPending,
+        p.onWarningContainer,
+      ),
+      TopicCloudStatus.fromOtherDevice => (
+        AppIcons.cloudSync,
+        S.cloudStatusRemote,
+        context.colors.onSurfaceVariant,
+      ),
+    };
+    if (label == null) return const SizedBox.shrink();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 4,
+      children: [
+        Icon(icon, size: 14, color: color),
+        Text(label, style: context.text.bodySmall!.copyWith(color: color)),
+      ],
     );
   }
 }

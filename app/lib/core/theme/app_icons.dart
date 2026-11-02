@@ -70,5 +70,8 @@ abstract final class AppIcons {
   static const IconData wifi = Symbols.wifi_sharp;
   static const IconData server = Symbols.dns_sharp;
   static const IconData upload = Symbols.upload_sharp;
+  static const IconData cloudDone = Symbols.cloud_done_sharp;
+  static const IconData cloudUpload = Symbols.cloud_upload_sharp;
+  static const IconData cloudSync = Symbols.cloud_sync_sharp;
   static const IconData refresh = Symbols.refresh_sharp;
 }

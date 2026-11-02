@@ -12,6 +12,9 @@ import '../models/topic.dart';
 /// 3. Әйтпесе → жалпы мәтін, тақырып таңдау.
 ///
 /// Бүгін сессия аяқталса, бүгінгі еске салу өткізіледі ([skipToday]).
+/// Екеуі де баптаудан өшіріледі (Figma F4): `skipIfPracticed`
+/// және `remindUnfinished` — өшірулі болса, 1-қадам
+/// өткізіліп, әлсіз тақырып ұсынылады.
 class ReminderPlan {
   const ReminderPlan({
     required this.kind,
@@ -34,12 +37,14 @@ class ReminderPlan {
     required List<InterviewSession> history,
     required Topic? Function(String id) topicById,
     required DateTime now,
+    bool skipIfPracticed = true,
+    bool remindUnfinished = true,
   }) {
-    final skipToday = history.any(
-      (s) => s.finished && _sameDay(s.startedAt, now),
-    );
+    final skipToday =
+        skipIfPracticed &&
+        history.any((s) => s.finished && _sameDay(s.startedAt, now));
 
-    if (active != null) {
+    if (active != null && remindUnfinished) {
       return ReminderPlan(
         kind: ReminderKind.resume,
         title: S.reminderResumeTitle,

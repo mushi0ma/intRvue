@@ -135,23 +135,15 @@ class _CloudTopicsScreenState extends State<CloudTopicsScreen> {
             FullBleed(child: InfoBanner(title: _failureText(failure))),
           const SizedBox(height: AppSpacing.md),
         ],
-        if (data == null && (loading || state is RequestIdle))
+        if (data == null && (loading || state is RequestIdle)) ...[
+          // F12: каркас тізім — жүктелгенде қай жерде не болатыны көрінеді.
           Semantics(
             liveRegion: true,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32),
-              child: Row(
-                spacing: 16,
-                children: [
-                  const SizedBox.square(
-                    dimension: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2.5),
-                  ),
-                  Text(S.cloudLoading, style: muted),
-                ],
-              ),
-            ),
+            child: Text(S.cloudLoading, style: muted),
           ),
+          GroupHeader(icon: AppIcons.cloud, title: S.cloudOnServer, meta: '–'),
+          const ExcludeSemantics(child: _Skeleton()),
+        ],
         if (data != null) ...[
           GroupHeader(
             icon: AppIcons.cloud,
@@ -255,6 +247,36 @@ class _CloudTopicsScreenState extends State<CloudTopicsScreen> {
 }
 
 enum _Action { rename, delete }
+
+class _Skeleton extends StatelessWidget {
+  const _Skeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    Widget bar(double w, double h) => Container(
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: p.tonal,
+        borderRadius: BorderRadius.circular(AppRadius.tag),
+      ),
+    );
+    return ListGroup(
+      children: [
+        for (final w in const [180.0, 140.0, 200.0])
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 8,
+              children: [bar(w, 14), bar(w * 0.6, 10)],
+            ),
+          ),
+      ],
+    );
+  }
+}
 
 class _Busy extends StatelessWidget {
   const _Busy();

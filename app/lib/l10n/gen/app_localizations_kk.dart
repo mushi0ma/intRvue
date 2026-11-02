@@ -1597,6 +1597,43 @@ class AppLocalizationsKk extends AppLocalizations {
       'Ештеңе жойылған жоқ: сервер жауап бермеді.';
 
   @override
+  String get cloudStatusSynced => 'Серверде';
+
+  @override
+  String get cloudStatusPending => 'Жіберілмеген';
+
+  @override
+  String get cloudStatusRemote => 'Басқа құрылғыдан';
+
+  @override
+  String get activeResumeShort => 'Жалғастыру';
+
+  @override
+  String get remindersSkipToday => 'Бүгін жаттықсам, өткізу';
+
+  @override
+  String get remindersSkipTodayHint => 'Сессия аяқталған күні еске салмаймыз';
+
+  @override
+  String get remindersUnfinished => 'Аяқталмаған сессия';
+
+  @override
+  String get remindersUnfinishedHint =>
+      'Нобай қалса, еске салу соны жалғастыруды ұсынады';
+
+  @override
+  String get filterTitle => 'Сүзгі';
+
+  @override
+  String get filterClear => 'Тазарту';
+
+  @override
+  String get period7 => '7 күн';
+
+  @override
+  String get period30 => '30 күн';
+
+  @override
   String get levelBeginner => 'Бастапқы';
 
   @override
@@ -1745,6 +1782,11 @@ class AppLocalizationsKk extends AppLocalizations {
   @override
   String greeting(String name) {
     return 'Сәлем, $name!';
+  }
+
+  @override
+  String paramsFewQuestions(int n) {
+    return 'Таңдалған тақырыптарда барлығы $n сұрақ — сессия қысқарақ болады.';
   }
 
   @override

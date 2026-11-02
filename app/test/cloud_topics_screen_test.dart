@@ -12,6 +12,10 @@ import 'package:intrvue/data/repositories/auth_repository.dart';
 import 'package:intrvue/data/local/app_database.dart';
 import 'package:intrvue/data/remote/dto.dart';
 import 'package:intrvue/data/remote/sync_api.dart';
+import 'package:intrvue/data/models/enums.dart';
+import 'package:intrvue/data/models/topic.dart';
+import 'package:intrvue/data/repositories/sync_repository.dart';
+import 'package:intrvue/data/repositories/topic_repository.dart';
 
 import 'helpers/fake_sync_api.dart';
 import 'helpers/test_app.dart';
@@ -146,6 +150,57 @@ void main() {
       // Аккаунт құрылғыда қалды, кіру экранына өткен жоқ.
       expect(repo<AuthRepository>(tester).user, isNotNull);
       expect(find.text(S.welcomeHero), findsNothing);
+    });
+
+    testWidgets('C2: каталогта өз тақырыбының бұлттағы күйі', (tester) async {
+      const draft = TopicDraft(
+        title: 'Docker негіздері',
+        summary: 'Image',
+        description: '',
+        direction: Direction.mobile,
+        level: Level.beginner,
+        reviewPoints: ['Image'],
+        questions: [
+          QuestionDraft(text: 'Image деген не?', modelAnswer: 'Үлгі.'),
+        ],
+      );
+      await pumpApp(
+        tester,
+        location: Routes.topics,
+        prefs: linked,
+        syncApi: (_) => FakeSyncApi(),
+      );
+      final topics = repo<TopicRepository>(tester);
+      final sync = repo<SyncRepository>(tester);
+      final topic = (await tester.runAsync(() => topics.create(draft)))!;
+      await settle(tester);
+      expect(find.text('Docker негіздері'), findsOneWidget);
+      // Жасалды, бірақ әлі жіберілмеді.
+      expect(find.text(S.cloudStatusPending), findsOneWidget);
+
+      await tester.runAsync(sync.syncNow);
+      await settle(tester);
+      expect(find.text(S.cloudStatusSynced), findsOneWidget);
+      expect(find.text(S.cloudStatusPending), findsNothing);
+
+      await tester.runAsync(
+        () => topics.update(
+          topic.id,
+          const TopicDraft(
+            title: 'Docker: жаңа',
+            summary: 'Image',
+            description: '',
+            direction: Direction.mobile,
+            level: Level.beginner,
+            reviewPoints: ['Image'],
+            questions: [
+              QuestionDraft(text: 'Image деген не?', modelAnswer: 'Үлгі.'),
+            ],
+          ),
+        ),
+      );
+      await settle(tester);
+      expect(find.text(S.cloudStatusPending), findsOneWidget);
     });
 
     testWidgets('PATCH: атау өзгерсе, тізім жаңарады', (tester) async {

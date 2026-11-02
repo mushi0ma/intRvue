@@ -517,6 +517,18 @@ abstract final class S {
   static String get retryDelete => _l.retryDelete;
   static String get deleteRemoteTitle => _l.deleteRemoteTitle;
   static String get deleteNothingRemoved => _l.deleteNothingRemoved;
+  static String get cloudStatusSynced => _l.cloudStatusSynced;
+  static String get cloudStatusPending => _l.cloudStatusPending;
+  static String get cloudStatusRemote => _l.cloudStatusRemote;
+  static String get activeResumeShort => _l.activeResumeShort;
+  static String get remindersSkipToday => _l.remindersSkipToday;
+  static String get remindersSkipTodayHint => _l.remindersSkipTodayHint;
+  static String get remindersUnfinished => _l.remindersUnfinished;
+  static String get remindersUnfinishedHint => _l.remindersUnfinishedHint;
+  static String get filterTitle => _l.filterTitle;
+  static String get filterClear => _l.filterClear;
+  static String get period7 => _l.period7;
+  static String get period30 => _l.period30;
   static String get levelBeginner => _l.levelBeginner;
   static String get levelJunior => _l.levelJunior;
   static String get levelMiddle => _l.levelMiddle;
@@ -563,6 +575,7 @@ abstract final class S {
   static String fieldRequired(String field) => _l.fieldRequired(field);
   static String answerTooLong(int max) => _l.answerTooLong(max);
   static String greeting(String name) => _l.greeting(name);
+  static String paramsFewQuestions(int n) => _l.paramsFewQuestions(n);
   static String questionsCount(int n) => _l.questionsCount(n);
   static String progressOf(int current, int total) =>
       _l.progressOf(current, total);

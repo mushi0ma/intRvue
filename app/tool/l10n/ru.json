@@ -500,5 +500,17 @@
   "openSync": "Открыть синхронизацию",
   "retryDelete": "Повторить удаление",
   "deleteRemoteTitle": "Копия на сервере не удалена",
-  "deleteNothingRemoved": "Ничего не удалено: сервер не ответил."
+  "deleteNothingRemoved": "Ничего не удалено: сервер не ответил.",
+  "cloudStatusSynced": "На сервере",
+  "cloudStatusPending": "Не отправлено",
+  "cloudStatusRemote": "С другого устройства",
+  "activeResumeShort": "Продолжить",
+  "remindersSkipToday": "Пропустить, если уже занимался",
+  "remindersSkipTodayHint": "В день завершённой сессии не напоминаем",
+  "remindersUnfinished": "Незавершённая сессия",
+  "remindersUnfinishedHint": "Если остался черновик, напоминание предложит продолжить",
+  "filterTitle": "Фильтр",
+  "filterClear": "Сбросить",
+  "period7": "7 дней",
+  "period30": "30 дней"
 }

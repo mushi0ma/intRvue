@@ -10,6 +10,7 @@ import '../local/app_database.dart';
 import '../local/db_errors.dart';
 import '../local/sync_store.dart';
 import '../models/enums.dart';
+import '../models/topic.dart';
 import '../models/user_profile.dart';
 import '../remote/live_channel.dart';
 import '../remote/sync_api.dart';
@@ -42,11 +43,30 @@ class SyncLink {
   };
 }
 
+/// Өз тақырыбының бұлттағы күйі (каталогта, Figma C2).
+enum TopicCloudStatus {
+  /// Серверде дәл осы нұсқа бар.
+  synced,
+
+  /// Құрылғыда өзгерді (не жаңа), серверге әлі жіберілмеген.
+  pending,
+
+  /// Соңғы нұсқа басқа құрылғыдан келді.
+  fromOtherDevice,
+}
+
 /// Басқа құрылғыдан келген өзгерістер (снекбар үшін).
 class RemoteUpdate {
-  const RemoteUpdate({this.sessions = 0, this.topics = 0});
+  const RemoteUpdate({
+    this.sessions = 0,
+    this.topics = 0,
+    this.topicIds = const {},
+  });
   final int sessions;
   final int topics;
+
+  /// Басқа құрылғыда жасалған не өзгерген тақырыптар (жойылғандарсыз).
+  final Set<String> topicIds;
   bool get isEmpty => sessions == 0 && topics == 0;
 
   /// Жергілікті сурет пен біріктірілген сурет арасындағы жаңа, өзгерген
@@ -61,6 +81,7 @@ class RemoteUpdate {
     Map<String, Object?> merged, {
     Map<String, int?> ownTopics = const {},
   }) {
+    final changedIds = <String>{};
     int changed(String key, Map<String, int?> own) {
       final before = {
         for (final r in (local[key] as List? ?? const []).cast<Map>())
@@ -71,17 +92,21 @@ class RemoteUpdate {
         final id = r['id'];
         if (before[id] == r['updated_at']) return false;
         return !(own.containsKey(id) && own[id] == r['updated_at']);
-      }).length;
+      }).toList();
+      if (key == 'topics') {
+        changedIds.addAll(changed.map((r) => r['id']).whereType<String>());
+      }
       final kept = {for (final r in after) r['id']};
       final removed = before.keys.where(
         (id) => !kept.contains(id) && !(own.containsKey(id) && own[id] == null),
       );
-      return changed + removed.length;
+      return changed.length + removed.length;
     }
 
     return RemoteUpdate(
       sessions: changed('sessions', const {}),
       topics: changed('topics', ownTopics),
+      topicIds: changedIds,
     );
   }
 }
@@ -213,6 +238,65 @@ class SyncRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  static String _versionsKey(int uid) => 'sync.topicVersions.$uid';
+  static String _remoteTopicsKey(int uid) => 'sync.remoteTopics.$uid';
+
+  /// Соңғы сәтті синхрондаудағы тақырып нұсқалары: id → updated_at (мс).
+  /// Уақытпен салыстырмаймыз: сервер мен телефон сағаттары сәйкес
+  /// келмеуі мүмкін, ал нұсқа (updated_at) екі жақта бірдей жазылады.
+  Map<String, int> _topicVersions(int uid) {
+    final raw = _prefs.getString(_versionsKey(uid));
+    if (raw == null) return const {};
+    return (jsonDecode(raw) as Map).map(
+      (k, v) => MapEntry(k as String, v as int),
+    );
+  }
+
+  Set<String> _remoteTopics(int uid) => {
+    ...?_prefs.getStringList(_remoteTopicsKey(uid)),
+  };
+
+  /// Өз тақырыбы серверде бар ма, жіберілмеген бе, басқа құрылғыдан ба.
+  /// Синхрондау өшірулі болса не тақырып каталогтікі болса — null.
+  TopicCloudStatus? cloudStatusOf(Topic topic) {
+    final uid = _userId;
+    if (uid == null || link == null || !topic.isCustom) return null;
+    final version = _topicVersions(uid)[topic.id];
+    final local = topic.updatedAt?.millisecondsSinceEpoch;
+    if (version == null || local == null || version != local) {
+      return TopicCloudStatus.pending;
+    }
+    return _remoteTopics(uid).contains(topic.id)
+        ? TopicCloudStatus.fromOtherDevice
+        : TopicCloudStatus.synced;
+  }
+
+  Future<void> _rememberVersions(
+    int uid,
+    Map<String, Object?> sent,
+    Map<String, Object?> merged,
+    Set<String> fromOther,
+  ) async {
+    final old = _topicVersions(uid);
+    final versions = <String, int>{
+      for (final r in (merged['topics'] as List? ?? const []).cast<Map>())
+        if (r['id'] is String && r['updated_at'] is int)
+          r['id'] as String: r['updated_at'] as int,
+    };
+    // Осы құрылғы өзгертіп жіберген тақырып енді «басқа құрылғыдан» емес.
+    final editedHere = {
+      for (final r in (sent['topics'] as List? ?? const []).cast<Map>())
+        if (old[r['id']] != r['updated_at']) r['id'],
+    };
+    final remote = {
+      for (final id in _remoteTopics(uid))
+        if (versions.containsKey(id) && !editedHere.contains(id)) id,
+      ...fromOther.where(versions.containsKey),
+    };
+    await _prefs.setString(_versionsKey(uid), jsonEncode(versions));
+    await _prefs.setStringList(_remoteTopicsKey(uid), remote.toList()..sort());
+  }
+
   /// Ағымдағы пайдаланушы серверге қосылған болса — байланыс.
   SyncLink? get link {
     final id = _userId;
@@ -228,6 +312,8 @@ class SyncRepository extends ChangeNotifier {
   Future<void> _saveLink(int userId, SyncLink? link) async {
     if (link == null) {
       await _prefs.remove(_linkKey(userId));
+      await _prefs.remove(_versionsKey(userId));
+      await _prefs.remove(_remoteTopicsKey(userId));
     } else {
       await _prefs.setString(_linkKey(userId), jsonEncode(link.toJson()));
     }
@@ -309,6 +395,7 @@ class SyncRepository extends ChangeNotifier {
       _lastFailure = null;
       final own = Map.of(_ownTopics);
       final update = RemoteUpdate.between(body, merged, ownTopics: own);
+      await _rememberVersions(uid, body, merged, update.topicIds);
       // Суретте көрінген нұсқалар енді керек емес.
       final present = {
         for (final r in (merged['topics'] as List? ?? const []).cast<Map>())

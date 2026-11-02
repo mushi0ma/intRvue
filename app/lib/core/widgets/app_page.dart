@@ -87,8 +87,13 @@ class AppPage extends StatelessWidget {
           padding: inset,
           child: Semantics(
             header: true,
+            // Ірі тақырып 130%-дан аспайды: 200%-да «Дайындыққ / а уақыт»,
+            // «жаттықты / рамыз» болып сөз ортасынан бөлінетін. 30 pt × 1,3
+            // бәрібір 200%-дағы негізгі мәтіннен (15 × 2) үлкен.
             child: Text(
               title!,
+              textScaler: MediaQuery.textScalerOf(context)
+                  .clamp(maxScaleFactor: 1.3),
               style: titleStyle ?? context.text.headlineLarge,
             ),
           ),

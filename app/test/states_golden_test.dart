@@ -4,6 +4,7 @@
 @Tags(['golden'])
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import 'package:intrvue/data/remote/sync_api.dart';
 import 'package:intrvue/data/models/enums.dart';
 import 'package:intrvue/data/models/topic.dart';
 import 'package:intrvue/data/repositories/session_repository.dart';
+import 'package:intrvue/data/repositories/sync_repository.dart';
 import 'package:intrvue/data/repositories/topic_repository.dart';
 
 import 'helpers/fake_sync_api.dart';
@@ -135,6 +137,25 @@ void main() {
     await shot(tester, 'D1_logout_dialog');
   });
 
+  testWidgets('history filter sheet', (tester) async {
+    await pumpApp(tester, location: '/history');
+    await tap(tester, S.filterTitle);
+    await tester.pump(const Duration(milliseconds: 400));
+    await shot(tester, 'E2_history_filter_sheet');
+  });
+
+  testWidgets('setup with 3 questions', (tester) async {
+    await pumpApp(tester, location: '/practice/topics?direction=mobile');
+    await tap(tester, '3');
+    await shot(tester, 'D1_setup_three');
+  });
+
+  testWidgets('active session dialog', (tester) async {
+    await pumpApp(tester, location: '/home');
+    await tap(tester, S.homeStartAction);
+    await shot(tester, 'B5_active_dialog');
+  });
+
   testWidgets('history delete dialog and filtered empty', (tester) async {
     await pumpApp(tester, location: '/history');
     await tester.tap(find.byTooltip(S.sessionActions).first);
@@ -159,7 +180,7 @@ void main() {
 
   testWidgets('reminders on', (tester) async {
     await pumpApp(tester, location: '/settings/reminders');
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(Switch).first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     await shot(tester, 'S15_reminders_on');
@@ -201,6 +222,20 @@ void main() {
     await shot(tester, 'F9_sync_linked');
   });
 
+  testWidgets('cloud topics loading', (tester) async {
+    final api = FakeSyncApi()..hold = Completer<void>();
+    await pumpApp(
+      tester,
+      location: Routes.cloudTopics,
+      prefs: linked,
+      syncApi: (_) => api,
+    );
+    await tester.pump();
+    await shot(tester, 'F12_cloud_loading');
+    api.hold!.complete();
+    await realWait(tester);
+  });
+
   testWidgets('cloud topics offline', (tester) async {
     await pumpApp(
       tester,
@@ -210,6 +245,31 @@ void main() {
     );
     await realWait(tester);
     await shot(tester, 'F14_cloud_timeout');
+  });
+
+  testWidgets('catalog cloud status', (tester) async {
+    await pumpApp(
+      tester,
+      location: Routes.topics,
+      prefs: linked,
+      syncApi: (_) => FakeSyncApi(),
+    );
+    final topics = repo<TopicRepository>(tester);
+    TopicDraft draft(String title) => TopicDraft(
+      title: title,
+      summary: '',
+      description: '',
+      direction: Direction.mobile,
+      level: Level.junior,
+      reviewPoints: const ['A'],
+      questions: const [QuestionDraft(text: 'Сұрақ?', modelAnswer: 'Жауап.')],
+    );
+    await tester.runAsync(() => topics.create(draft('Flutter анимациялары')));
+    await tester.runAsync(repo<SyncRepository>(tester).syncNow);
+    await tester.runAsync(() => topics.create(draft('Docker негіздері')));
+    await realWait(tester);
+    await tap(tester, S.filterMine);
+    await shot(tester, 'C2_catalog_cloud');
   });
 
   testWidgets('delete account server unavailable', (tester) async {

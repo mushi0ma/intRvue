@@ -166,6 +166,67 @@ Future<void> main() async {
       },
     );
 
+    test(
+      'C2: тақырып күйі — жіберілмеген / серверде / басқа құрылғыдан',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        TopicDraft edited(String title) => TopicDraft(
+          title: title,
+          summary: _topic.summary,
+          description: '',
+          direction: _topic.direction,
+          level: _topic.level,
+          reviewPoints: _topic.reviewPoints,
+          questions: _topic.questions,
+        );
+
+        final a = await device();
+        await a.auth.login(AppDatabase.demoEmail, AppDatabase.demoPassword);
+        final custom = await a.topics.create(_topic);
+        // Синхрондау өшірулі — күй көрсетілмейді.
+        expect(a.sync.cloudStatusOf(custom), isNull);
+
+        expect(await a.sync.connect(AppDatabase.demoPassword), isNull);
+        TopicCloudStatus? statusA() =>
+            a.sync.cloudStatusOf(a.topics.byId(custom.id));
+        expect(statusA(), TopicCloudStatus.synced);
+        // Каталог тақырыбы — серверге жатпайды.
+        expect(a.sync.cloudStatusOf(a.topics.byId('dart-basics')), isNull);
+
+        await a.topics.update(custom.id, edited('Docker: A өзгертті'));
+        expect(statusA(), TopicCloudStatus.pending);
+        expect(await a.sync.syncNow(), isNull);
+        expect(statusA(), TopicCloudStatus.synced);
+
+        // 2-құрылғы (басқа пайдаланушы id — баптаулар кілттері бөлек).
+        final b = await device();
+        await b.database.db.delete('users');
+        await b.auth.logout();
+        expect(
+          await b.sync.restore(AppDatabase.demoEmail, AppDatabase.demoPassword),
+          isTrue,
+        );
+        expect(b.auth.user!.id, isNot(a.auth.user!.id));
+        TopicCloudStatus? statusB() =>
+            b.sync.cloudStatusOf(b.topics.byId(custom.id));
+        expect(statusB(), TopicCloudStatus.fromOtherDevice);
+
+        // Өз өзгерісі жіберілгеннен кейін — «серверде», ал A-да «басқа
+        // құрылғыдан».
+        await b.topics.update(custom.id, edited('Docker: B өзгертті'));
+        expect(statusB(), TopicCloudStatus.pending);
+        expect(await b.sync.syncNow(), isNull);
+        expect(statusB(), TopicCloudStatus.synced);
+        expect(await a.sync.syncNow(), isNull);
+        expect(a.topics.byId(custom.id).title, 'Docker: B өзгертті');
+        expect(statusA(), TopicCloudStatus.fromOtherDevice);
+
+        // Ажыратқанда күй жойылады.
+        await a.sync.disconnect();
+        expect(statusA(), isNull);
+      },
+    );
+
     test('соңғы өзгеріс жеңеді: тақырыпты екі құрылғыда өзгерту', () async {
       SharedPreferences.setMockInitialValues({});
       final a = await device();

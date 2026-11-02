@@ -500,5 +500,17 @@
   "openSync": "Синхрондауды ашу",
   "retryDelete": "Қайталап жою",
   "deleteRemoteTitle": "Сервердегі көшірме жойылмады",
-  "deleteNothingRemoved": "Ештеңе жойылған жоқ: сервер жауап бермеді."
+  "deleteNothingRemoved": "Ештеңе жойылған жоқ: сервер жауап бермеді.",
+  "cloudStatusSynced": "Серверде",
+  "cloudStatusPending": "Жіберілмеген",
+  "cloudStatusRemote": "Басқа құрылғыдан",
+  "activeResumeShort": "Жалғастыру",
+  "remindersSkipToday": "Бүгін жаттықсам, өткізу",
+  "remindersSkipTodayHint": "Сессия аяқталған күні еске салмаймыз",
+  "remindersUnfinished": "Аяқталмаған сессия",
+  "remindersUnfinishedHint": "Нобай қалса, еске салу соны жалғастыруды ұсынады",
+  "filterTitle": "Сүзгі",
+  "filterClear": "Тазарту",
+  "period7": "7 күн",
+  "period30": "30 күн"
 }

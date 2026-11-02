@@ -80,6 +80,8 @@ class ReminderCoordinator {
     history: _sessions.history,
     topicById: _topics.tryById,
     now: _clock(),
+    skipIfPracticed: _settings.reminders.skipIfPracticed,
+    remindUnfinished: _settings.reminders.remindUnfinished,
   );
 
   /// Кестені деректерге сәйкестендіру. Қатар шақырулар кезекпен орындалады.

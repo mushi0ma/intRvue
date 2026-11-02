@@ -9,17 +9,33 @@ class ReminderSettings {
     this.enabled = false,
     this.days = const {1, 3, 5},
     this.time = const TimeOfDay(hour: 19, minute: 0),
+    this.skipIfPracticed = true,
+    this.remindUnfinished = true,
   });
 
   final bool enabled;
   final Set<int> days;
   final TimeOfDay time;
 
-  ReminderSettings copyWith({bool? enabled, Set<int>? days, TimeOfDay? time}) {
+  /// Бүгін сессия аяқталса, бүгінгі еске салу өткізіледі (Figma F4).
+  final bool skipIfPracticed;
+
+  /// Аяқталмаған сессия болса, еске салу соны жалғастыруды ұсынады.
+  final bool remindUnfinished;
+
+  ReminderSettings copyWith({
+    bool? enabled,
+    Set<int>? days,
+    TimeOfDay? time,
+    bool? skipIfPracticed,
+    bool? remindUnfinished,
+  }) {
     return ReminderSettings(
       enabled: enabled ?? this.enabled,
       days: days ?? this.days,
       time: time ?? this.time,
+      skipIfPracticed: skipIfPracticed ?? this.skipIfPracticed,
+      remindUnfinished: remindUnfinished ?? this.remindUnfinished,
     );
   }
 }
@@ -43,6 +59,8 @@ class SettingsRepository extends ChangeNotifier {
         hour: _prefs.getInt(_reminderHourKey) ?? 19,
         minute: _prefs.getInt(_reminderMinuteKey) ?? 0,
       ),
+      skipIfPracticed: _prefs.getBool(_reminderSkipKey) ?? true,
+      remindUnfinished: _prefs.getBool(_reminderUnfinishedKey) ?? true,
     );
   }
 
@@ -53,6 +71,8 @@ class SettingsRepository extends ChangeNotifier {
   static const _reminderDaysKey = 'settings.reminder.days';
   static const _reminderHourKey = 'settings.reminder.hour';
   static const _reminderMinuteKey = 'settings.reminder.minute';
+  static const _reminderSkipKey = 'settings.reminder.skipIfPracticed';
+  static const _reminderUnfinishedKey = 'settings.reminder.unfinished';
 
   final SharedPreferences _prefs;
   late ThemeMode _themeMode;
@@ -92,5 +112,7 @@ class SettingsRepository extends ChangeNotifier {
     );
     await _prefs.setInt(_reminderHourKey, value.time.hour);
     await _prefs.setInt(_reminderMinuteKey, value.time.minute);
+    await _prefs.setBool(_reminderSkipKey, value.skipIfPracticed);
+    await _prefs.setBool(_reminderUnfinishedKey, value.remindUnfinished);
   }
 }

@@ -173,7 +173,36 @@ void main() {
         isTrue,
       );
       expect(at(_future).skipToday, isFalse);
+      // F4: «Бүгін жаттықсам, өткізу» өшірулі — бүгін де еске салады.
+      expect(
+        ReminderPlan.build(
+          active: null,
+          history: s.sessions.history,
+          topicById: s.topics.tryById,
+          now: DateTime(day.year, day.month, day.day, 23, 59),
+          skipIfPracticed: false,
+        ).skipToday,
+        isFalse,
+      );
     });
+
+    test(
+      'F4: «Аяқталмаған сессия» өшірулі — әлсіз тақырып ұсынылады',
+      () async {
+        final s = await startServices();
+        addTearDown(s.dispose);
+        expect(s.sessions.active, isNotNull);
+        ReminderPlan plan({required bool unfinished}) => ReminderPlan.build(
+          active: s.sessions.active,
+          history: s.sessions.history,
+          topicById: s.topics.tryById,
+          now: _future,
+          remindUnfinished: unfinished,
+        );
+        expect(plan(unfinished: true).kind, ReminderKind.resume);
+        expect(plan(unfinished: false).kind, ReminderKind.weakTopic);
+      },
+    );
   });
 
   group('ReminderCoordinator: кесте деректермен бірге өзгереді', () {
@@ -273,6 +302,24 @@ void main() {
       );
     });
 
+    test('F4: баптаулар сақталады және кестеге әсер етеді', () async {
+      final (c, fake, s) = await setup();
+      await s.settings.setReminders(
+        _enabled.copyWith(remindUnfinished: false, skipIfPracticed: false),
+      );
+      await c.refresh();
+      expect(fake.scheduled.last.title, isNot(S.reminderResumeTitle));
+      // Қайта іске қосқанда (жаңа SettingsRepository) мәндер оқылады.
+      final again = await startServices();
+      addTearDown(again.dispose);
+      expect(again.settings.reminders.remindUnfinished, isFalse);
+      expect(again.settings.reminders.skipIfPracticed, isFalse);
+
+      await s.settings.setReminders(_enabled);
+      await c.refresh();
+      expect(fake.scheduled.last.title, S.reminderResumeTitle);
+    });
+
     test('аккаунттан шыққанда → барлық хабарлама өшіріледі', () async {
       final (c, fake, s) = await setup();
       await s.settings.setReminders(_enabled);
@@ -316,7 +363,7 @@ void main() {
     ) async {
       final fake = FakeScheduler(permitted: false)..permitted = true;
       await pumpApp(tester, location: Routes.reminders, reminders: fake);
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(Switch).first);
       await tester.pump();
       // Рұқсат бұрыннан бар — батырма жай «Сақтау» (BUG-8.05).
       await tester.tap(find.text(S.save));
@@ -332,7 +379,7 @@ void main() {
     ) async {
       final fake = FakeScheduler();
       await pumpApp(tester, location: Routes.reminders, reminders: fake);
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(Switch).first);
       await tester.pump();
       await tester.tap(find.text(S.save));
       await tester.pump();
@@ -365,7 +412,7 @@ void main() {
       (tester) async {
         final fake = FakeScheduler(permitted: false);
         await pumpApp(tester, location: Routes.reminders, reminders: fake);
-        await tester.tap(find.byType(Switch));
+        await tester.tap(find.byType(Switch).first);
         await tester.pump();
         await tester.tap(find.text(S.remindersSave));
         await tester.pump();

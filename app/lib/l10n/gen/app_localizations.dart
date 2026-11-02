@@ -3110,6 +3110,78 @@ abstract class AppLocalizations {
   /// **'Ештеңе жойылған жоқ: сервер жауап бермеді.'**
   String get deleteNothingRemoved;
 
+  /// No description provided for @cloudStatusSynced.
+  ///
+  /// In kk, this message translates to:
+  /// **'Серверде'**
+  String get cloudStatusSynced;
+
+  /// No description provided for @cloudStatusPending.
+  ///
+  /// In kk, this message translates to:
+  /// **'Жіберілмеген'**
+  String get cloudStatusPending;
+
+  /// No description provided for @cloudStatusRemote.
+  ///
+  /// In kk, this message translates to:
+  /// **'Басқа құрылғыдан'**
+  String get cloudStatusRemote;
+
+  /// No description provided for @activeResumeShort.
+  ///
+  /// In kk, this message translates to:
+  /// **'Жалғастыру'**
+  String get activeResumeShort;
+
+  /// No description provided for @remindersSkipToday.
+  ///
+  /// In kk, this message translates to:
+  /// **'Бүгін жаттықсам, өткізу'**
+  String get remindersSkipToday;
+
+  /// No description provided for @remindersSkipTodayHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сессия аяқталған күні еске салмаймыз'**
+  String get remindersSkipTodayHint;
+
+  /// No description provided for @remindersUnfinished.
+  ///
+  /// In kk, this message translates to:
+  /// **'Аяқталмаған сессия'**
+  String get remindersUnfinished;
+
+  /// No description provided for @remindersUnfinishedHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Нобай қалса, еске салу соны жалғастыруды ұсынады'**
+  String get remindersUnfinishedHint;
+
+  /// No description provided for @filterTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сүзгі'**
+  String get filterTitle;
+
+  /// No description provided for @filterClear.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тазарту'**
+  String get filterClear;
+
+  /// No description provided for @period7.
+  ///
+  /// In kk, this message translates to:
+  /// **'7 күн'**
+  String get period7;
+
+  /// No description provided for @period30.
+  ///
+  /// In kk, this message translates to:
+  /// **'30 күн'**
+  String get period30;
+
   /// No description provided for @levelBeginner.
   ///
   /// In kk, this message translates to:
@@ -3379,6 +3451,12 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Сәлем, {name}!'**
   String greeting(String name);
+
+  /// No description provided for @paramsFewQuestions.
+  ///
+  /// In kk, this message translates to:
+  /// **'Таңдалған тақырыптарда барлығы {n} сұрақ — сессия қысқарақ болады.'**
+  String paramsFewQuestions(int n);
 
   /// No description provided for @questionsCount.
   ///

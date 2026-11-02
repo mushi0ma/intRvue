@@ -28,6 +28,8 @@ class _RemindersScreenState extends State<RemindersScreen> {
   late bool _enabled = _settings.reminders.enabled;
   late final Set<int> _days = {..._settings.reminders.days};
   late TimeOfDay _time = _settings.reminders.time;
+  late bool _skipIfPracticed = _settings.reminders.skipIfPracticed;
+  late bool _remindUnfinished = _settings.reminders.remindUnfinished;
   String? _error;
   bool _saving = false;
 
@@ -87,7 +89,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
     setState(() => _saving = true);
     try {
       await _settings.setReminders(
-        ReminderSettings(enabled: _enabled, days: _days, time: _time),
+        ReminderSettings(
+          enabled: _enabled,
+          days: _days,
+          time: _time,
+          skipIfPracticed: _skipIfPracticed,
+          remindUnfinished: _remindUnfinished,
+        ),
       );
       if (!_enabled) {
         await scheduler.cancelAll();
@@ -123,6 +131,9 @@ class _RemindersScreenState extends State<RemindersScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final label = context.text.labelMedium!.copyWith(
+      color: colors.onSurfaceVariant,
+    );
+    final hint = context.text.bodySmall!.copyWith(
       color: colors.onSurfaceVariant,
     );
 
@@ -178,6 +189,28 @@ class _RemindersScreenState extends State<RemindersScreen> {
           enabled: _enabled,
           onTap: _pickTime,
           suffixIcon: Icon(AppIcons.schedule, color: colors.onSurfaceVariant),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // F4: еске салу деректерге қарай өзгереді — екі ережесі баптауда.
+        ListGroup(
+          children: [
+            SwitchListTile(
+              title: Text(S.remindersSkipToday, style: context.text.bodyLarge),
+              subtitle: Text(S.remindersSkipTodayHint, style: hint),
+              value: _skipIfPracticed,
+              onChanged: _enabled
+                  ? (v) => setState(() => _skipIfPracticed = v)
+                  : null,
+            ),
+            SwitchListTile(
+              title: Text(S.remindersUnfinished, style: context.text.bodyLarge),
+              subtitle: Text(S.remindersUnfinishedHint, style: hint),
+              value: _remindUnfinished,
+              onChanged: _enabled
+                  ? (v) => setState(() => _remindUnfinished = v)
+                  : null,
+            ),
+          ],
         ),
         const SizedBox(height: AppSpacing.lg),
         if (_permitted ?? false)

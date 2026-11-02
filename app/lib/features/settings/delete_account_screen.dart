@@ -6,6 +6,8 @@ import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
@@ -26,6 +28,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   bool _loading = false;
   String? _error;
 
+  /// Сервердегі көшірме жойылмады (F17): аккаунт құрылғыда сақталды.
+  bool _remoteFailed = false;
+
   @override
   void dispose() {
     _password.dispose();
@@ -33,7 +38,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   }
 
   Future<void> _delete() async {
-    setState(() => _error = null);
+    setState(() {
+      _error = null;
+      _remoteFailed = false;
+    });
     if (!_form.currentState!.validate()) return;
     setState(() => _loading = true);
     final sync = context.read<SyncRepository>();
@@ -49,10 +57,12 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
           }
         },
       );
-    } on AppException catch (e) {
+    } on AppException {
       if (!mounted) return;
-      setState(() => _loading = false);
-      showAppSnackBar(context, e.message);
+      setState(() {
+        _loading = false;
+        _remoteFailed = true;
+      });
       return;
     }
     if (!mounted) return;
@@ -67,19 +77,74 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final muted = context.text.bodyLarge!.copyWith(
-      color: context.colors.onSurfaceVariant,
-    );
+    final email = context.read<AuthRepository>().user?.email ?? '';
     return Form(
       key: _form,
       child: AppPage(
         showBack: true,
         title: S.deleteAccountTitle,
-        subtitle: S.deleteAccountSubtitle,
-        headerGap: 40,
+        subtitle: _remoteFailed
+            ? S.deleteNothingRemoved
+            : S.deleteAccountSubtitle,
         body: [
-          Text(S.deleteAccountBody, style: muted),
-          const SizedBox(height: 32),
+          if (_remoteFailed) ...[
+            FullBleed(
+              child: ColoredBox(
+                color: context.palette.surface,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: AppSpacing.sm,
+                      children: [
+                        RequestTrace(
+                          request:
+                              'DELETE ${context.read<SyncRepository>().serverUrl.authority}/v1/account',
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          S.deleteRemoteTitle,
+                          style: context.text.titleSmall,
+                        ),
+                        Text(
+                          S.deleteRemoteBody,
+                          style: context.text.bodySmall!.copyWith(
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: OutlinedButton.icon(
+                            onPressed: () => context.push(Routes.sync),
+                            icon: const Icon(AppIcons.sync, size: 18),
+                            label: Text(S.openSync),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+          // F16: не жойылатыны — нақты тізім, тақырыбында аккаунт.
+          if (!_remoteFailed) ...[
+            ConsequenceBox(
+              header: email,
+              items: [S.delSessions, S.delProgress, S.delTopics, S.delLogin],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              S.deleteAccountBody,
+              style: context.text.bodySmall!.copyWith(
+                color: context.colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           AppTextField(
             label: S.deleteAccountPassword,
             controller: _password,
@@ -89,23 +154,23 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
             errorText: _error,
             onSubmitted: (_) => _delete(),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             S.deleteAccountNote,
-            style: context.text.bodyMedium!.copyWith(
+            style: context.text.bodySmall!.copyWith(
               color: context.colors.onSurfaceVariant,
             ),
           ),
         ],
         actions: [
           AppButton.danger(
-            label: S.deleteAccountAction,
+            label: _remoteFailed ? S.retryDelete : S.deleteAccountAction,
             loading: _loading,
             onPressed: _delete,
           ),
-          AppButton.tonal(
+          AppButton.text(
             label: S.cancel,
-            onPressed: () => context.popOr(Routes.settings),
+            onPressed: () => context.popOr(Routes.profile),
           ),
         ],
       ),

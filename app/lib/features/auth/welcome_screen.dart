@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/models/enums.dart';
 import '../../data/repositories/settings_repository.dart';
@@ -16,77 +18,61 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final secondary = colors.onSurfaceVariant;
     return AppPage(
       leading: const Padding(
-        padding: EdgeInsets.only(left: 16),
+        padding: EdgeInsets.only(left: 8),
         child: Wordmark(),
       ),
-      trailing: Padding(
-        padding: const EdgeInsets.only(right: 16),
-        child: SizedBox(
-          width: 124,
-          child: FilterDropdown<InterfaceLanguage>(
-            value: context.watch<SettingsRepository>().language,
-            values: InterfaceLanguage.values,
-            labelOf: (l) => l.label,
-            semanticLabel: S.interfaceLanguage,
-            // Тіл бірден ауысады және баптауларда сақталады.
-            onChanged: (l) {
-              final settings = context.read<SettingsRepository>();
-              settings.setAppearance(settings.themeMode, l);
-            },
-          ),
+      trailing: SizedBox(
+        width: 136,
+        child: FilterDropdown<InterfaceLanguage>(
+          value: context.watch<SettingsRepository>().language,
+          values: InterfaceLanguage.values,
+          labelOf: (l) => l.label,
+          icon: AppIcons.language,
+          semanticLabel: S.interfaceLanguage,
+          // Тіл бірден ауысады және баптауларда сақталады.
+          onChanged: (l) {
+            final settings = context.read<SettingsRepository>();
+            settings.setAppearance(settings.themeMode, l);
+          },
         ),
       ),
       body: [
-        const SizedBox(height: 32),
+        const SizedBox(height: AppSpacing.lg),
         Semantics(
           header: true,
-          child: Text(S.welcomeHero, style: context.text.displayMedium),
+          child: Text(S.welcomeHero, style: context.text.headlineLarge),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           S.welcomeBody,
-          style: context.text.bodyLarge!.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
+          style: context.text.bodyMedium!.copyWith(color: secondary),
         ),
-        const SizedBox(height: 32),
-        TrainingBlock(
-          padding: const EdgeInsets.fromLTRB(24, 22, 24, 40),
-          children: [
-            Text(
-              S.welcomeAssessmentTitle,
-              style: context.text.titleLarge!.copyWith(
-                color: colors.onPrimaryContainer,
-              ),
-            ),
-            const SizedBox(height: 24),
-            AssessmentScales(
-              correctness: 4,
-              completeness: 3,
-              clarity: 5,
-              labels: (S.correctness, S.completeness, S.clarity),
-              onBlock: true,
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.lg),
+        Text(S.welcomeAssessmentTitle, style: context.text.labelLarge),
+        const SizedBox(height: AppSpacing.xs),
+        // Рубрика үлгісі: бір жауап — үш өлшем, 0–5.
+        CriterionRow(score: 5, title: S.correctness, hint: S.correctnessHint),
+        const Divider(),
+        CriterionRow(score: 4, title: S.completeness, hint: S.completenessHint),
+        const Divider(),
+        CriterionRow(score: 3, title: S.clarity, hint: S.clarityHint),
+        const Divider(),
+        const SizedBox(height: AppSpacing.smd),
         Text(
-          '${S.aiDisclaimer}\n${S.notHiringDecision}',
-          style: context.text.bodyMedium!.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
+          '${S.aiDisclaimer} ${S.notHiringDecision}',
+          style: context.text.bodySmall!.copyWith(color: secondary),
         ),
       ],
       actions: [
-        AppButton(
+        AppButton.accent(
           label: S.continueAction,
           onPressed: () => context.push(Routes.register),
         ),
-        AppLink(
+        AppButton.tonal(
           label: S.haveAccountLogin,
-          alignment: Alignment.center,
           onPressed: () => context.push(Routes.login),
         ),
       ],

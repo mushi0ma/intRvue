@@ -1,115 +1,83 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_icons.dart';
 import '../theme/app_spacing.dart';
+import 'app_button.dart';
 import 'app_page.dart';
+import 'review_mark.dart';
 
-/// Экран еніндегі жасыл жаттығу блогы (primaryContainer).
-/// Басты беттегі «Жаттығуды жалғастырайық» пен ұсынымдарда.
-class TrainingBlock extends StatelessWidget implements FullWidth {
-  const TrainingBlock({
-    super.key,
-    required this.children,
-    this.padding = const EdgeInsets.fromLTRB(24, 24, 24, 24),
-  });
+enum BannerKind {
+  /// Ақпарат: bg/tonal, info белгішесі.
+  info,
 
-  final List<Widget> children;
-  final EdgeInsetsGeometry padding;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return ColoredBox(
-      color: colors.primaryContainer,
-      child: Padding(
-        padding: padding,
-        child: DefaultTextStyle.merge(
-          style: TextStyle(color: colors.onPrimaryContainer),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: children,
-          ),
-        ),
-      ),
-    );
-  }
+  /// Ескерту / қате: ревью белгісі мен жиек жолағы, қызыл емес.
+  warning,
 }
 
-/// Ескерту жолағы (Figma «Banner / Offline»): желі жоқ, шектеулі әрекет.
+/// Экран еніндегі баннер (Figma `K.banner`): желі жоқ, демо режимі т.б.
 class InfoBanner extends StatelessWidget implements FullWidth {
-  const InfoBanner({super.key, required this.title, this.body});
+  const InfoBanner({
+    super.key,
+    required this.title,
+    this.body,
+    this.kind = BannerKind.warning,
+    this.actionLabel,
+    this.onAction,
+  });
 
   final String title;
   final String? body;
+  final BannerKind kind;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Semantics(
-      liveRegion: true,
-      child: ColoredBox(
-        color: palette.warningContainer,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 8,
-            children: [
-              Text(
-                title,
-                style: context.text.titleSmall!.copyWith(
-                  color: palette.onWarningContainer,
-                ),
-              ),
-              if (body != null)
-                Text(
-                  body!,
-                  style: context.text.bodyMedium!.copyWith(
-                    color: palette.onWarningContainer,
-                  ),
-                ),
-            ],
+    final p = context.palette;
+    final ink = context.colors.onSurface;
+    final flagged = kind == BannerKind.warning;
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.inset,
+        vertical: 12,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 12,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: flagged
+                ? const ReviewMark(size: 20)
+                : Icon(AppIcons.info, size: 20, color: ink),
           ),
-        ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                Text(title, style: context.text.labelLarge),
+                if (body != null) Text(body!, style: context.text.bodyMedium),
+                if (actionLabel != null)
+                  AppLink(label: actionLabel!, onPressed: onAction),
+              ],
+            ),
+          ),
+        ],
       ),
     );
-  }
-}
-
-/// Күй белгісі: «✓ Толық», «Бағалау күтілуде».
-class StatusChip extends StatelessWidget {
-  const StatusChip({super.key, required this.label, this.complete = true});
-
-  final String label;
-  final bool complete;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final palette = context.palette;
-    final bg = complete ? colors.secondaryContainer : palette.warningContainer;
-    final fg = complete
-        ? colors.onSecondaryContainer
-        : palette.onWarningContainer;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 32),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: DecoratedBox(
         decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(AppRadius.chip),
+          color: flagged ? p.surface : p.tonal,
+          border: flagged
+              ? Border(bottom: BorderSide(color: p.lineSubtle))
+              : null,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (complete) ...[
-              Icon(Icons.check, size: 16, color: colors.primary),
-              const SizedBox(width: 6),
-            ],
-            Text(label, style: context.text.labelMedium!.copyWith(color: fg)),
-          ],
-        ),
+        child: ReviewGutter(flagged: flagged, offset: 0, child: content),
       ),
     );
   }
@@ -124,21 +92,20 @@ class PageIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    final p = context.palette;
     return Semantics(
       label: '${index + 1} / $count',
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 8,
+        spacing: 4,
         children: [
           for (var i = 0; i < count; i++)
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: i == index ? 24 : 8,
-              height: 8,
+              width: i == index ? 20 : 8,
+              height: 3,
               decoration: BoxDecoration(
-                color: i == index ? colors.primary : colors.outlineVariant,
-                borderRadius: BorderRadius.circular(4),
+                color: i == index ? p.ink : p.lineStrong.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(AppRadius.pill),
               ),
             ),
         ],
@@ -156,125 +123,34 @@ class QuestionProgress extends StatelessWidget {
   /// Белсенді сұрақты қоса есептегенде.
   final int done;
 
+  /// Figma D5: өткендері — сия, ағымдағысы — жасыл (сия жиекпен),
+  /// алдағылары — жіңішке сұр.
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Row(
-      spacing: 6,
-      children: [
-        for (var i = 0; i < total; i++)
-          Expanded(
-            child: Container(
-              height: 5,
-              decoration: BoxDecoration(
-                color: i < done ? colors.primary : colors.secondaryContainer,
-                borderRadius: BorderRadius.circular(2),
+    final p = context.palette;
+    return ExcludeSemantics(
+      child: Row(
+        spacing: 4,
+        children: [
+          for (var i = 0; i < total; i++)
+            Expanded(
+              child: Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  color: i < done - 1
+                      ? p.ink
+                      : i == done - 1
+                      ? p.accent
+                      : p.lineStrong.withValues(alpha: 0.45),
+                  border: i == done - 1
+                      ? Border.all(color: p.ink, width: 0.5)
+                      : null,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
               ),
             ),
-          ),
-      ],
-    );
-  }
-}
-
-class AppAvatar extends StatelessWidget {
-  const AppAvatar({super.key, required this.initial, this.size = 40});
-
-  final String initial;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: colors.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      child: Text(
-        initial,
-        style: context.text.titleSmall!.copyWith(
-          color: colors.onPrimaryContainer,
-          fontSize: size * 0.4,
-        ),
-      ),
-    );
-  }
-}
-
-/// Тізім жолы: тақырып 18/600, сипаттама 14, астында бөлгіш.
-class ListRow extends StatelessWidget {
-  const ListRow({
-    super.key,
-    required this.title,
-    this.subtitle,
-    this.meta,
-    this.trailing,
-    this.onTap,
-    this.subtitleColor,
-    this.divider = true,
-    this.titleStyle,
-  });
-
-  final String title;
-  final String? subtitle;
-
-  /// Тақырыптың үстіндегі шағын жол: «19 қазан · 18:42».
-  final String? meta;
-  final Widget? trailing;
-  final VoidCallback? onTap;
-  final Color? subtitleColor;
-  final bool divider;
-  final TextStyle? titleStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final muted = context.text.bodyMedium!.copyWith(
-      color: colors.onSurfaceVariant,
-    );
-    final content = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (meta != null) ...[
-                  Text(meta!, style: muted),
-                  const SizedBox(height: 6),
-                ],
-                Text(title, style: titleStyle ?? context.text.titleMedium),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 8),
-                  Text(subtitle!, style: muted.copyWith(color: subtitleColor)),
-                ],
-              ],
-            ),
-          ),
-          if (trailing != null) ...[const SizedBox(width: 12), trailing!],
         ],
       ),
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (onTap == null)
-          content
-        else
-          InkWell(
-            onTap: onTap,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 72),
-              child: content,
-            ),
-          ),
-        if (divider) const Divider(),
-      ],
     );
   }
 }
@@ -322,142 +198,6 @@ class SectionDivider extends StatelessWidget {
     padding: EdgeInsets.symmetric(vertical: vertical),
     child: const Divider(),
   );
-}
-
-/// Баптаулар жолы: атауы 16/500 және мәні 14.
-class SettingsRow extends StatelessWidget {
-  const SettingsRow({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.onTap,
-  });
-
-  final String title;
-  final String value;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        InkWell(
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 64),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 6,
-                      children: [
-                        Text(
-                          title,
-                          style: context.text.bodyLarge!.copyWith(
-                            fontWeight: FontWeight.w500,
-                            height: 1.2,
-                          ),
-                        ),
-                        Text(
-                          value,
-                          style: context.text.bodyMedium!.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const Divider(),
-      ],
-    );
-  }
-}
-
-/// Тақырып таңдау жолы: шаршы белгі, атауы, сипаттамасы.
-class CheckRow extends StatelessWidget {
-  const CheckRow({
-    super.key,
-    required this.title,
-    required this.subtitle,
-    required this.checked,
-    required this.onChanged,
-  });
-
-  final String title;
-  final String subtitle;
-  final bool checked;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Semantics(
-          checked: checked,
-          label: title,
-          excludeSemantics: true,
-          onTap: () => onChanged(!checked),
-          child: InkWell(
-            onTap: () => onChanged(!checked),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 72),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 40,
-                      height: 24,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Checkbox(
-                          value: checked,
-                          onChanged: (v) => onChanged(v ?? false),
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 8,
-                        children: [
-                          Text(title, style: context.text.titleMedium),
-                          Text(
-                            subtitle,
-                            style: context.text.bodyMedium!.copyWith(
-                              color: colors.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const Divider(),
-      ],
-    );
-  }
 }
 
 /// Бос күй: тақырып және түсіндірме.

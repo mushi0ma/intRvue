@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/widgets.dart';
@@ -70,21 +72,33 @@ class _PreparingScreenState extends State<PreparingScreen> {
   Widget build(BuildContext context) {
     final request = _request;
     final topics = context.read<TopicRepository>();
-    final muted = context.text.bodyLarge!.copyWith(
+    Widget closeButton(VoidCallback onPressed) => Row(
+      children: [
+        IconButton.outlined(
+          tooltip: S.cancel,
+          onPressed: onPressed,
+          style: IconButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.control),
+            ),
+            side: BorderSide(color: context.palette.ink),
+          ),
+          icon: const Icon(AppIcons.close, size: 20),
+        ),
+      ],
+    );
+    final muted = context.text.bodySmall!.copyWith(
       color: context.colors.onSurfaceVariant,
     );
 
     final error = _error;
     if (error != null) {
       return AppPage(
-        showBack: true,
+        leading: closeButton(() => context.popOr(Routes.practiceTopics)),
         title: S.prepareErrorTitle,
         subtitle: S.prepareErrorSubtitle,
         body: [
-          Semantics(
-            liveRegion: true,
-            child: Text(error, style: context.text.bodyLarge),
-          ),
+          Semantics(liveRegion: true, child: ReviewNote(error)),
           if (request != null) ...[
             const SizedBox(height: 24),
             Text(
@@ -110,32 +124,42 @@ class _PreparingScreenState extends State<PreparingScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _cancel();
       },
+      // D3: «×», мазмұн экранның төменгі жартысында, жіңішке жолақ.
       child: AppPage(
-        showBack: true,
-        onBack: _cancel,
-        title: S.preparingTitle,
-        headerGap: 40,
+        leading: closeButton(_cancel),
         body: [
-          if (request != null)
-            Text(
-              '${request.direction.label} · ${request.level.label}\n'
-              '${request.topicIds.map((id) => topics.tryById(id)?.title ?? id).join(', ')}\n'
-              '${request.language.label} · ${S.questionsCount(request.questionCount)}',
-              style: muted,
-            ),
-          const SizedBox(height: 40),
+          SizedBox(height: MediaQuery.sizeOf(context).height * 0.18),
           Semantics(
-            label: S.preparingTitle.replaceAll('\n', ' '),
+            label: S.preparingTitle,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: const LinearProgressIndicator(minHeight: 4),
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              child: LinearProgressIndicator(
+                minHeight: 4,
+                color: context.palette.ink,
+                backgroundColor: context.palette.lineStrong.withValues(
+                  alpha: 0.45,
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: AppSpacing.lg),
+          Semantics(
+            header: true,
+            child: Text(S.preparingTitle, style: context.text.headlineLarge),
+          ),
+          const SizedBox(height: AppSpacing.smd),
+          if (request != null)
+            Text(
+              '${request.direction.label} · ${request.level.label} · '
+              '${S.questionsCount(request.questionCount)}\n'
+              '${request.topicIds.map((id) => topics.tryById(id)?.title ?? id).join(', ')}',
+              style: muted,
+            ),
+          const SizedBox(height: AppSpacing.md),
           Text(S.preparingBody, style: muted),
-          const SectionDivider(vertical: 32),
-          Text(S.preparingMotto, style: context.text.titleLarge),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.lg),
+          Text(S.preparingMotto, style: context.text.titleMedium),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             S.preparingHint,
             style: context.text.bodyMedium!.copyWith(
@@ -143,7 +167,7 @@ class _PreparingScreenState extends State<PreparingScreen> {
             ),
           ),
         ],
-        actions: [AppButton.tonal(label: S.backToHome, onPressed: _cancel)],
+        actions: [AppButton.tonal(label: S.cancel, onPressed: _cancel)],
       ),
     );
   }

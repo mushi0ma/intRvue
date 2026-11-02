@@ -5,10 +5,14 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
 import '../../data/repositories/session_repository.dart';
+import '../../data/repositories/topic_repository.dart';
 import '../results/assessment_details.dart';
+import 'practice_bar.dart';
 
 /// S10 Кері байланыс: үш өлшем, дәлел, нені толықтыру керек.
 class FeedbackScreen extends StatefulWidget {
@@ -54,6 +58,9 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     }
     final index = session.currentIndex;
     final record = session.current;
+    final topic = context.read<TopicRepository>().tryById(
+      record.question.topicId,
+    );
 
     return PopScope(
       canPop: false,
@@ -61,34 +68,88 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         if (!didPop) context.go(Routes.home);
       },
       child: AppPage(
-        // Бұл — ағымдағы орын белгісі, сілтеме емес (Figma S10).
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: Text(
-            S.feedbackHeader(index + 1, session.questionCount),
-            style: context.text.labelLarge!.copyWith(
-              color: context.colors.primary,
+        leading: PracticeBar(
+          icon: AppIcons.close,
+          tooltip: S.pauseHome,
+          onPressed: () => context.go(Routes.home),
+          label: S.feedbackLabel,
+          counter: '${index + 1} / ${session.questionCount}',
+          counterSemantics: S.feedbackHeader(index + 1, session.questionCount),
+        ),
+        body: [
+          const SizedBox(height: AppSpacing.sm),
+          QuestionProgress(total: session.questionCount, done: index + 1),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    assessment.headline,
+                    style: context.text.headlineLarge,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: AppTag(S.demoTag, kind: TagKind.warning),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          CodeText(
+            assessment.advice,
+            style: context.text.bodyMedium!.copyWith(
+              color: context.colors.onSurfaceVariant,
             ),
           ),
-        ),
-        title: assessment.headline,
-        subtitle: assessment.advice,
-        subtitleStyle: context.text.bodyLarge,
-        body: [
+          const SizedBox(height: AppSpacing.md),
           AssessmentDetails(
             record: record,
+            showDisputeLink: false,
             onDispute: () => context.push(Routes.dispute(session.id, index)),
           ),
+          // D10: әлсіз жауап — тақырыпты қайталау туралы ескерту.
+          if (assessment.total < 9 && topic != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            FullBleed(
+              child: InfoBanner(
+                kind: BannerKind.warning,
+                title: S.weakAnswerTitle,
+                body: S.weakAnswerBody(topic.title),
+              ),
+            ),
+          ],
         ],
         actions: [
-          AppButton.tonal(
-            label: S.readModelAnswer,
-            onPressed: () =>
-                context.push(Routes.modelAnswer(session.id, index)),
-          ),
-          AppButton(
+          AppButton.accent(
             label: session.isLastQuestion ? S.finishSession : S.nextQuestion,
             onPressed: () => _next(sessions),
+          ),
+          Row(
+            spacing: AppSpacing.sm,
+            children: [
+              Expanded(
+                child: AppButton.tonal(
+                  label: S.modelAnswerTitle,
+                  icon: AppIcons.book,
+                  onPressed: () =>
+                      context.push(Routes.modelAnswer(session.id, index)),
+                ),
+              ),
+              if (!record.disputed)
+                Expanded(
+                  child: AppButton.tonal(
+                    label: S.disagreeShort,
+                    icon: AppIcons.flag,
+                    onPressed: () =>
+                        context.push(Routes.dispute(session.id, index)),
+                  ),
+                ),
+            ],
           ),
         ],
       ),

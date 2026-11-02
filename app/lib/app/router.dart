@@ -7,7 +7,6 @@ import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
 import '../features/auth/welcome_screen.dart';
-import '../features/history/history_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/interview/active_session_screen.dart';
 import '../features/interview/consent_screen.dart';
@@ -15,12 +14,11 @@ import '../features/interview/feedback_screen.dart';
 import '../features/interview/interview_screen.dart';
 import '../features/interview/preparing_screen.dart';
 import '../features/interview/session_setup_screen.dart';
-import '../features/interview/topic_selection_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/profile/edit_profile_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/results/results_screen.dart';
 import '../features/profile/profile_setup_screen.dart';
-import '../features/progress/progress_screen.dart';
 import '../features/results/dispute_screen.dart';
 import '../features/results/model_answer_screen.dart';
 import '../features/results/recommendations_screen.dart';
@@ -34,7 +32,6 @@ import '../features/settings/reminder_status_screens.dart';
 import '../features/settings/reminders_screen.dart';
 import '../features/settings/cloud_topics_screen.dart';
 import '../features/settings/sync_screen.dart';
-import '../features/settings/settings_screen.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/topics/favorites_screen.dart';
 import '../features/topics/search_screen.dart';
@@ -82,6 +79,10 @@ GoRouter buildRouter(AuthRepository auth, {String initial = Routes.splash}) {
         (s) => ResetSentScreen(
           email: s.uri.queryParameters['email'] ?? '',
           token: s.uri.queryParameters['token'],
+          sentAt: switch (int.tryParse(s.uri.queryParameters['at'] ?? '')) {
+            final ms? => DateTime.fromMillisecondsSinceEpoch(ms),
+            null => null,
+          },
         ),
       ),
       // Сілтеме: intrvue://app/reset-password?token=…
@@ -99,32 +100,45 @@ GoRouter buildRouter(AuthRepository auth, {String initial = Routes.splash}) {
             routes: [route(Routes.home, (_) => const HomeScreen())],
           ),
           StatefulShellBranch(
-            routes: [route(Routes.history, (_) => const HistoryScreen())],
+            routes: [
+              route(Routes.topics, (_) => const TopicCatalogScreen()),
+              route(Routes.search, (_) => const SearchScreen()),
+            ],
           ),
           StatefulShellBranch(
-            routes: [route(Routes.progress, (_) => const ProgressScreen())],
+            routes: [
+              route(
+                Routes.results,
+                (s) => ResultsScreen(
+                  tab: s.uri.queryParameters['tab'] == 'progress'
+                      ? ResultsTab.progress
+                      : ResultsTab.history,
+                ),
+              ),
+            ],
           ),
           StatefulShellBranch(
-            routes: [route(Routes.settings, (_) => const SettingsScreen())],
+            routes: [route(Routes.profile, (_) => const ProfileScreen())],
           ),
         ],
       ),
+      GoRoute(path: Routes.legacyHistory, redirect: (_, _) => Routes.history),
+      GoRoute(path: Routes.legacyProgress, redirect: (_, _) => Routes.progress),
+      GoRoute(path: Routes.settings, redirect: (_, _) => Routes.profile),
 
       // Толық экранды беттер — навигация жолағын жабады.
-      route(Routes.topics, (_) => const TopicCatalogScreen()),
       // Create/Edit: '/topics/new' '/topics/:id'-ден бұрын тұруы керек.
       route(Routes.topicNew, (_) => const TopicFormScreen()),
       route('/topics/:id', (s) => TopicDetailScreen(topicId: id(s))),
       route('/topics/:id/edit', (s) => TopicFormScreen(topicId: id(s))),
-      route(Routes.search, (_) => const SearchScreen()),
       route(Routes.favorites, (_) => const FavoritesScreen()),
-      route(Routes.profile, (_) => const ProfileScreen()),
       route(Routes.profileEdit, (_) => const EditProfileScreen()),
 
       route(
         Routes.practiceTopics,
-        (s) => TopicSelectionScreen(
+        (s) => SessionSetupScreen(
           direction: _direction(s.uri.queryParameters['direction']),
+          level: _level(s.uri.queryParameters['level']),
         ),
       ),
       route(
@@ -178,6 +192,13 @@ GoRouter buildRouter(AuthRepository auth, {String initial = Routes.splash}) {
       route(Routes.deleteAccount, (_) => const DeleteAccountScreen()),
     ],
   );
+}
+
+Level? _level(String? name) {
+  for (final l in Level.values) {
+    if (l.name == name) return l;
+  }
+  return null;
 }
 
 Direction? _direction(String? name) {

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/widgets.dart';
@@ -60,6 +61,7 @@ class _DisputeScreenState extends State<DisputeScreen> {
   Widget build(BuildContext context) {
     final session = context.read<SessionRepository>().byId(widget.sessionId);
     final question = session?.answers[widget.index].question;
+    final assessment = session?.answers[widget.index].assessment;
     final topic = question == null
         ? null
         : context.read<TopicRepository>().tryById(question.topicId);
@@ -69,20 +71,32 @@ class _DisputeScreenState extends State<DisputeScreen> {
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: AppPage(
         showBack: true,
+        header: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          child: Text(
+            [
+              S.disputeSubtitle(widget.index + 1, topic?.title ?? ''),
+              if (assessment != null)
+                '${assessment.correctness} / ${assessment.completeness} / '
+                    '${assessment.clarity}',
+            ].join(' · '),
+            style: context.text.bodySmall!.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+        ),
         title: S.disputeTitle,
-        subtitle: S.disputeSubtitle(widget.index + 1, topic?.title ?? ''),
-        headerGap: 34,
+        subtitle: S.disputeQuestion,
         body: [
-          Text(S.disputeQuestion, style: context.text.titleLarge),
-          const SizedBox(height: 16),
-          ChoiceGroup<_Reason>(
+          // D12: себеп — радио-тізім карточкада, таңдалғаны тонды фонда.
+          RadioCardGroup<_Reason>(
             values: _Reason.values,
             selected: _reason,
             labelOf: (r) =>
                 r == _Reason.wrong ? S.disputeWrong : S.disputeUnclear,
             onChanged: (r) => setState(() => _reason = r),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           AppTextField(
             label: S.disputeComment,
             controller: _comment,
@@ -95,10 +109,10 @@ class _DisputeScreenState extends State<DisputeScreen> {
                 ? S.disputeCommentRequired
                 : null,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             S.disputeNote,
-            style: context.text.bodyMedium!.copyWith(
+            style: context.text.bodySmall!.copyWith(
               color: context.colors.onSurfaceVariant,
             ),
           ),

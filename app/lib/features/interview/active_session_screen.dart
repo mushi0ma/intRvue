@@ -22,27 +22,34 @@ class ActiveSessionScreen extends StatelessWidget {
     return AppPage(
       showBack: true,
       title: S.activeTitle,
-      headerGap: 40,
       body: [
-        if (active != null)
-          Text(
-            '${active.trackLabel}\n'
-            '${S.progressOf(active.currentIndex + 1, active.questionCount)}'
-            ' · ${S.draftStored}',
-            style: context.text.titleMedium,
-          ),
-        const SectionDivider(vertical: 24),
         Text(
           S.activeBody,
-          style: context.text.bodyLarge!.copyWith(
+          style: context.text.bodyMedium!.copyWith(
             color: colors.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 24),
-        Text(
-          S.activeWarning,
-          style: context.text.bodyMedium!.copyWith(
-            color: context.palette.onWarningContainer,
+        const SizedBox(height: 16),
+        if (active != null)
+          ListGroup(
+            children: [
+              ItemRow(
+                overline: active.trackLabel,
+                title: S.progressOf(
+                  active.currentIndex + 1,
+                  active.questionCount,
+                ),
+                meta: S.draftStored,
+              ),
+            ],
+          ),
+        const SizedBox(height: 16),
+        // Ерте аяқтаудың салдары — қызыл емес, жиектегі белгімен.
+        FullBleed(
+          child: InfoBanner(
+            kind: BannerKind.warning,
+            title: S.statusIncomplete,
+            body: S.activeWarning,
           ),
         ),
       ],

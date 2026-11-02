@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_icons.dart';
 import '../theme/app_spacing.dart';
 
 enum AppButtonVariant {
-  /// Негізгі әрекет — primary фон.
+  /// Негізгі әрекет — сия фон (Figma kind=primary).
   filled,
 
-  /// Қосымша әрекет — secondaryContainer фон.
+  /// Қосымша әрекет — сия жиек (kind=outline).
   tonal,
 
-  /// Мәтіндік батырма.
+  /// Мәтіндік батырма (kind=text).
   text,
 
-  /// Қайтарылмайтын әрекет — error фон.
+  /// Қайтарылмайтын әрекет. Қызыл емес: сия фон + белгіше, қауіпті
+  /// мазмұн (diff, мерзім) көрсетеді.
   danger,
+
+  /// Экрандағы басты CTA — жасыл акцент, жазу солда, көрсеткі оңда
+  /// (kind=accent).
+  accent,
 }
 
-/// Экран еніндегі 56 dp батырма (Figma «Component / Button / …»).
+/// Экран еніндегі 48 dp батырма (Figma «v2 · Components / Button»).
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
@@ -49,8 +55,16 @@ class AppButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.loading = false,
-    this.icon,
+    this.icon = AppIcons.delete,
   }) : variant = AppButtonVariant.danger;
+
+  const AppButton.accent({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.loading = false,
+    this.icon = AppIcons.forward,
+  }) : variant = AppButtonVariant.accent;
 
   final String label;
   final VoidCallback? onPressed;
@@ -63,18 +77,33 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final palette = context.palette;
     final action = loading ? null : onPressed;
+    final onInk =
+        variant == AppButtonVariant.filled ||
+        variant == AppButtonVariant.danger;
+    final accent = variant == AppButtonVariant.accent;
     final child = loading
         ? SizedBox.square(
-            dimension: 22,
+            dimension: 20,
             child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              color:
-                  variant == AppButtonVariant.filled ||
-                      variant == AppButtonVariant.danger
+              strokeWidth: 2,
+              color: onInk
                   ? colors.onPrimary
+                  : accent
+                  ? palette.onAccent
                   : colors.primary,
             ),
+          )
+        : accent
+        ? Row(
+            children: [
+              Expanded(child: Text(label)),
+              if (icon != null) ...[
+                const SizedBox(width: 8),
+                Icon(icon, size: 20),
+              ],
+            ],
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
@@ -89,13 +118,14 @@ class AppButton extends StatelessWidget {
 
     const minSize = Size(double.infinity, AppSpacing.controlHeight);
     final button = switch (variant) {
-      AppButtonVariant.filled => FilledButton(onPressed: action, child: child),
-      AppButtonVariant.tonal => FilledButton.tonal(
+      AppButtonVariant.filled || AppButtonVariant.danger => FilledButton(
         onPressed: action,
-        style: FilledButton.styleFrom(
-          backgroundColor: colors.secondaryContainer,
-          foregroundColor: colors.primary,
-        ),
+        style: FilledButton.styleFrom(minimumSize: minSize),
+        child: child,
+      ),
+      AppButtonVariant.tonal => OutlinedButton(
+        onPressed: action,
+        style: OutlinedButton.styleFrom(minimumSize: minSize),
         child: child,
       ),
       AppButtonVariant.text => TextButton(
@@ -103,11 +133,12 @@ class AppButton extends StatelessWidget {
         style: TextButton.styleFrom(minimumSize: minSize),
         child: child,
       ),
-      AppButtonVariant.danger => FilledButton(
+      AppButtonVariant.accent => FilledButton(
         onPressed: action,
         style: FilledButton.styleFrom(
-          backgroundColor: colors.error,
-          foregroundColor: colors.onError,
+          minimumSize: minSize,
+          backgroundColor: palette.accent,
+          foregroundColor: palette.onAccent,
         ),
         child: child,
       ),
@@ -149,9 +180,12 @@ class AppLink extends StatelessWidget {
       child: TextButton(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          foregroundColor: color ?? context.colors.primary,
+          foregroundColor: color ?? context.palette.ink,
           padding: EdgeInsets.zero,
           shape: const RoundedRectangleBorder(),
+          textStyle: context.text.labelLarge!.copyWith(
+            decoration: TextDecoration.underline,
+          ),
           minimumSize: const Size(
             AppSpacing.touchTarget,
             AppSpacing.touchTarget,

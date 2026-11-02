@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
@@ -92,7 +93,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           onBack: _leave,
           title: S.editProfile,
           subtitle: S.editProfileSubtitle,
-          headerGap: 36,
           body: [
             AppTextField(
               label: S.fieldName,
@@ -101,28 +101,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               validator: Validators.name,
               onChanged: (_) => setState(() {}),
             ),
-            const SizedBox(height: 32),
-            AppDropdownField<Direction>(
+            const SizedBox(height: AppSpacing.lg),
+            ChoiceGroup<Direction>(
               label: S.fieldDirection,
-              value: _direction,
-              items: Direction.values,
-              itemLabel: (d) => d.label,
+              values: Direction.values,
+              selected: _direction,
+              labelOf: (d) => d.label,
               onChanged: (d) => setState(() => _direction = d),
             ),
-            const SizedBox(height: 32),
-            AppDropdownField<Level>(
+            const SizedBox(height: AppSpacing.lg),
+            ChoiceGroup<Level>(
               label: S.fieldLevel,
-              value: _level,
-              items: Level.values,
-              itemLabel: (l) => l.label,
+              values: Level.values,
+              selected: _level,
+              labelOf: (l) => l.label,
               onChanged: (l) => setState(() => _level = l),
             ),
-            const SizedBox(height: 32),
-            AppDropdownField<InterviewLanguage>(
+            const SizedBox(height: AppSpacing.lg),
+            ChoiceGroup<InterviewLanguage>(
               label: S.fieldInterviewLanguage,
-              value: _language,
-              items: InterviewLanguage.values,
-              itemLabel: (l) => l.label,
+              values: InterviewLanguage.values,
+              selected: _language,
+              labelOf: (l) => l.label,
               onChanged: (l) => setState(() => _language = l),
             ),
           ],

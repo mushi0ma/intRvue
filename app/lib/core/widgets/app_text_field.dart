@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 
 import '../constants/app_strings.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_icons.dart';
 import '../theme/app_spacing.dart';
+import 'review_mark.dart';
 
 /// Белгісі өрістің үстінде тұратын енгізу өрісі (Figma «Field / …»).
 class AppTextField extends StatefulWidget {
@@ -32,6 +34,8 @@ class AppTextField extends StatefulWidget {
     this.readOnly = false,
     this.onTap,
     this.suffixIcon,
+    this.leadingIcon,
+    this.flagged = false,
   });
 
   final String label;
@@ -62,6 +66,12 @@ class AppTextField extends StatefulWidget {
   final VoidCallback? onTap;
   final Widget? suffixIcon;
 
+  /// Өріс ішіндегі сол жақ белгіше (Figma: mail, lock, search).
+  final IconData? leadingIcon;
+
+  /// Хабарламасыз белгі: жиек — сия 1,5 (хабарлама ортақ, [FlagGroup]).
+  final bool flagged;
+
   @override
   State<AppTextField> createState() => _AppTextFieldState();
 }
@@ -69,120 +79,90 @@ class AppTextField extends StatefulWidget {
 class _AppTextFieldState extends State<AppTextField> {
   late bool _hidden = widget.obscure;
 
+  /// Валидатор қайтарған соңғы қате — өріс жиегіндегі белгі үшін.
+  String? _validatorError;
+
+  String? _validate(String? value) {
+    final error = widget.validator?.call(value);
+    if (error != _validatorError) {
+      // Валидатор build кезінде де шақырылады — күйді кейін жаңартамыз.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _validatorError = error);
+      });
+    }
+    return error;
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          widget.label,
-          style: context.text.labelMedium!.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        TextFormField(
-          controller: widget.controller,
-          initialValue: widget.initialValue,
-          focusNode: widget.focusNode,
-          validator: widget.validator,
-          onChanged: widget.onChanged,
-          onFieldSubmitted: widget.onSubmitted,
-          keyboardType: widget.keyboardType,
-          textInputAction: widget.textInputAction,
-          autofillHints: widget.autofillHints,
-          obscureText: _hidden,
-          autofocus: widget.autofocus,
-          enabled: widget.enabled,
-          readOnly: widget.readOnly,
-          onTap: widget.onTap,
-          minLines: widget.minLines,
-          maxLines: widget.obscure ? 1 : widget.maxLines,
-          maxLength: widget.maxLength,
-          maxLengthEnforcement: MaxLengthEnforcement.enforced,
-          textCapitalization: widget.textCapitalization,
-          style: context.text.bodyLarge!.copyWith(height: 1.4),
-          decoration: InputDecoration(
-            hintText: widget.hint,
-            helperText: widget.helper,
-            // Қазақша мәтіндер ұзын: бір жолға сыймаса қысқармасын.
-            helperMaxLines: 4,
-            errorMaxLines: 4,
-            helperStyle: context.text.bodyMedium!.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-            errorText: widget.errorText,
-            errorStyle: context.text.bodyMedium!.copyWith(
-              color: colors.error,
-              fontWeight: FontWeight.w500,
-            ),
-            counterText: '',
-            suffixIcon: widget.obscure
-                ? IconButton(
-                    tooltip: _hidden ? S.showPassword : S.hidePassword,
-                    onPressed: () => setState(() => _hidden = !_hidden),
-                    icon: Icon(
-                      _hidden
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+    final flagged = widget.errorText != null || _validatorError != null;
+    final ink = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppRadius.control),
+      borderSide: BorderSide(color: context.palette.ink, width: 1.5),
+    );
+    return ReviewGutter(
+      flagged: flagged,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(widget.label, style: context.text.labelMedium),
+          const SizedBox(height: AppSpacing.xs + 2),
+          TextFormField(
+            controller: widget.controller,
+            initialValue: widget.initialValue,
+            focusNode: widget.focusNode,
+            validator: widget.validator == null ? null : _validate,
+            errorBuilder: (context, message) => ReviewNote(message),
+            onChanged: widget.onChanged,
+            onFieldSubmitted: widget.onSubmitted,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            autofillHints: widget.autofillHints,
+            obscureText: _hidden,
+            autofocus: widget.autofocus,
+            enabled: widget.enabled,
+            readOnly: widget.readOnly,
+            onTap: widget.onTap,
+            minLines: widget.minLines,
+            maxLines: widget.obscure ? 1 : widget.maxLines,
+            maxLength: widget.maxLength,
+            maxLengthEnforcement: MaxLengthEnforcement.enforced,
+            textCapitalization: widget.textCapitalization,
+            style: context.text.bodyLarge,
+            decoration: InputDecoration(
+              hintText: widget.hint,
+              helperText: widget.helper,
+              // Қазақша мәтіндер ұзын: бір жолға сыймаса қысқармасын.
+              helperMaxLines: 4,
+              errorMaxLines: 4,
+              // Сервер қатесі де валидатор қатесі сияқты белгімен көрсетіледі.
+              error: widget.errorText == null
+                  ? null
+                  : ReviewNote(widget.errorText!),
+              counterText: '',
+              enabledBorder: widget.flagged ? ink : null,
+              prefixIcon: widget.leadingIcon == null
+                  ? null
+                  : Icon(
+                      widget.leadingIcon,
+                      size: 20,
                       color: colors.onSurfaceVariant,
                     ),
-                  )
-                : widget.suffixIcon,
+              suffixIcon: widget.obscure
+                  ? IconButton(
+                      tooltip: _hidden ? S.showPassword : S.hidePassword,
+                      onPressed: () => setState(() => _hidden = !_hidden),
+                      icon: Icon(
+                        _hidden ? AppIcons.visibility : AppIcons.visibilityOff,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    )
+                  : widget.suffixIcon,
+            ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Тізімнен таңдау өрісі (Figma «Field / Dropdown»).
-class AppDropdownField<T> extends StatelessWidget {
-  const AppDropdownField({
-    super.key,
-    required this.label,
-    required this.value,
-    required this.items,
-    required this.itemLabel,
-    required this.onChanged,
-  });
-
-  final String label;
-  final T value;
-  final List<T> items;
-  final String Function(T) itemLabel;
-  final ValueChanged<T> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          label,
-          style: context.text.labelMedium!.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        DropdownButtonFormField<T>(
-          initialValue: value,
-          isExpanded: true,
-          icon: Icon(Icons.arrow_drop_down, color: colors.onSurfaceVariant),
-          borderRadius: BorderRadius.circular(AppRadius.field),
-          dropdownColor: colors.surface,
-          style: context.text.bodyLarge!.copyWith(height: 1.4),
-          items: [
-            for (final item in items)
-              DropdownMenuItem(value: item, child: Text(itemLabel(item))),
-          ],
-          onChanged: (v) {
-            if (v != null) onChanged(v);
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

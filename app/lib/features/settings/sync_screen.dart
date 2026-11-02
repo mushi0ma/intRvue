@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/utils/validators.dart';
@@ -131,18 +132,19 @@ class _SyncScreenState extends State<SyncScreen> {
       key: _form,
       child: AppPage(
         showBack: true,
-        onBack: () => context.popOr(Routes.settings),
+        onBack: () => context.popOr(Routes.profile),
         title: S.syncTitle,
         subtitle: S.syncSubtitle,
-        headerGap: 40,
         body: [
           if (failure != null) ...[
-            InfoBanner(title: SyncScreen.failureText(failure)),
-            const SizedBox(height: 24),
+            FullBleed(
+              child: InfoBanner(title: SyncScreen.failureText(failure)),
+            ),
+            const SizedBox(height: AppSpacing.md),
           ],
           if (link == null) ...[
             Text(S.syncIntro, style: muted),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.lg),
             AppTextField(
               label: S.syncPassword,
               controller: _password,
@@ -152,7 +154,7 @@ class _SyncScreenState extends State<SyncScreen> {
               validator: Validators.loginPassword,
               onSubmitted: (_) => _connect(),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.md),
             if (_editServer)
               AppTextField(
                 label: S.syncServer,
@@ -178,33 +180,37 @@ class _SyncScreenState extends State<SyncScreen> {
                 ],
               ),
           ] else ...[
-            InfoSection(
-              title: S.syncAccount,
-              body:
-                  '${context.watch<AuthRepository>().user?.email ?? link.email}'
-                  '\n${sync.serverUrl}',
-            ),
-            SectionDivider(vertical: 28),
-            Semantics(
-              liveRegion: true,
-              child: InfoSection(
-                title: S.syncLast,
-                body: SyncScreen.statusLabel(sync),
-              ),
-            ),
-            SectionDivider(vertical: 28),
+            // F9/F10: тікелей байланыс күйі жоғарыда, астында деректер тобы.
             const LiveStatusSection(),
-            SectionDivider(vertical: 28),
-            SettingsRow(
-              title: S.cloudTitle,
-              value: sync.serverUrl.authority,
-              onTap: () => context.push(Routes.cloudTopics),
+            const SizedBox(height: AppSpacing.md),
+            ListGroup(
+              children: [
+                GroupRow(
+                  title: S.syncAccount,
+                  subtitle:
+                      '${context.watch<AuthRepository>().user?.email ?? link.email}'
+                      ' · ${sync.serverUrl.authority}',
+                  trailing: null,
+                ),
+                Semantics(
+                  liveRegion: true,
+                  child: GroupRow(
+                    title: S.syncLast,
+                    subtitle: SyncScreen.statusLabel(sync),
+                    trailing: null,
+                  ),
+                ),
+                GroupRow(
+                  title: S.cloudTitle,
+                  onTap: () => context.push(Routes.cloudTopics),
+                ),
+              ],
             ),
           ],
         ],
         actions: link == null
             ? [
-                AppButton(
+                AppButton.accent(
                   label: S.syncConnect,
                   loading: _connecting,
                   onPressed: _connect,
@@ -276,22 +282,53 @@ class _LiveStatusSectionState extends State<LiveStatusSection> {
           LiveStatus.waiting => S.syncLiveWaiting(seconds),
           LiveStatus.off => S.syncAuto,
         };
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Semantics(
-              liveRegion: status != LiveStatus.waiting,
-              child: InfoSection(title: S.syncLiveTitle, body: body),
+        if (status == LiveStatus.waiting) {
+          return FullBleed(
+            child: InfoBanner(
+              title: S.syncLiveTitle,
+              body: body,
+              actionLabel: S.syncLiveRetry,
+              onAction: live.retryNow,
             ),
-            if (status == LiveStatus.waiting)
+          );
+        }
+        final p = context.palette;
+        return Semantics(
+          liveRegion: true,
+          container: true,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: AppButton.text(
-                  label: S.syncLiveRetry,
-                  onPressed: live.retryNow,
+                padding: const EdgeInsets.only(top: 5),
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: status == LiveStatus.live ? p.accent : p.tonal,
+                    border: Border.all(color: p.ink),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-          ],
+              const SizedBox(width: AppSpacing.smd),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 2,
+                  children: [
+                    Text(S.syncLiveTitle, style: context.text.titleSmall),
+                    Text(
+                      body,
+                      style: context.text.bodySmall!.copyWith(
+                        color: context.colors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intrvue/app/routes.dart';
 import 'package:intrvue/core/constants/app_strings.dart';
+import 'package:intrvue/core/widgets/widgets.dart';
+import 'package:intrvue/data/repositories/auth_repository.dart';
 import 'package:intrvue/data/local/app_database.dart';
 import 'package:intrvue/data/remote/dto.dart';
 import 'package:intrvue/data/remote/sync_api.dart';
@@ -104,8 +106,47 @@ void main() {
         await settle(tester);
         expect(find.text(text()), findsOneWidget);
         expect(find.text(S.cloudRefresh), findsOneWidget);
+        // Сұрау қай жерде үзілгені: телефон — желі — сервер.
+        expect(find.byType(RequestTrace), findsOneWidget);
+        expect(
+          find.textContaining(RegExp(r'^GET .+/v1/topics')),
+          findsOneWidget,
+        );
       });
     }
+
+    testWidgets('Аккаунтты жою: сервер жауап бермесе, аккаунт сақталады', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        location: Routes.deleteAccount,
+        prefs: linked,
+        syncApi: (_) => FakeSyncApi(failure: SyncFailure.offline),
+      );
+      await tester.enterText(
+        find.byType(TextFormField),
+        AppDatabase.demoPassword,
+      );
+      await tester.tap(find.text(S.deleteAccountAction));
+      for (
+        var i = 0;
+        i < 40 && find.text(S.deleteRemoteTitle).evaluate().isEmpty;
+        i++
+      ) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 100)),
+        );
+        await tester.pump();
+      }
+      expect(find.text(S.deleteRemoteTitle), findsOneWidget);
+      expect(find.byType(RequestTrace), findsOneWidget);
+      expect(find.text(S.retryDelete), findsOneWidget);
+      expect(find.text(S.deleteNothingRemoved), findsOneWidget);
+      // Аккаунт құрылғыда қалды, кіру экранына өткен жоқ.
+      expect(repo<AuthRepository>(tester).user, isNotNull);
+      expect(find.text(S.welcomeHero), findsNothing);
+    });
 
     testWidgets('PATCH: атау өзгерсе, тізім жаңарады', (tester) async {
       final api = FakeSyncApi()

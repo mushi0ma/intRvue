@@ -6,11 +6,12 @@ import 'package:provider/provider.dart';
 
 import '../core/constants/app_strings.dart';
 import '../core/theme/app_colors.dart';
+import '../core/theme/app_icons.dart';
 import '../core/theme/app_spacing.dart';
 import '../core/widgets/feedback.dart';
 import '../data/repositories/sync_repository.dart';
 
-/// Төрт негізгі бөлім: Басты бет, Тарих, Прогресс, Баптаулар.
+/// Төрт негізгі бөлім: Басты бет, Тақырыптар, Нәтижелер, Профиль.
 /// Тар экранда — NavigationBar, кең экранда (≥ 600) — NavigationRail.
 /// Басқа құрылғыдан деректер келсе — қысқа хабарлама.
 class AppShell extends StatefulWidget {
@@ -42,11 +43,11 @@ class _AppShellState extends State<AppShell> {
     super.dispose();
   }
 
-  static List<(IconData, IconData, String)> get _destinations => [
-    (Icons.grid_view_outlined, Icons.grid_view_rounded, S.navHome),
-    (Icons.schedule_outlined, Icons.watch_later, S.navHistory),
-    (Icons.bar_chart_outlined, Icons.bar_chart_rounded, S.navProgress),
-    (Icons.tune_outlined, Icons.tune_rounded, S.navSettings),
+  static List<(IconData, String)> get _destinations => [
+    (AppIcons.home, S.navHome),
+    (AppIcons.topics, S.navTopics),
+    (AppIcons.results, S.navResults),
+    (AppIcons.profile, S.navProfile),
   ];
 
   void _onSelect(int index) {
@@ -78,7 +79,7 @@ class _AppShellState extends State<AppShell> {
         body: Row(
           children: [
             ColoredBox(
-              color: context.palette.navigationBar,
+              color: context.palette.nav,
               child: SafeArea(
                 right: false,
                 child: NavigationRail(
@@ -86,10 +87,9 @@ class _AppShellState extends State<AppShell> {
                   onDestinationSelected: _onSelect,
                   groupAlignment: -0.6,
                   destinations: [
-                    for (final (icon, selected, label) in _destinations)
+                    for (final (icon, label) in _destinations)
                       NavigationRailDestination(
                         icon: Icon(icon),
-                        selectedIcon: Icon(selected),
                         label: Text(label),
                       ),
                   ],
@@ -104,17 +104,19 @@ class _AppShellState extends State<AppShell> {
 
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onSelect,
-        destinations: [
-          for (final (icon, selected, label) in _destinations)
-            NavigationDestination(
-              icon: Icon(icon),
-              selectedIcon: Icon(selected),
-              label: label,
-            ),
-        ],
+      // Жазулар 1,15 есеге дейін үлкейеді: 360 dp-та бір бөлімге 90 dp,
+      // үлкенірек масштабта «Тақырыптар» буынға бөлініп кетеді. Экран
+      // оқушыға толық мәтін беріледі, белгіше әр бөлімде бар.
+      bottomNavigationBar: MediaQuery.withClampedTextScaling(
+        maxScaleFactor: 1.15,
+        child: NavigationBar(
+          selectedIndex: navigationShell.currentIndex,
+          onDestinationSelected: _onSelect,
+          destinations: [
+            for (final (icon, label) in _destinations)
+              NavigationDestination(icon: Icon(icon), label: label),
+          ],
+        ),
       ),
     );
   }

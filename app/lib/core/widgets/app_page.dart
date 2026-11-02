@@ -16,12 +16,12 @@ class FullBleed extends StatelessWidget implements FullWidth {
   Widget build(BuildContext context) => child;
 }
 
-/// Барлық экранның ортақ қаңқасы (Figma: 412 × 892, шет 24).
+/// Барлық экранның ортақ қаңқасы (Figma v2: 412 × 892, шет 16).
 ///
 /// ```
-/// [Артқа]                [trailing]
-/// Тақырып 30/600
-/// Сипаттама 14/400
+/// [←]                    [trailing]
+/// Тақырып title-l 30/36
+/// Сипаттама body-s 14/20
 /// ...children (айналады)...
 /// [actions — төменге бекітілген]
 /// ```
@@ -39,9 +39,10 @@ class AppPage extends StatelessWidget {
     this.trailing,
     this.body = const [],
     this.actions = const [],
-    this.headerGap = AppSpacing.xl,
+    this.headerGap = 20,
     this.scrollController,
     this.bottomNavigation = false,
+    this.header,
   });
 
   final String? title;
@@ -70,14 +71,18 @@ class AppPage extends StatelessWidget {
   /// Экран NavigationBar ішінде тұр — төменгі жүйелік шетті ол алады.
   final bool bottomNavigation;
 
+  /// Тақырыптың үстіндегі блок (мысалы, сценарий қадамдары). Шет қосылмайды.
+  final Widget? header;
+
   @override
   Widget build(BuildContext context) {
     final hasTopBar = showBack || leading != null || trailing != null;
     const inset = EdgeInsets.symmetric(horizontal: AppSpacing.inset);
 
     final header = <Widget>[
+      ?this.header,
       if (title != null) ...[
-        SizedBox(height: hasTopBar ? AppSpacing.lg : 36),
+        SizedBox(height: hasTopBar ? AppSpacing.xs : AppSpacing.lg),
         Padding(
           padding: inset,
           child: Semantics(
@@ -90,7 +95,7 @@ class AppPage extends StatelessWidget {
         ),
       ],
       if (subtitle != null) ...[
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         Padding(
           padding: inset,
           child: Text(
@@ -192,14 +197,14 @@ class _ActionBar extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.inset,
-                AppSpacing.sm,
+                AppSpacing.smd,
                 AppSpacing.inset,
-                AppSpacing.xl,
+                AppSpacing.lg,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: AppSpacing.md,
+                spacing: AppSpacing.sm,
                 children: actions,
               ),
             ),

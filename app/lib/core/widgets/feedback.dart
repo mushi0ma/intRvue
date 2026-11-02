@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_strings.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_icons.dart';
 import '../theme/app_spacing.dart';
 
 /// Растау диалогы (Figma «Dialog / Confirm»). true — растады.
@@ -12,6 +13,7 @@ Future<bool> showConfirmDialog(
   required String confirmLabel,
   String? cancelLabel,
   bool destructive = false,
+  Widget? extra,
 }) async {
   final result = await showDialog<bool>(
     context: context,
@@ -19,11 +21,18 @@ Future<bool> showConfirmDialog(
       final colors = context.colors;
       return AlertDialog(
         title: Text(title),
-        content: Text(
-          body,
-          style: context.text.bodyLarge!.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              body,
+              style: context.text.bodyLarge!.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+            if (extra != null) ...[const SizedBox(height: 16), extra],
+          ],
         ),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
@@ -31,13 +40,18 @@ Future<bool> showConfirmDialog(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(cancelLabel ?? S.cancel),
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: destructive
-                ? TextButton.styleFrom(foregroundColor: colors.error)
-                : null,
-            child: Text(confirmLabel),
-          ),
+          // Қауіпті әрекет қызыл емес: сия батырма + белгіше (Figma K.dialog).
+          if (destructive)
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).pop(true),
+              icon: const Icon(AppIcons.delete),
+              label: Text(confirmLabel),
+            )
+          else
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(confirmLabel),
+            ),
         ],
       );
     },
@@ -75,7 +89,15 @@ class FilterDropdown<T> extends StatelessWidget {
     required this.onChanged,
     this.semanticLabel,
     this.expand = true,
+    this.icon,
+    this.highlighted = false,
   });
+
+  /// true — сүзгі қолданылып тұр: чип сиямен толтырылады (Figma C1).
+  final bool highlighted;
+
+  /// Мәннің алдындағы белгіше (мысалы, тіл таңдауында — глобус).
+  final IconData? icon;
 
   /// false — ені мәтінге қарай (Wrap ішінде): тар экранда қысқармайды.
   final bool expand;
@@ -88,6 +110,7 @@ class FilterDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final fg = highlighted ? colors.onPrimary : colors.onSurface;
     return PopupMenuButton<T>(
       tooltip: semanticLabel,
       initialValue: value,
@@ -100,27 +123,35 @@ class FilterDropdown<T> extends StatelessWidget {
             child: Text(labelOf(v), style: context.text.bodyLarge),
           ),
       ],
-      child: Container(
-        constraints: const BoxConstraints(minHeight: AppSpacing.touchTarget),
-        padding: const EdgeInsets.only(left: 12, right: 8),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          border: Border.all(color: colors.outline),
-          borderRadius: BorderRadius.circular(AppRadius.choice),
-        ),
-        child: Row(
-          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-          children: [
-            Flexible(
-              fit: expand ? FlexFit.tight : FlexFit.loose,
-              child: Text(
-                labelOf(value),
-                style: context.text.labelMedium,
-                overflow: TextOverflow.ellipsis,
+      // Figma чип-сүзгі: 40 dp, r10, сия жиек; сенсорлық аймақ 48.
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 40),
+          padding: const EdgeInsets.only(left: 12, right: 6),
+          decoration: BoxDecoration(
+            color: highlighted ? colors.primary : context.palette.surface,
+            border: Border.all(color: context.palette.ink),
+            borderRadius: BorderRadius.circular(AppRadius.chip),
+          ),
+          child: Row(
+            mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 18, color: fg),
+                const SizedBox(width: 6),
+              ],
+              Flexible(
+                fit: expand ? FlexFit.tight : FlexFit.loose,
+                child: Text(
+                  labelOf(value),
+                  style: context.text.labelMedium!.copyWith(color: fg),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-            Icon(Icons.arrow_drop_down, color: colors.onSurfaceVariant),
-          ],
+              Icon(AppIcons.dropdown, color: fg),
+            ],
+          ),
         ),
       ),
     );

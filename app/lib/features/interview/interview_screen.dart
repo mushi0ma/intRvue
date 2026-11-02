@@ -5,12 +5,15 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_icons.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
 import '../../data/models/interview_session.dart';
 import '../../data/repositories/session_repository.dart';
 import '../../data/repositories/topic_repository.dart';
+import 'practice_bar.dart';
 
 /// S09 Сұхбат: сұрақ, мәтіндік жауап, нобайды сақтау, жіберу/өткізу.
 class InterviewScreen extends StatefulWidget {
@@ -56,6 +59,41 @@ class _InterviewScreenState extends State<InterviewScreen> {
     context.go(Routes.home);
   }
 
+  /// D8: үзіліс парағы — жалғастыру, Басты бетке шығу, ерте аяқтау.
+  Future<void> _openPauseSheet() async {
+    context.read<SessionRepository>().saveDraft(_answer.text);
+    final choice = await showModalBottomSheet<_PauseChoice>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => const _PauseSheet(),
+    );
+    if (!mounted) return;
+    switch (choice) {
+      case _PauseChoice.home:
+        await _pause();
+      case _PauseChoice.finish:
+        await _finishEarly();
+      case _PauseChoice.resume || null:
+        break;
+    }
+  }
+
+  Future<void> _finishEarly() async {
+    final sessions = context.read<SessionRepository>()..saveDraft(_answer.text);
+    final id = sessions.active!.id;
+    setState(() => _leaving = true);
+    try {
+      await sessions.flushDraft();
+      await sessions.finishActive();
+    } on AppException catch (e) {
+      if (!mounted) return;
+      setState(() => _leaving = false);
+      showAppSnackBar(context, e.message);
+      return;
+    }
+    if (mounted) context.go(Routes.summary(id));
+  }
+
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     if (!_form.currentState!.validate()) return;
@@ -74,11 +112,34 @@ class _InterviewScreenState extends State<InterviewScreen> {
   }
 
   Future<void> _skip() async {
+    final index = context.read<SessionRepository>().active!.currentIndex;
     final confirmed = await showConfirmDialog(
       context,
       title: S.skipConfirmTitle,
       body: S.skipConfirmBody,
       confirmLabel: S.skip,
+      // D7: өткізілген сұрақтың баллы алдын ала көрінеді.
+      extra: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Text(
+            S.questionN(index + 1),
+            style: context.text.bodySmall!.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+          for (var i = 0; i < 3; i++)
+            const ScoreCell(
+              text: '—',
+              band: ScoreBand.skipped,
+              width: 32,
+              height: 28,
+            ),
+          Text(S.zeroPoints, style: context.text.bodySmall),
+        ],
+      ),
     );
     if (!confirmed || !mounted) return;
     final sessions = context.read<SessionRepository>();
@@ -121,6 +182,11 @@ class _InterviewScreenState extends State<InterviewScreen> {
     );
     final length = _answer.text.characters.length;
 
+    final p = context.palette;
+    final small = context.text.bodySmall!.copyWith(
+      color: colors.onSurfaceVariant,
+    );
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -129,33 +195,47 @@ class _InterviewScreenState extends State<InterviewScreen> {
       child: Form(
         key: _form,
         child: AppPage(
-          leading: AppBackLink(label: S.pause, onPressed: _pause),
-          trailing: Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Text(
-              S.progressOf(session.currentIndex + 1, session.questionCount),
-              style: context.text.bodyLarge!.copyWith(
-                fontWeight: FontWeight.w500,
-                color: colors.onSurfaceVariant,
-              ),
+          leading: PracticeBar(
+            icon: AppIcons.pause,
+            tooltip: S.pause,
+            onPressed: _submitting ? null : _openPauseSheet,
+            label: '${S.practiceLabel} · ${session.trackLabel}',
+            counter: '${session.currentIndex + 1} / ${session.questionCount}',
+            counterSemantics: S.progressOf(
+              session.currentIndex + 1,
+              session.questionCount,
             ),
           ),
           body: [
-            const SizedBox(height: 14),
+            const SizedBox(height: AppSpacing.sm),
             QuestionProgress(
               total: session.questionCount,
               done: session.currentIndex + 1,
             ),
-            const SizedBox(height: 34),
-            if (topic != null)
-              Text(
-                topic.title,
-                style: context.text.labelMedium!.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w600,
+            const SizedBox(height: AppSpacing.md),
+            FullBleed(
+              child: Container(
+                color: p.muted,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(AppIcons.code, size: 18),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        topic?.title ?? '',
+                        style: context.text.labelLarge,
+                      ),
+                    ),
+                    Text(S.questionN(session.currentIndex + 1), style: small),
+                  ],
                 ),
               ),
-            const SizedBox(height: 22),
+            ),
+            const SizedBox(height: AppSpacing.md),
             Semantics(
               header: true,
               child: Text(
@@ -163,19 +243,14 @@ class _InterviewScreenState extends State<InterviewScreen> {
                 style: context.text.headlineSmall,
               ),
             ),
-            const SizedBox(height: 14),
-            Text(
-              record.question.hint,
-              style: context.text.bodyMedium!.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 40),
+            const SizedBox(height: AppSpacing.sm),
+            Text(record.question.hint, style: small),
+            const SizedBox(height: AppSpacing.lg),
             AppTextField(
               label: S.yourAnswer,
               controller: _answer,
               hint: S.answerHint,
-              minLines: 10,
+              minLines: 8,
               maxLines: 14,
               maxLength: SessionRepository.maxAnswerLength,
               keyboardType: TextInputType.multiline,
@@ -188,47 +263,162 @@ class _InterviewScreenState extends State<InterviewScreen> {
                 setState(() {});
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
+            // Үлкен мәтінде екі жолға бөлінеді.
             Wrap(
               alignment: WrapAlignment.spaceBetween,
               runSpacing: 4,
               children: [
-                Text(
-                  length > 0 ? S.draftSaved : '',
-                  style: context.text.bodyMedium!.copyWith(
-                    color: colors.primary,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (length > 0) ...[
+                      Icon(AppIcons.check, size: 14, color: p.success),
+                      const SizedBox(width: 4),
+                      Text(
+                        S.draftSaved,
+                        style: small.copyWith(color: p.success),
+                      ),
+                    ],
+                  ],
                 ),
                 Text(
                   '$length / ${SessionRepository.maxAnswerLength}',
-                  style: context.text.bodyMedium!.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
+                  style: small,
                 ),
               ],
             ),
-            if (_submitting) ...[
-              const SizedBox(height: 16),
-              Semantics(
-                liveRegion: true,
-                child: Text(
-                  S.assessing,
-                  style: context.text.bodyMedium!.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
           ],
           actions: [
-            AppButton(
+            // D6: бағалау кезінде — үш өлшемнің жүктелу жолақтары.
+            if (_submitting) const _AssessingPanel(),
+            AppButton.accent(
               label: S.submitAnswer,
               loading: _submitting,
               onPressed: _submit,
             ),
-            AppButton.tonal(
+            AppButton.text(
               label: S.skipQuestion,
+              icon: AppIcons.skip,
               onPressed: _submitting ? null : _skip,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _PauseChoice { resume, home, finish }
+
+class _PauseSheet extends StatelessWidget {
+  const _PauseSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final secondary = context.colors.onSurfaceVariant;
+    Widget row(
+      IconData icon,
+      String title,
+      String? hint,
+      _PauseChoice choice, {
+      Widget? tag,
+    }) => ListTile(
+      leading: Icon(icon, size: 20),
+      title: Text(title),
+      subtitle: hint == null ? null : Text(hint),
+      trailing: tag ?? const Icon(AppIcons.chevronRight, size: 20),
+      onTap: () => Navigator.of(context).pop(choice),
+    );
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(S.pause, style: context.text.titleLarge),
+                ),
+                Text(
+                  S.pauseSheetBody,
+                  style: context.text.bodySmall!.copyWith(color: secondary),
+                ),
+              ],
+            ),
+          ),
+          row(AppIcons.play, S.continueAction, null, _PauseChoice.resume),
+          const Divider(),
+          row(AppIcons.home, S.pauseHome, S.pauseHomeHint, _PauseChoice.home),
+          const Divider(),
+          row(
+            AppIcons.flag,
+            S.pauseFinish,
+            S.pauseFinishHint,
+            _PauseChoice.finish,
+            tag: AppTag(S.statusIncomplete, kind: TagKind.warning),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+      ),
+    );
+  }
+}
+
+class _AssessingPanel extends StatelessWidget {
+  const _AssessingPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.palette;
+    final small = context.text.bodySmall!.copyWith(
+      color: context.colors.onSurfaceVariant,
+    );
+    return Semantics(
+      liveRegion: true,
+      label: S.assessing,
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.smd),
+        decoration: BoxDecoration(
+          color: p.tonal,
+          borderRadius: BorderRadius.circular(AppRadius.control),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: AppSpacing.sm,
+          children: [
+            Row(
+              children: [
+                const Icon(AppIcons.schedule, size: 18),
+                const SizedBox(width: AppSpacing.sm),
+                Text(S.assessing, style: context.text.labelLarge),
+              ],
+            ),
+            Row(
+              spacing: AppSpacing.sm,
+              children: [
+                for (final label in [S.correctness, S.completeness, S.clarity])
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                        Text(label, style: small, maxLines: 1),
+                        LinearProgressIndicator(
+                          minHeight: 3,
+                          color: p.ink,
+                          backgroundColor: p.lineStrong.withValues(alpha: 0.4),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
           ],
         ),

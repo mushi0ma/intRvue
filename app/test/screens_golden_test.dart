@@ -40,12 +40,12 @@ const _cases = [
   _Case('S04_forgot_password', '/forgot-password', loggedIn: false),
   _Case(
     'S04_reset_sent',
-    '/forgot-password/sent?email=aidana@example.com',
+    '/forgot-password/sent?email=aidana@example.com'
+        '&at=1792422960000', // 19.10.2026 20:16 (жергілікті уақыт)
     loggedIn: false,
   ),
   _Case('S05_profile_setup', '/profile-setup'),
   _Case('S06_home', '/home'),
-  _Case('S07_topic_selection', '/practice/topics'),
   _Case(
     'S08_session_setup',
     '/practice/setup?direction=mobile&topics=dart-basics,flutter-widgets',
@@ -62,7 +62,6 @@ const _cases = [
   _Case('S10_model_answer', '/sessions/s-1019/answers/1/model'),
   _Case('S10_dispute', '/sessions/s-1019/answers/1/dispute'),
   _Case('S14_progress', '/progress'),
-  _Case('S15_settings', '/settings'),
   _Case('S15_appearance', '/settings/appearance'),
   _Case('S15_reminders', '/settings/reminders'),
   _Case('S15_privacy', '/settings/privacy'),
@@ -71,7 +70,7 @@ const _cases = [
   _Case('S17_topic_detail', '/topics/flutter-widgets'),
   _Case('S18_search', '/search'),
   _Case('S19_favorites', '/favorites'),
-  _Case('S20_profile', '/profile'),
+  _Case('F1_profile', '/profile'),
   _Case('S22_edit_profile', '/profile/edit'),
   _Case('S23_favorites_empty', '/favorites', noFavorites: true),
   _Case('S25_topic_create', '/topics/new'),

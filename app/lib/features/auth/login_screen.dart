@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
@@ -70,71 +72,70 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final message = _failed
+        ? '${S.loginWrongCredentials} ${S.loginWrongWhy}'
+        : null;
     return Form(
       key: _form,
       autovalidateMode: _autovalidate,
       child: AutofillGroup(
         child: AppPage(
           showBack: true,
-          title: _failed ? S.loginErrorTitle : S.loginTitle,
-          subtitle: _failed ? S.loginErrorSubtitle : S.loginSubtitle,
-          headerGap: 44,
+          title: S.loginTitle,
+          subtitle: S.loginSubtitle,
           body: [
-            AppTextField(
-              label: S.fieldEmail,
-              controller: _email,
-              hint: 'name@example.com',
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.email],
-              validator: Validators.email,
-              onChanged: (_) => _clearFailure(),
+            // A7: қате кезде екі өріске бір ортақ белгі — қайсысы қате
+            // екені ашылмайды (Figma K.flagGroup).
+            FlagGroup(
+              message: message,
+              children: [
+                AppTextField(
+                  label: S.fieldEmail,
+                  controller: _email,
+                  hint: 'name@example.com',
+                  leadingIcon: AppIcons.mail,
+                  flagged: _failed,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.email],
+                  validator: Validators.email,
+                  onChanged: (_) => _clearFailure(),
+                ),
+                AppTextField(
+                  label: S.fieldPassword,
+                  controller: _password,
+                  obscure: true,
+                  leadingIcon: AppIcons.lock,
+                  flagged: _failed,
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.password],
+                  validator: Validators.loginPassword,
+                  onChanged: (_) => _clearFailure(),
+                  onSubmitted: (_) => _submit(),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            AppTextField(
-              label: S.fieldPassword,
-              controller: _password,
-              obscure: true,
-              textInputAction: TextInputAction.done,
-              autofillHints: const [AutofillHints.password],
-              validator: Validators.loginPassword,
-              errorText: _failed ? S.loginWrongCredentials : null,
-              onChanged: (_) => _clearFailure(),
-              onSubmitted: (_) => _submit(),
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             AppLink(
               label: _failed ? S.resetPasswordLink : S.forgotPassword,
               onPressed: () => context.push(Routes.forgotPassword),
             ),
-            const SizedBox(height: 24),
-            AppButton(
-              label: _failed ? S.loginRetry : S.loginAction,
-              loading: _loading,
-              onPressed: _submit,
-            ),
-            const SizedBox(height: 36),
-            const Divider(),
-            const SizedBox(height: 32),
-            Text(S.noAccount, style: context.text.bodyLarge),
-            const SizedBox(height: 16),
-            AppButton.tonal(
-              label: S.registerAction,
-              onPressed: () => context.pushReplacement(Routes.register),
-            ),
-            const SizedBox(height: 40),
-            Text(
-              S.dataPrivate,
-              style: context.text.bodyMedium!.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
+          ],
+          actions: [
             Text(
               S.demoHint,
               style: context.text.bodySmall!.copyWith(
                 color: colors.onSurfaceVariant,
               ),
+            ),
+            AppButton(
+              label: _failed ? S.loginRetry : S.loginAction,
+              loading: _loading,
+              onPressed: _submit,
+            ),
+            AppButton.tonal(
+              label: S.noAccountRegister,
+              onPressed: () => context.pushReplacement(Routes.register),
             ),
           ],
         ),

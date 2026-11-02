@@ -5,6 +5,7 @@ import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/repositories/session_repository.dart';
 import '../../data/repositories/topic_repository.dart';
@@ -30,39 +31,63 @@ class ModelAnswerScreen extends StatelessWidget {
     final topic = context.read<TopicRepository>().tryById(question.topicId);
     final colors = context.colors;
 
+    final p = context.palette;
     return AppPage(
       showBack: true,
-      title: S.modelAnswerTitle,
-      subtitle: topic?.title,
-      headerGap: 40,
-      body: [
-        Text(question.text, style: context.text.titleLarge),
-        const SizedBox(height: 16),
-        Text(
-          question.modelAnswer,
-          style: context.text.bodyLarge!.copyWith(
+      header: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+        child: Text(
+          [S.questionN(index + 1), ?topic?.title].join(' · '),
+          style: context.text.bodySmall!.copyWith(
             color: colors.onSurfaceVariant,
           ),
         ),
-        const SectionDivider(vertical: 28),
-        Text(S.keyConcepts, style: context.text.titleMedium),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final concept in question.concepts)
-              Chip(
-                label: Text(concept.label),
-                labelStyle: context.text.labelMedium,
-                backgroundColor: colors.secondaryContainer,
-                side: BorderSide.none,
-              ),
-          ],
+      ),
+      title: S.modelAnswerTitle,
+      body: [
+        Text(question.text, style: context.text.titleMedium),
+        const SizedBox(height: AppSpacing.smd),
+        CodeText(question.modelAnswer, style: context.text.bodyMedium),
+        const SizedBox(height: AppSpacing.lg),
+        // D11: негізгі ұғымдар — сұр жолақта, сия жиекті чиптер.
+        FullBleed(
+          child: Container(
+            color: p.muted,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(S.keyConcepts, style: context.text.labelLarge),
+                const SizedBox(height: AppSpacing.smd),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final concept in question.concepts)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: p.surface,
+                          border: Border.all(color: p.ink),
+                          borderRadius: BorderRadius.circular(AppRadius.chip),
+                        ),
+                        child: Text(
+                          concept.label,
+                          style: context.text.labelMedium,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ],
       actions: [
-        AppButton.tonal(
+        AppButton(
           label: S.backToFeedback,
           onPressed: () => context.popOr(Routes.history),
         ),

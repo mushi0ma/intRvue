@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/widgets.dart';
@@ -56,9 +57,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final ok = await showConfirmDialog(
       context,
       title: S.deleteSessionTitle,
-      body: '${Fmt.day(s.startedAt)} · ${s.trackLabel}\n${S.deleteSessionBody}',
+      body: S.irreversible,
       confirmLabel: S.delete,
       destructive: true,
+      // E3: нені жоятынымыз — нақты тізім.
+      extra: ConsequenceBox(
+        header: '${Fmt.day(s.startedAt)} · ${s.trackLabel}',
+        items: [
+          S.consequenceAnswers(s.answeredCount),
+          S.consequenceProgress,
+          S.consequenceAccount,
+        ],
+      ),
     );
     if (!ok || !mounted) return;
     try {
@@ -85,10 +95,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     return AppPage(
       bottomNavigation: true,
-      title: S.historyTitle,
-      subtitle: S.historySubtitle,
-      headerGap: 28,
       body: [
+        const SizedBox(height: AppSpacing.md),
         // Бір жолдағы көлденең айналатын сүзгілер (M3 filter chips үлгісі):
         // ені мәтінге қарай, 360dp экранда «Барлық сесс…» болып қысқармайды.
         FullBleed(
@@ -100,6 +108,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 FilterDropdown<Direction?>(
                   expand: false,
+                  highlighted: _direction != null,
                   value: _direction,
                   values: const [null, ...Direction.values],
                   labelOf: (d) => d?.label ?? S.allDirections,
@@ -108,6 +117,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
                 FilterDropdown<_StatusFilter>(
                   expand: false,
+                  highlighted: _status != _StatusFilter.all,
                   value: _status,
                   values: _StatusFilter.values,
                   labelOf: (f) => f.label,
@@ -131,15 +141,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.sm),
         if (sessions.isEmpty)
           EmptyState(title: S.historyEmptyTitle, body: S.historyEmptyBody)
         else ...[
-          for (final s in sessions) _SessionRow(session: s, onDelete: _delete),
-          const SizedBox(height: 20),
+          ListGroup(
+            children: [
+              for (final s in sessions)
+                _SessionRow(session: s, onDelete: _delete),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
           Text(
             S.historyHint,
-            style: context.text.bodyMedium!.copyWith(
+            style: context.text.bodySmall!.copyWith(
               color: colors.onSurfaceVariant,
             ),
           ),
@@ -157,45 +172,58 @@ class _SessionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final s = session;
     final complete = s.isComplete;
     final done = s.answeredCount + s.skippedCount;
-    final meta = complete
-        ? '${S.questionsCount(s.questionCount)} · ${S.statusComplete}'
-        : '$done / ${s.questionCount} · ${S.statusIncomplete}';
+    final secondary = context.colors.onSurfaceVariant;
 
-    return ListRow(
-      meta: Fmt.dayTime(s.startedAt),
+    return ItemRow(
+      overline: Fmt.dayTime(s.startedAt),
       title: s.trackLabel,
-      subtitle: meta,
-      subtitleColor: complete ? null : context.palette.onWarningContainer,
+      meta: complete
+          ? '${S.questionsCount(s.questionCount)} · ${S.statusComplete}'
+          : '$done / ${s.questionCount}',
+      metaTrailing: complete
+          ? null
+          : AppTag(S.statusIncomplete, kind: TagKind.warning),
       onTap: () => context.push(Routes.summary(s.id)),
-      trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+      trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            complete ? Fmt.score(s.score!) : '—',
-            semanticsLabel: complete ? null : S.scoreNotReady,
-            style: context.text.headlineSmall!.copyWith(
-              fontSize: 24,
-              color: colors.primary,
-            ),
-          ),
-          TextButton(
-            onPressed: () => onDelete(s),
-            style: TextButton.styleFrom(
-              foregroundColor: colors.error,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-            ),
-            child: Text(
-              S.delete,
-              style: context.text.labelMedium!.copyWith(
-                color: colors.error,
-                fontWeight: FontWeight.w600,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                complete ? Fmt.score(s.score!) : '—',
+                semanticsLabel: complete ? null : S.scoreNotReady,
+                style: context.text.headlineSmall,
               ),
-            ),
+              Text(
+                '/ 100',
+                style: context.text.bodySmall!.copyWith(color: secondary),
+              ),
+            ],
+          ),
+          // E1: жою ⋮ мәзірінде — тізімде қауіпті батырма көрінбейді.
+          // onSelected — мәзір жабылғаннан кейін: диалог бірге жабылмайды.
+          PopupMenuButton<bool>(
+            tooltip: S.sessionActions,
+            icon: const Icon(AppIcons.more, size: 20),
+            position: PopupMenuPosition.under,
+            onSelected: (_) => onDelete(s),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: true,
+                child: Row(
+                  children: [
+                    const Icon(AppIcons.delete, size: 20),
+                    const SizedBox(width: 12),
+                    Text(S.delete),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -219,51 +247,49 @@ class _PeriodButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final label = period == null ? S.periodAll : Fmt.period(period!);
-    return Material(
-      color: period == null ? colors.surface : colors.secondaryContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.choice),
-        side: BorderSide(
-          color: period == null ? colors.outline : colors.primary,
+    final p = context.palette;
+    final on = period != null;
+    final fg = on ? colors.onPrimary : colors.onSurface;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Material(
+        color: on ? colors.primary : p.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.chip),
+          side: BorderSide(color: p.ink),
         ),
-      ),
-      child: InkWell(
-        onTap: onPick,
-        borderRadius: BorderRadius.circular(AppRadius.choice),
-        child: Semantics(
-          button: true,
-          label: '${S.periodLabel}: $label',
-          excludeSemantics: true,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: AppSpacing.touchTarget,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(width: 12),
-                Icon(
-                  Icons.date_range,
-                  size: 18,
-                  color: colors.onSurfaceVariant,
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    label,
-                    style: context.text.labelMedium,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (period != null)
-                  IconButton(
-                    tooltip: S.periodClear,
-                    onPressed: onClear,
-                    icon: const Icon(Icons.close, size: 18),
-                  )
-                else
+        child: InkWell(
+          onTap: onPick,
+          borderRadius: BorderRadius.circular(AppRadius.chip),
+          child: Semantics(
+            button: true,
+            label: '${S.periodLabel}: $label',
+            excludeSemantics: true,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 40),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   const SizedBox(width: 12),
-              ],
+                  Icon(AppIcons.dateRange, size: 18, color: fg),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: context.text.labelMedium!.copyWith(color: fg),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (period != null)
+                    IconButton(
+                      tooltip: S.periodClear,
+                      onPressed: onClear,
+                      icon: Icon(AppIcons.close, size: 18, color: fg),
+                    )
+                  else
+                    const SizedBox(width: 12),
+                ],
+              ),
             ),
           ),
         ),

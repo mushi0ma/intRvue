@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
@@ -79,35 +80,48 @@ class _SearchScreenState extends State<SearchScreen> {
       color: colors.onSurfaceVariant,
     );
 
+    // C4/C5: «←» және іздеу өрісі бір жолда, нәтижелер карточкада.
     return AppPage(
-      showBack: true,
-      title: S.searchTitle,
-      subtitle: S.searchSubtitle,
-      headerGap: 30,
-      body: [
-        AppTextField(
-          label: S.searchLabel,
-          controller: _query,
-          hint: S.searchHint,
-          autofocus: true,
-          textInputAction: TextInputAction.search,
-          onChanged: _onChanged,
-          suffixIcon: _query.text.isEmpty
-              ? Icon(Icons.search, color: colors.onSurfaceVariant)
-              : IconButton(
-                  tooltip: S.clearSearch,
-                  onPressed: _clear,
-                  icon: const Icon(Icons.close),
+      bottomNavigation: true,
+      leading: Row(
+        children: [
+          const AppBackLink(),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: TextFormField(
+              controller: _query,
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              onChanged: _onChanged,
+              decoration: InputDecoration(
+                hintText: S.searchHint,
+                isDense: true,
+                prefixIcon: Icon(
+                  AppIcons.search,
+                  color: colors.onSurfaceVariant,
                 ),
-        ),
-        const SizedBox(height: 32),
+                suffixIcon: _query.text.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: S.clearSearch,
+                        onPressed: _clear,
+                        icon: const Icon(AppIcons.close),
+                      ),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+        ],
+      ),
+      body: [
+        const SizedBox(height: AppSpacing.smd),
         if (_error != null) ...[
-          Text(_error!, style: muted.copyWith(color: colors.error)),
+          ReviewNote(_error!),
           const SizedBox(height: 12),
           AppButton.tonal(label: S.retry, onPressed: _run),
         ] else if (query.isEmpty) ...[
           Text(S.popularTopics, style: context.text.titleMedium),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.smd),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -123,58 +137,96 @@ class _SearchScreenState extends State<SearchScreen> {
                 ActionChip(
                   label: Text(topic.title),
                   onPressed: () => context.push(Routes.topic(topic.id)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.chip),
-                  ),
-                  side: BorderSide(color: colors.outline),
-                  backgroundColor: colors.surface,
-                  labelStyle: context.text.labelMedium,
                 ),
             ],
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.lg),
           Text(S.searchAllDirections, style: muted),
         ] else if (results.isEmpty) ...[
+          const SizedBox(height: AppSpacing.xl),
+          Center(
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                border: Border.all(color: context.palette.ink),
+                borderRadius: BorderRadius.circular(AppRadius.control),
+              ),
+              child: const Icon(AppIcons.searchOff),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
           Semantics(
             liveRegion: true,
-            child: Text(S.notFoundTitle, style: context.text.titleLarge),
+            child: Text(
+              S.notFoundTitle,
+              style: context.text.titleLarge,
+              textAlign: TextAlign.center,
+            ),
           ),
-          const SizedBox(height: 12),
-          Text(S.notFoundBody, style: muted),
+          const SizedBox(height: AppSpacing.sm),
+          Text(S.notFoundBody, style: muted, textAlign: TextAlign.center),
+          const SizedBox(height: AppSpacing.lg),
+          AppButton(
+            label: S.addTopic,
+            icon: AppIcons.add,
+            onPressed: () => context.push(Routes.topicNew),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppButton.tonal(label: S.clearSearch, onPressed: _clear),
         ] else ...[
           Semantics(
             liveRegion: true,
             child: Text(
               S.found(results.length),
-              style: context.text.bodyMedium!.copyWith(
+              style: context.text.bodySmall!.copyWith(
                 color: colors.onSurfaceVariant,
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          for (final topic in results)
-            ListRow(
-              title: topic.title,
-              titleStyle: context.text.titleLarge,
-              subtitle: '${topic.trackLabel}\n${topic.summary}',
-              onTap: () => context.push(Routes.topic(topic.id)),
-            ),
+          const SizedBox(height: AppSpacing.sm),
+          ListGroup(
+            children: [
+              for (final topic in results)
+                ItemRow(
+                  overline: [
+                    topic.trackLabel,
+                    if (topic.isCustom) S.myTopic,
+                  ].join(' · '),
+                  title: topic.title,
+                  meta: topic.summary,
+                  onTap: () => context.push(Routes.topic(topic.id)),
+                  trailing: _Bookmark(topic: topic),
+                ),
+            ],
+          ),
         ],
       ],
-      actions: [
-        if (query.isNotEmpty)
-          AppButton.tonal(label: S.clearSearch, onPressed: _clear),
-        if (query.isEmpty || results.isEmpty)
-          AppButton(
-            variant: query.isEmpty
-                ? AppButtonVariant.tonal
-                : AppButtonVariant.filled,
-            label: S.toCatalog,
-            onPressed: () => context.canPop()
-                ? context.pop()
-                : context.pushReplacement(Routes.topics),
-          ),
-      ],
+    );
+  }
+}
+
+class _Bookmark extends StatelessWidget {
+  const _Bookmark({required this.topic});
+
+  final Topic topic;
+
+  @override
+  Widget build(BuildContext context) {
+    final repo = context.watch<TopicRepository>();
+    final on = repo.isFavorite(topic.id);
+    return IconButton(
+      tooltip: on ? S.removeFavorite : S.addFavorite,
+      isSelected: on,
+      onPressed: () async {
+        try {
+          await repo.toggleFavorite(topic.id);
+        } on AppException catch (e) {
+          if (context.mounted) showAppSnackBar(context, e.message);
+        }
+      },
+      icon: const Icon(AppIcons.bookmark),
+      selectedIcon: const Icon(AppIcons.bookmark, fill: 1),
     );
   }
 }

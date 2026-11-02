@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_icons.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/utils/validators.dart';
@@ -12,6 +14,7 @@ import '../../data/remote/dto.dart';
 import '../../data/remote/request_state.dart';
 import '../../data/remote/sync_api.dart';
 import '../../data/repositories/cloud_topics_repository.dart';
+import '../../data/repositories/sync_repository.dart';
 import 'sync_screen.dart';
 
 /// Сервердегі тақырыптар (практикалық №5): GET тізімі, POST, PATCH, DELETE.
@@ -82,15 +85,55 @@ class _CloudTopicsScreenState extends State<CloudTopicsScreen> {
       color: context.colors.onSurfaceVariant,
     );
 
+    final server = context.read<SyncRepository>().serverUrl;
+    final small = context.text.bodySmall!.copyWith(
+      color: context.colors.onSurfaceVariant,
+    );
+
     return AppPage(
       showBack: true,
       onBack: () => context.popOr(Routes.sync),
+      header: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+        child: Text('${S.serverLabel} · ${server.authority}', style: small),
+      ),
       title: S.cloudTitle,
       subtitle: S.cloudSubtitle,
       body: [
         if (state case RequestFailure(:final failure)) ...[
-          InfoBanner(title: _failureText(failure)),
-          const SizedBox(height: 24),
+          // F13/F14: сұрау қай жерде үзілгені + не сақталғаны.
+          if (const {
+            SyncFailure.offline,
+            SyncFailure.timeout,
+            SyncFailure.server,
+          }.contains(failure))
+            FullBleed(
+              child: ColoredBox(
+                color: context.palette.surface,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: AppSpacing.sm,
+                    children: [
+                      RequestTrace(
+                        request: 'GET ${server.authority}/v1/topics',
+                        reachedNetwork: failure != SyncFailure.offline,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _failureText(failure),
+                        style: context.text.titleSmall,
+                      ),
+                      Text(S.cloudKeptOnDevice, style: small),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            FullBleed(child: InfoBanner(title: _failureText(failure))),
+          const SizedBox(height: AppSpacing.md),
         ],
         if (data == null && (loading || state is RequestIdle))
           Semantics(
@@ -110,76 +153,91 @@ class _CloudTopicsScreenState extends State<CloudTopicsScreen> {
             ),
           ),
         if (data != null) ...[
-          InfoSection(
-            title: S.cloudAccount,
-            titleStyle: context.text.titleMedium,
-            body:
-                '${data.account.name} · ${data.account.email}\n'
-                '${S.cloudRegistered}: ${Fmt.day(data.account.createdAt.toLocal())}'
-                ' · ${S.cloudLoadedAt}: ${Fmt.time(data.loadedAt)}',
+          GroupHeader(
+            icon: AppIcons.cloud,
+            title: S.cloudOnServer,
+            meta: '${data.topics.length}',
           ),
-          const SizedBox(height: 32),
-          Text(
-            '${S.cloudOnServer} · ${data.topics.length}',
-            style: context.text.titleMedium,
-          ),
-          const SizedBox(height: 4),
           if (data.topics.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(S.cloudEmpty, style: muted),
-            ),
-          for (final t in data.topics)
-            ListRow(
-              meta: _relationLabel(cloud.relationOf(t)),
-              title: t.title,
-              subtitle:
-                  '${t.direction.label} · ${t.level.label} · '
-                  '${S.questionsCount(t.questions.length)}',
-              trailing: cloud.isBusy(t.id)
-                  ? const _Busy()
-                  : PopupMenuButton<_Action>(
-                      tooltip: S.cloudActions,
-                      onSelected: (a) => switch (a) {
-                        _Action.rename => _rename(t),
-                        _Action.delete => _delete(t),
-                      },
-                      itemBuilder: (_) => [
-                        PopupMenuItem(
-                          value: _Action.rename,
-                          child: Text(S.cloudRename),
-                        ),
-                        PopupMenuItem(
-                          value: _Action.delete,
-                          child: Text(S.cloudDelete),
-                        ),
-                      ],
+            )
+          else
+            ListGroup(
+              children: [
+                for (final t in data.topics)
+                  ItemRow(
+                    title: t.title,
+                    meta:
+                        '${t.direction.label} · ${t.level.label} · '
+                        '${S.questionsCount(t.questions.length)}',
+                    metaTrailing: AppTag(
+                      _relationLabel(cloud.relationOf(t)),
+                      kind: cloud.relationOf(t) == CloudRelation.synced
+                          ? TagKind.success
+                          : TagKind.neutral,
                     ),
+                    trailing: cloud.isBusy(t.id)
+                        ? const _Busy()
+                        : PopupMenuButton<_Action>(
+                            tooltip: S.cloudActions,
+                            onSelected: (a) => switch (a) {
+                              _Action.rename => _rename(t),
+                              _Action.delete => _delete(t),
+                            },
+                            itemBuilder: (_) => [
+                              PopupMenuItem(
+                                value: _Action.rename,
+                                child: Text(S.cloudRename),
+                              ),
+                              PopupMenuItem(
+                                value: _Action.delete,
+                                child: Text(S.cloudDelete),
+                              ),
+                            ],
+                          ),
+                  ),
+              ],
             ),
           if (cloud.deviceOnly case final local when local.isNotEmpty) ...[
-            const SizedBox(height: 32),
-            Text(
-              '${S.cloudDeviceOnly} · ${local.length}',
-              style: context.text.titleMedium,
+            GroupHeader(
+              icon: AppIcons.phone,
+              title: S.cloudDeviceOnly,
+              meta: '${local.length}',
             ),
-            const SizedBox(height: 4),
-            for (final t in local)
-              ListRow(
-                title: t.title,
-                subtitle: t.trackLabel,
-                trailing: cloud.isBusy(t.id)
-                    ? const _Busy()
-                    : TextButton(
-                        onPressed: () =>
-                            _run(cloud.upload(t.id), S.cloudUploaded),
-                        child: Text(S.cloudUpload),
-                      ),
-              ),
+            ListGroup(
+              children: [
+                for (final t in local)
+                  ItemRow(
+                    title: t.title,
+                    meta: t.trackLabel,
+                    trailing: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: cloud.isBusy(t.id)
+                          ? const _Busy()
+                          : OutlinedButton.icon(
+                              onPressed: () =>
+                                  _run(cloud.upload(t.id), S.cloudUploaded),
+                              icon: const Icon(AppIcons.upload, size: 18),
+                              label: Text(S.cloudUpload),
+                            ),
+                    ),
+                  ),
+              ],
+            ),
           ],
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            '${S.cloudAccount}: ${data.account.name} · ${data.account.email} · '
+            '${S.cloudRegistered} ${Fmt.day(data.account.createdAt.toLocal())}'
+            ' · ${S.cloudLoadedAt} ${Fmt.time(data.loadedAt)}',
+            style: small,
+          ),
         ],
       ],
       actions: [
-        AppButton(
+        AppButton.tonal(
           label: S.cloudRefresh,
           loading: loading,
           onPressed: cloud.linked ? cloud.load : null,

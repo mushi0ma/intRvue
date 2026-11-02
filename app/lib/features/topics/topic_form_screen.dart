@@ -4,8 +4,10 @@ import 'package:provider/provider.dart';
 
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
@@ -82,6 +84,22 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
 
   bool get _isEdit => _existing != null;
 
+  /// «Тексеру» ұяшығы: жарамды — ✓; сақтау басылғаннан кейін — «!».
+  bool? _ready(String? Function(String?) validator, String text) {
+    if (validator(text) == null) return true;
+    return _autovalidate == AutovalidateMode.disabled ? null : false;
+  }
+
+  bool? _questionsReady() {
+    final ok = _questions.every(
+      (q) =>
+          Validators.questionText(q.text.text) == null &&
+          Validators.modelAnswer(q.answer.text) == null,
+    );
+    if (ok) return true;
+    return _autovalidate == AutovalidateMode.disabled ? null : false;
+  }
+
   @override
   void dispose() {
     for (final c in [_title, _summary, _description, _points]) {
@@ -151,21 +169,29 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
   }
 
   Future<void> _delete() async {
+    final existing = _existing!;
     final ok = await showConfirmDialog(
       context,
       title: S.deleteTopicTitle,
-      body: S.deleteTopicBody,
+      body: S.irreversible,
       confirmLabel: S.delete,
       destructive: true,
+      // C10: тақырыппен бірге не жойылады.
+      extra: ConsequenceBox(
+        header: existing.title,
+        items: [
+          S.consequenceTopic(_repo.questionsFor(existing.id).length),
+          if (_repo.isFavorite(existing.id)) S.consequenceFavorite,
+          if (context.read<CloudTopicsRepository>().linked) S.consequenceServer,
+        ],
+      ),
     );
     if (!ok || !mounted) return;
     try {
-      await _repo.delete(_existing!.id);
+      await _repo.delete(existing.id);
       if (!mounted) return;
       final cloud = context.read<CloudTopicsRepository>();
-      final pushed = cloud.linked
-          ? await cloud.pushDeleted(_existing.id)
-          : null;
+      final pushed = cloud.linked ? await cloud.pushDeleted(existing.id) : null;
       if (!mounted) return;
       _dirty = false;
       showAppSnackBar(
@@ -225,12 +251,43 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
         key: _form,
         autovalidateMode: _autovalidate,
         onChanged: _markDirty,
+        // C8/C9: «×» және шағын атау жоғарғы жолда (толық экранды форма).
         child: AppPage(
-          showBack: true,
-          onBack: _leave,
-          title: _isEdit ? S.topicFormEdit : S.topicFormCreate,
-          subtitle: S.topicFormSubtitle,
+          leading: Row(
+            children: [
+              IconButton.outlined(
+                tooltip: S.cancel,
+                onPressed: _leave,
+                style: IconButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.control),
+                  ),
+                  side: BorderSide(color: context.palette.ink),
+                ),
+                icon: const Icon(AppIcons.close, size: 20),
+              ),
+              const SizedBox(width: AppSpacing.smd),
+              Flexible(
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    _isEdit ? S.topicFormEdit : S.topicFormCreate,
+                    style: context.text.labelLarge,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
           body: [
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              S.topicFormSubtitle,
+              style: context.text.bodyMedium!.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             AppTextField(
               label: S.fieldTopicTitle,
               controller: _title,
@@ -249,22 +306,22 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
               validator: Validators.summary,
             ),
             const SizedBox(height: 24),
-            AppDropdownField<Direction>(
+            ChoiceGroup<Direction>(
               label: S.fieldDirection,
-              value: _direction,
-              items: Direction.values,
-              itemLabel: (d) => d.label,
+              values: Direction.values,
+              selected: _direction,
+              labelOf: (d) => d.label,
               onChanged: (d) => setState(() {
                 _direction = d;
                 _dirty = true;
               }),
             ),
             const SizedBox(height: 24),
-            AppDropdownField<Level>(
+            ChoiceGroup<Level>(
               label: S.fieldLevel,
-              value: _level,
-              items: Level.values,
-              itemLabel: (l) => l.label,
+              values: Level.values,
+              selected: _level,
+              labelOf: (l) => l.label,
               onChanged: (l) => setState(() {
                 _level = l;
                 _dirty = true;
@@ -289,9 +346,11 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
               maxLength: 400,
               keyboardType: TextInputType.multiline,
             ),
-            const SectionDivider(vertical: 28),
-            Text(S.questionsSection, style: context.text.titleLarge),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.lg),
+            GroupHeader(
+              title: S.questionsSection,
+              meta: '${_questions.length}',
+            ),
             for (var i = 0; i < _questions.length; i++)
               _QuestionCard(
                 key: _questions[i].key,
@@ -299,9 +358,9 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
                 fields: _questions[i],
                 onRemove: () => _removeQuestion(_questions[i]),
               ),
-            AppButton.text(
+            AppButton.tonal(
               label: S.addQuestion,
-              icon: Icons.add,
+              icon: AppIcons.add,
               onPressed: _addQuestion,
             ),
             if (_isEdit) ...[
@@ -309,10 +368,9 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
               TextButton.icon(
                 onPressed: _saving ? null : _delete,
                 style: TextButton.styleFrom(
-                  foregroundColor: colors.error,
-                  minimumSize: const Size.fromHeight(56),
+                  minimumSize: const Size.fromHeight(48),
                 ),
-                icon: const Icon(Icons.delete_outline),
+                icon: const Icon(AppIcons.delete),
                 label: Text(S.deleteTopic),
               ),
               Text(
@@ -325,6 +383,27 @@ class _TopicFormScreenState extends State<TopicFormScreen> {
             ],
           ],
           actions: [
+            if (!_isEdit)
+              ListenableBuilder(
+                listenable: Listenable.merge([
+                  _title,
+                  _summary,
+                  for (final q in _questions) ...[q.text, q.answer],
+                ]),
+                builder: (context, _) => ReadinessRow(
+                  title: S.readinessTitle,
+                  items: [
+                    (
+                      S.fieldTopicTitle,
+                      _ready(Validators.topicTitle, _title.text),
+                    ),
+                    (S.readySummary, _ready(Validators.summary, _summary.text)),
+                    (S.fieldDirection, true),
+                    (S.fieldLevel, true),
+                    (S.questionsSection, _questionsReady()),
+                  ],
+                ),
+              ),
             AppButton(
               label: _isEdit ? S.saveChanges : S.addTopic,
               loading: _saving,
@@ -351,8 +430,15 @@ class _QuestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+    final p = context.palette;
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.smd),
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+      decoration: BoxDecoration(
+        color: p.surface,
+        borderRadius: BorderRadius.circular(AppRadius.control),
+        border: Border.all(color: p.lineStrong),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -361,13 +447,13 @@ class _QuestionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   S.questionN(index + 1),
-                  style: context.text.titleMedium,
+                  style: context.text.labelLarge,
                 ),
               ),
               IconButton(
                 tooltip: S.removeQuestion,
                 onPressed: onRemove,
-                icon: const Icon(Icons.close),
+                icon: const Icon(AppIcons.delete, size: 20),
               ),
             ],
           ),

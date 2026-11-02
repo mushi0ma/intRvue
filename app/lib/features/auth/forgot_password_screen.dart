@@ -5,6 +5,10 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_typography.dart';
+import '../../core/utils/formatters.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
@@ -54,6 +58,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         queryParameters: {
           'email': _email.text.trim(),
           'token': ?link?.queryParameters['token'],
+          'at': '${DateTime.now().millisecondsSinceEpoch}',
         },
       ).toString(),
     );
@@ -61,35 +66,31 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final muted = context.text.bodyLarge!.copyWith(
-      color: context.colors.onSurfaceVariant,
-    );
     return Form(
       key: _form,
       autovalidateMode: _autovalidate,
       child: AppPage(
         showBack: true,
         title: S.resetTitle,
+        subtitle: S.resetSubtitle,
+        header: _steps(0),
         body: [
-          const SizedBox(height: 4),
-          Text(S.resetSubtitle, style: muted),
-          const SizedBox(height: 40),
           AppTextField(
             label: S.fieldEmail,
             controller: _email,
             hint: 'name@example.com',
+            leadingIcon: AppIcons.mail,
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.send,
             autofillHints: const [AutofillHints.email],
             validator: Validators.email,
             onSubmitted: (_) => _submit(),
           ),
-          const SizedBox(height: 48),
-          AppButton(label: S.resetSend, loading: _loading, onPressed: _submit),
-          const SectionDivider(vertical: 42),
+          const SizedBox(height: AppSpacing.lg),
           InfoSection(title: S.resetNoEmailTitle, body: S.resetNoEmailBody),
         ],
         actions: [
+          AppButton(label: S.resetSend, loading: _loading, onPressed: _submit),
           AppLink(
             label: S.backToLogin,
             alignment: Alignment.center,
@@ -104,9 +105,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
 /// S04 күйі: «Хат жіберілді».
 class ResetSentScreen extends StatefulWidget {
-  const ResetSentScreen({super.key, required this.email, this.token});
+  const ResetSentScreen({
+    super.key,
+    required this.email,
+    this.token,
+    this.sentAt,
+  });
 
   final String email;
+
+  /// Хат сұралған сәт (маршрут `at`): мерзім шкаласы осыдан саналады.
+  final DateTime? sentAt;
 
   /// Пошта сервері жоқ: демо режимінде сілтеме экранда ашылады.
   final String? token;
@@ -117,6 +126,7 @@ class ResetSentScreen extends StatefulWidget {
 
 class _ResetSentScreenState extends State<ResetSentScreen> {
   late String? _token = widget.token;
+  late DateTime _sentAt = widget.sentAt ?? DateTime.now();
 
   Future<void> _resend() async {
     try {
@@ -124,7 +134,10 @@ class _ResetSentScreenState extends State<ResetSentScreen> {
         widget.email,
       );
       if (!mounted) return;
-      setState(() => _token = link?.queryParameters['token'] ?? _token);
+      setState(() {
+        _token = link?.queryParameters['token'] ?? _token;
+        _sentAt = DateTime.now();
+      });
       showAppSnackBar(context, S.resetResent);
     } on AppException catch (e) {
       if (mounted) showAppSnackBar(context, e.message);
@@ -135,39 +148,56 @@ class _ResetSentScreenState extends State<ResetSentScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final token = _token;
+    String at(DateTime t) => Fmt.timeOfDay(TimeOfDay.fromDateTime(t));
     return AppPage(
       showBack: true,
       title: S.resetSentTitle,
-      subtitle: widget.email,
+      subtitle: S.resetSentLead,
+      header: _steps(1),
       body: [
-        Text(
-          S.resetSentBody,
-          style: context.text.bodyLarge!.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
+        Row(
+          children: [
+            Icon(AppIcons.mail, size: 18, color: colors.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                widget.email,
+                style: AppTypography.code(colors.onSurface),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 32),
-        AppButton.tonal(label: S.resetResend, onPressed: _resend),
-        if (token != null) ...[
-          const SizedBox(height: 24),
-          InfoBanner(title: S.resetDemoTitle, body: S.resetDemoBody),
-          const SizedBox(height: 12),
-          AppLink(
-            label: S.resetDemoOpen,
-            onPressed: () => context.push(
+        const SizedBox(height: AppSpacing.md),
+        DeadlineTimeline(
+          points: [
+            (at(_sentAt), S.timelineSent),
+            (
+              at(_sentAt.add(AuthRepository.resetLinkLifetime)),
+              S.timelineExpires,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        if (token != null)
+          InfoBanner(
+            title: S.resetDemoTitle,
+            body: S.resetDemoBody,
+            actionLabel: S.resetDemoOpen,
+            onAction: () => context.push(
               Uri(
                 path: Routes.resetPassword,
                 queryParameters: {'token': token},
               ).toString(),
             ),
           ),
-        ],
-        const SizedBox(height: 40),
+        const SizedBox(height: AppSpacing.lg),
         InfoSection(title: S.resetNoEmailTitle, body: S.resetSentHint),
       ],
       actions: [
-        AppButton.tonal(
+        AppButton.tonal(label: S.resetResend, onPressed: _resend),
+        AppLink(
           label: S.backToLogin,
+          alignment: Alignment.center,
           onPressed: () => context.go(Routes.login),
         ),
       ],
@@ -231,7 +261,6 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return Form(
       key: _form,
       autovalidateMode: _autovalidate,
@@ -240,34 +269,54 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
         onBack: () => context.go(Routes.login),
         title: S.newPasswordTitle,
         subtitle: S.newPasswordSubtitle,
+        header: _steps(2),
         body: [
           if (_invalidLink) ...[
-            Semantics(
-              liveRegion: true,
-              child: Text(
-                S.resetLinkInvalid,
-                style: context.text.bodyLarge!.copyWith(color: colors.error),
-              ),
-            ),
+            Semantics(liveRegion: true, child: ReviewNote(S.resetLinkInvalid)),
             const SizedBox(height: 24),
           ],
           AppTextField(
             label: S.newPasswordField,
             controller: _password,
             obscure: true,
-            helper: S.passwordRule,
+            leadingIcon: AppIcons.lock,
             textInputAction: TextInputAction.next,
             autofillHints: const [AutofillHints.newPassword],
             validator: Validators.newPassword,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           AppTextField(
             label: S.repeatPasswordField,
             controller: _repeat,
             obscure: true,
+            leadingIcon: AppIcons.lock,
             textInputAction: TextInputAction.done,
             validator: Validators.confirmPassword(() => _password.text),
             onSubmitted: (_) => _save(),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          // Пароль талаптары — рубрика жолы: әр шарт өз ұяшығында.
+          ListenableBuilder(
+            listenable: Listenable.merge([_password, _repeat]),
+            builder: (context, _) {
+              final p = _password.text;
+              bool? cell(bool ok) => p.isEmpty ? null : ok;
+              return ReadinessRow(
+                title: S.passwordRules,
+                items: [
+                  (
+                    S.readyLength,
+                    cell(p.length >= Validators.minPasswordLength),
+                  ),
+                  (S.readyLetter, cell(Validators.hasLetter(p))),
+                  (S.readyDigit, cell(Validators.hasDigit(p))),
+                  (
+                    S.readyMatch,
+                    _repeat.text.isEmpty ? null : _repeat.text == p,
+                  ),
+                ],
+              );
+            },
           ),
         ],
         actions: [
@@ -282,3 +331,17 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
     );
   }
 }
+
+/// Қалпына келтіру сценарийінің үш қадамы.
+Widget _steps(int current) => Padding(
+  padding: const EdgeInsets.fromLTRB(
+    AppSpacing.inset,
+    AppSpacing.xs,
+    AppSpacing.inset,
+    AppSpacing.sm,
+  ),
+  child: StepProgress(
+    steps: [S.stepEmail, S.stepLetter, S.stepNewPassword],
+    current: current,
+  ),
+);

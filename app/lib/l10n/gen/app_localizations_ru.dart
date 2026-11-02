@@ -43,9 +43,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get toHome => 'На главную';
 
   @override
-  String get backToHome => 'Вернуться на главную';
-
-  @override
   String get outOf100 => '/ 100';
 
   @override
@@ -67,7 +64,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navProgress => 'Прогресс';
 
   @override
-  String get navSettings => 'Настройки';
+  String get navTopics => 'Темы';
+
+  @override
+  String get navResults => 'Результаты';
+
+  @override
+  String get navProfile => 'Профиль';
 
   @override
   String get splashTagline => 'Всё начинается с одного ответа.';
@@ -80,21 +83,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding1Body =>
-      'Отвечайте на вопрос своими словами.\nЧерновик всегда сохраняется на устройстве.';
+      'Отвечайте на вопрос своими словами. Черновик всегда сохраняется на устройстве.';
 
   @override
   String get onboarding2Title => 'Смотрите, за что\nпоставлена оценка';
 
   @override
   String get onboarding2Body =>
-      'ИИ оценивает правильность, полноту и ясность\nпо шкале 0–5 и показывает обоснование.';
+      'ИИ оценивает правильность, полноту и ясность по шкале 0–5 и показывает обоснование.';
 
   @override
   String get onboarding3Title => 'Повторяйте\nслабые темы';
 
   @override
   String get onboarding3Body =>
-      'По итогам предлагается не больше трёх\nслабых тем — шаг к следующей тренировке.';
+      'По итогам предлагается не больше трёх слабых тем — шаг к следующей тренировке.';
 
   @override
   String get onboardingYourAnswer => 'Ваш ответ';
@@ -103,14 +106,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingWeakTopics => 'Слабые темы';
 
   @override
-  String get onboardingPractice => 'Потренировать эту тему';
-
-  @override
   String get welcomeHero => 'Превратите\nзнания\nв ответы.';
 
   @override
   String get welcomeBody =>
-      'Тренируйтесь к IT-собеседованию текстом.\nЧётко видно, что вы знаете,\nа что стоит дополнить.';
+      'Тренируйтесь к IT-собеседованию текстом. Чётко видно, что вы знаете, а что стоит дополнить.';
 
   @override
   String get welcomeAssessmentTitle => 'Один ответ. Три критерия.';
@@ -191,12 +191,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get loginSubtitle => 'Продолжайте подготовку с того же места.';
 
   @override
-  String get loginErrorTitle => 'Не удалось войти';
-
-  @override
-  String get loginErrorSubtitle => 'Проверьте email и пароль.';
-
-  @override
   String get loginWrongCredentials => 'Неверный email или пароль.';
 
   @override
@@ -210,15 +204,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get loginRetry => 'Войти снова';
-
-  @override
-  String get noAccount => 'Ещё нет аккаунта?';
-
-  @override
-  String get registerAction => 'Зарегистрироваться';
-
-  @override
-  String get dataPrivate => 'Ваши данные доступны только вам.';
 
   @override
   String get demoHint => 'Демо: aidana@example.com · intrvue2026';
@@ -242,7 +227,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get aiConsentLater =>
-      'Согласие на оценку ответов\nзапрашивается перед первой тренировкой.';
+      'Согласие на оценку ответов запрашивается перед первой тренировкой.';
 
   @override
   String get createAccount => 'Создать аккаунт';
@@ -251,11 +236,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get emailTaken => 'Этот email уже зарегистрирован. Попробуйте войти.';
 
   @override
-  String get resetTitle => 'Восстановление\nвхода';
+  String get resetTitle => 'Восстановление входа';
 
   @override
   String get resetSubtitle =>
-      'Отправим на email одноразовую ссылку.\nОна действует 15 минут.';
+      'Отправим на email одноразовую ссылку. Она действует 15 минут.';
 
   @override
   String get resetSend => 'Отправить ссылку';
@@ -265,17 +250,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resetNoEmailBody =>
-      'Проверьте папку «Спам».\nМожно исправить email\nи запросить снова.';
+      'Проверьте папку «Спам». Можно исправить email и запросить снова.';
 
   @override
   String get backToLogin => 'Вернуться ко входу';
 
   @override
   String get resetSentTitle => 'Письмо отправлено';
-
-  @override
-  String get resetSentBody =>
-      'Откройте ссылку в течение 15 минут.\nЕё можно использовать только один раз.';
 
   @override
   String get resetResend => 'Запросить письмо снова';
@@ -320,7 +301,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resetSentHint =>
-      'Проверьте папку «Спам».\nПосле перехода по ссылке\nвы зададите новый пароль.';
+      'Проверьте папку «Спам». После перехода по ссылке вы зададите новый пароль.';
 
   @override
   String get setupTitle => 'Тренировка под вас';
@@ -332,40 +313,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get setupSave => 'Сохранить и продолжить';
 
   @override
-  String get homeSubtitle => 'Сегодня — ещё один шаг вперёд.';
-
-  @override
-  String get homeResumeTitle => 'Продолжим\nтренировку';
-
-  @override
-  String get homeStartTitle => 'Начнём новую\nтренировку';
+  String get homeStartTitle => 'Начнём новую тренировку';
 
   @override
   String get homeStartBody =>
-      'Выберите направление и темы,\nначните с 5 вопросов.';
+      'Выберите направление и темы, начните с 5 вопросов.';
 
   @override
   String get homeStartAction => 'Новая тренировка';
-
-  @override
-  String get homeNextTitle => 'Следующая тренировка';
-
-  @override
-  String get homeNextBody =>
-      'Flutter, Dart или новая тема.\nСначала завершите активную сессию.';
-
-  @override
-  String get homeNextBodyFree =>
-      'Откройте тему из каталога и начните тренировку.';
 
   @override
   String get homeCatalog => 'Каталог тем';
 
   @override
   String get homeLastResult => 'Последний результат';
-
-  @override
-  String get homeNoResult => 'Завершённых сессий пока нет.';
 
   @override
   String get openProfile => 'Открыть профиль';
@@ -377,52 +338,36 @@ class AppLocalizationsRu extends AppLocalizations {
   String get topicsPickSubtitle => 'Выберите хотя бы одну тему.';
 
   @override
-  String get pickTopicFirst => 'Выберите тему';
-
-  @override
-  String get paramsTitle => 'Параметры тренировки';
-
-  @override
-  String get paramsLanguage => 'Язык интервью и обратной связи';
-
-  @override
   String get paramsCount => 'Количество вопросов';
-
-  @override
-  String get paramsPaceTitle => 'Удобный для вас темп';
-
-  @override
-  String get paramsPaceBody =>
-      'Без ограничения времени. Сессию можно\nпоставить на паузу и продолжить позже.\nЧерновик ответа хранится на устройстве.';
 
   @override
   String get paramsStart => 'Начать тренировку';
 
   @override
-  String get consentTitle => 'Согласие на оценку\nответа';
+  String get consentTitle => 'Согласие на оценку ответа';
 
   @override
   String get consentWhatTitle => 'Что используется для оценки?';
 
   @override
   String get consentWhatBody =>
-      'Вопрос, ваш ответ и параметры\nтренировки. Сейчас оценка — демо\nна устройстве: ответ никуда не отправляется.';
+      'Вопрос, ваш ответ и параметры тренировки. Сейчас оценка — демо на устройстве: ответ никуда не отправляется.';
 
   @override
   String get consentAdviceTitle => 'Оценка — учебная рекомендация';
 
   @override
   String get consentAdviceBody =>
-      'ИИ может ошибаться. Если оценка непонятна,\nоставьте отзыв.\nБез согласия сессия не начнётся.';
+      'ИИ может ошибаться. Если оценка непонятна, оставьте отзыв. Без согласия сессия не начнётся.';
 
   @override
   String get consentAccept => 'Согласен, начать';
 
   @override
-  String get preparingTitle => 'Готовим\nвопросы';
+  String get preparingTitle => 'Готовим вопросы';
 
   @override
-  String get preparingBody => 'Подбираем вопросы\nиз выбранных тем.';
+  String get preparingBody => 'Подбираем вопросы из выбранных тем.';
 
   @override
   String get preparingMotto => 'Один вопрос — один шаг.';
@@ -442,18 +387,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get preparingHint =>
-      'Вопросы берутся из каталога\nна устройстве — интернет не нужен.';
+      'Вопросы берутся из каталога на устройстве — интернет не нужен.';
 
   @override
-  String get activeTitle => 'Есть незавершённая\nсессия';
+  String get activeTitle => 'Есть незавершённая сессия';
 
   @override
   String get activeBody =>
-      'Можно продолжить её\nили завершить досрочно\nи начать новую тренировку.';
+      'Можно продолжить её или завершить досрочно и начать новую тренировку.';
 
   @override
   String get activeWarning =>
-      'Досрочно завершённая сессия сохранится\nкак «Неполная» и не войдёт\nв средний балл.';
+      'Досрочно завершённая сессия сохранится как «Неполная» и не войдёт в средний балл.';
 
   @override
   String get activeResume => 'Продолжить сессию';
@@ -484,7 +429,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get skipConfirmBody =>
-      'За пропущенный вопрос ставится 0 баллов.\nВернуться к нему будет нельзя.';
+      'За пропущенный вопрос ставится 0 баллов. Вернуться к нему будет нельзя.';
 
   @override
   String get assessing => 'Ответ оценивается…';
@@ -545,7 +490,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get disputeNote =>
-      'Отзыв привязывается к этому вопросу\nи версии оценки. Исходный балл\nавтоматически не меняется.';
+      'Отзыв привязывается к этому вопросу и версии оценки. Исходный балл автоматически не меняется.';
 
   @override
   String get disputeSend => 'Отправить отзыв';
@@ -591,7 +536,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get incompleteBody =>
-      'Когда придут все оценки,\nрезультат пересчитается. Пока эта\nсессия не входит в средний балл.\nЗа пропущенный вопрос ставится 0 баллов.';
+      'Когда придут все оценки, результат пересчитается. Пока эта сессия не входит в средний балл. За пропущенный вопрос ставится 0 баллов.';
 
   @override
   String get toHistory => 'Перейти в историю';
@@ -613,7 +558,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get recommendLimit =>
-      'Одновременно предлагается не больше\n3 слабых тем. Темп выбираете вы.';
+      'Одновременно предлагается не больше 3 слабых тем. Темп выбираете вы.';
 
   @override
   String get otherWeakTopics => 'Другие слабые темы';
@@ -621,12 +566,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get noRecommendations =>
       'Недостаточно оценённых ответов для рекомендации.';
-
-  @override
-  String get historyTitle => 'История тренировок';
-
-  @override
-  String get historySubtitle => 'Пересматривайте сохранённые сессии.';
 
   @override
   String get allDirections => 'Все направления';
@@ -666,10 +605,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deleteSessionTitle => 'Удалить сессию?';
 
   @override
-  String get deleteSessionBody =>
-      'Ответы будут удалены, прогресс\nпересчитается. Аккаунт сохранится.';
-
-  @override
   String get sessionDeleted => 'Сессия удалена.';
 
   @override
@@ -694,20 +629,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get yourAnswerSaved => 'Ваш ответ';
 
   @override
-  String get progressTitle => 'Ваш прогресс';
-
-  @override
-  String get progressSubtitle =>
-      'Сравниваются только одно направление и уровень.';
-
-  @override
-  String get scoreAxis => 'Балл / 100';
-
-  @override
-  String get incompleteExcluded =>
-      'Неполные сессии не входят в динамику\nи средний балл.';
-
-  @override
   String get sampleData => 'Показанные значения — демонстрационные данные.';
 
   @override
@@ -715,23 +636,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get progressEmptyBody =>
-      'Завершите одну тренировку.\nЗдесь появится динамика баллов\nпо этому направлению и уровню.';
-
-  @override
-  String get progressEmptyHint =>
-      'Начните подготовку с 5 вопросов.\nБез ограничения времени.';
+      'Завершите одну тренировку. Здесь появится динамика баллов по этому направлению и уровню.';
 
   @override
   String get progressEmptyAction => 'Начать первую тренировку';
-
-  @override
-  String get settingsTitle => 'Настройки';
-
-  @override
-  String get settingsSubtitle => 'Настройте подготовку под себя.';
-
-  @override
-  String get profileLink => 'Профиль';
 
   @override
   String get interfaceLanguage => 'Язык интерфейса';
@@ -771,7 +679,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get logoutBody =>
-      'История сохранится в аккаунте.\nЧтобы продолжить подготовку,\nнужно будет войти снова.';
+      'История сохранится в аккаунте. Чтобы продолжить подготовку, нужно будет войти снова.';
 
   @override
   String get logoutAction => 'Выйти';
@@ -784,7 +692,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get appearanceNote =>
-      'Тема сразу применяется ко всем экранам.\nЯзык прошлых интервью не меняется.';
+      'Тема сразу применяется ко всем экранам. Язык прошлых интервью не меняется.';
 
   @override
   String get systemColors => 'Системные цвета';
@@ -892,21 +800,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get privacyAiBody =>
-      'Вопрос, ваш ответ и параметры\nтренировки. Сейчас оценка — демо\nна устройстве: ответ никуда не отправляется.';
+      'Вопрос, ваш ответ и параметры тренировки. Сейчас оценка — демо на устройстве: ответ никуда не отправляется.';
 
   @override
   String get privacyStoredTitle => 'Что хранится';
 
   @override
   String get privacyStoredBody =>
-      'Ответы, черновики, оценки и прогресс\nхранятся на устройстве; при включённой\nсинхронизации — и на сервере.';
+      'Ответы, черновики, оценки и прогресс хранятся на устройстве; при включённой синхронизации — и на сервере.';
 
   @override
   String get privacyManageTitle => 'Управление данными';
 
   @override
   String get privacyManageBody =>
-      'Сессию можно удалить в истории,\nаккаунт — в настройках.';
+      'Сессию можно удалить в истории, аккаунт — в настройках.';
 
   @override
   String get deleteAccountTitle => 'Удалить аккаунт?';
@@ -916,14 +824,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get deleteAccountBody =>
-      'Сессии, темы и прогресс\nудаляются с устройства сразу.\nЕсли включена синхронизация —\nи с сервера.';
+      'Сессии, темы и прогресс удаляются с устройства сразу. Если включена синхронизация — и с сервера.';
 
   @override
   String get deleteAccountPassword => 'Пароль для подтверждения';
 
   @override
   String get deleteAccountNote =>
-      'Если пароль неверный,\nаккаунт не будет удалён.';
+      'Если пароль неверный, аккаунт не будет удалён.';
 
   @override
   String get deleteAccountAction => 'Удалить аккаунт навсегда';
@@ -968,15 +876,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get open => 'Открыть';
 
   @override
-  String get searchTitle => 'Поиск темы';
-
-  @override
-  String get searchSubtitle => 'Введите направление или название темы.';
-
-  @override
-  String get searchLabel => 'Поиск';
-
-  @override
   String get searchHint => 'Название темы';
 
   @override
@@ -984,7 +883,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get searchAllDirections =>
-      'Можно искать по направлениям\nFrontend · Backend · Mobile · QA.';
+      'Можно искать по направлениям Frontend · Backend · Mobile · QA.';
 
   @override
   String get clearSearch => 'Очистить поиск';
@@ -997,7 +896,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notFoundBody =>
-      'Попробуйте сократить название\nили откройте каталог направлений.\nПоиск не меняет другие данные.';
+      'Попробуйте сократить название или откройте каталог направлений. Поиск не меняет другие данные.';
 
   @override
   String get favoritesTitle => 'Избранное';
@@ -1016,32 +915,20 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get favoritesNote =>
-      'Откройте тему и начните новую\nтренировку. Удаление из списка\nне стирает прежние результаты.';
-
-  @override
-  String get toProfile => 'Перейти в профиль';
+      'Откройте тему и начните новую тренировку. Удаление из списка не стирает прежние результаты.';
 
   @override
   String get favoritesEmptyTitle => 'Сохранённых тем пока нет';
 
   @override
   String get favoritesEmptyBody =>
-      'Откройте тему в каталоге\nи нажмите «В избранное».';
-
-  @override
-  String get profileTitle => 'Мой профиль';
-
-  @override
-  String get profileSubtitle => 'Параметры подготовки';
+      'Откройте тему в каталоге и нажмите «В избранное».';
 
   @override
   String get editProfile => 'Изменить профиль';
 
   @override
   String get favoriteTopics => 'Избранные темы';
-
-  @override
-  String get toSettings => 'Перейти в настройки';
 
   @override
   String get editProfileSubtitle => 'Параметры по умолчанию для новых сессий';
@@ -1320,7 +1207,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get privacySyncBody =>
-      'Только если вы её включили: данные\nотправляются на сервер intRvue. Пароль\nи там, и на устройстве хранится\nкак хэш PBKDF2.';
+      'Только если вы её включили: данные отправляются на сервер intRvue. Пароль и там, и на устройстве хранится как хэш PBKDF2.';
 
   @override
   String get syncErrTimeout =>
@@ -1436,6 +1323,281 @@ class AppLocalizationsRu extends AppLocalizations {
   String get syncLiveRetry => 'Подключиться сейчас';
 
   @override
+  String get resultsTitle => 'Результаты';
+
+  @override
+  String get profileGroupPractice => 'Подготовка';
+
+  @override
+  String get profileGroupMore => 'Дополнительно';
+
+  @override
+  String get deleteAccountRowHint => 'Сессии и прогресс будут удалены';
+
+  @override
+  String get loginWrongWhy =>
+      'Что именно неверно, не сообщаем ради безопасности — проверьте оба поля.';
+
+  @override
+  String get noAccountRegister => 'Ещё нет аккаунта? Регистрация';
+
+  @override
+  String get readinessTitle => 'Проверка';
+
+  @override
+  String get readyName => 'Имя';
+
+  @override
+  String get readyEmail => 'Email';
+
+  @override
+  String get readyPassword => 'Пароль';
+
+  @override
+  String get readyConsent => 'Согласие';
+
+  @override
+  String get readyLength => '8+ символов';
+
+  @override
+  String get readyLetter => 'Буква';
+
+  @override
+  String get readyDigit => 'Цифра';
+
+  @override
+  String get readyMatch => 'Совпадают';
+
+  @override
+  String get passwordRules => 'Требования к паролю';
+
+  @override
+  String get stepEmail => 'Email';
+
+  @override
+  String get stepLetter => 'Письмо';
+
+  @override
+  String get stepNewPassword => 'Новый пароль';
+
+  @override
+  String get resetSentLead =>
+      'Ссылка одноразовая: откройте её и задайте новый пароль.';
+
+  @override
+  String get timelineSent => 'Письмо отправлено';
+
+  @override
+  String get timelineExpires => 'Ссылка истечёт';
+
+  @override
+  String get correctnessHint => 'Верен ли смысл';
+
+  @override
+  String get completenessHint => 'Раскрыты ли ключевые понятия';
+
+  @override
+  String get clarityHint => 'Понятно ли изложено';
+
+  @override
+  String get demoTag => 'демо';
+
+  @override
+  String get demoAssessmentNote =>
+      'Пример оценки: рекомендация для обучения, а не решение о найме.';
+
+  @override
+  String get setupStep => 'Профиль · шаг 1';
+
+  @override
+  String get homeActiveSession => 'Активная сессия';
+
+  @override
+  String get homeDeltaPrev => 'к прошлой сессии';
+
+  @override
+  String get homeLastSession => 'последняя сессия';
+
+  @override
+  String get rubricQuestion => 'Вопрос';
+
+  @override
+  String get rubricLegend => '0–5 баллов · 4–5 хорошо · 3 средне · 0–2 слабо';
+
+  @override
+  String get homeAnswers => 'Ответы';
+
+  @override
+  String get homeNextStep => 'Следующий шаг';
+
+  @override
+  String get homeFirstLabel => 'Первая тренировка';
+
+  @override
+  String get homeHowAssessed => 'Как оценивается ответ';
+
+  @override
+  String get homeComplete => 'полная';
+
+  @override
+  String get lastScoreOn => 'Последний балл';
+
+  @override
+  String get weakTopicTag => 'слабая тема';
+
+  @override
+  String get hasModelAnswer => 'Есть образцовый ответ';
+
+  @override
+  String get readySummary => 'Описание';
+
+  @override
+  String get fieldTopics => 'Темы';
+
+  @override
+  String get consentCheck => 'Согласен(на) на оценку ответов';
+
+  @override
+  String get consentCheckHint =>
+      'Демо-оценка проходит на устройстве. Имя, email и пароль не передаются.';
+
+  @override
+  String get consentRequired => 'Чтобы начать, отметьте согласие.';
+
+  @override
+  String get paramsFooter =>
+      'Без ограничения времени · черновик хранится на устройстве';
+
+  @override
+  String get paramsLanguageShort => 'Язык';
+
+  @override
+  String get practiceLabel => 'Тренировка';
+
+  @override
+  String get pauseSheetBody => 'Черновик сохранён. Продолжите с того же места.';
+
+  @override
+  String get pauseHome => 'Выйти на главную';
+
+  @override
+  String get pauseHomeHint => 'Сессия останется активной';
+
+  @override
+  String get pauseFinish => 'Завершить досрочно';
+
+  @override
+  String get pauseFinishHint => 'Не войдёт в средний балл';
+
+  @override
+  String get feedbackLabel => 'Разбор ответа';
+
+  @override
+  String get zeroPoints => '= 0 баллов';
+
+  @override
+  String get weakAnswerTitle => 'Слабый ответ';
+
+  @override
+  String get disagreeShort => 'Не согласен';
+
+  @override
+  String get sessionActions => 'Действия';
+
+  @override
+  String get consequenceProgress => 'Прогресс будет пересчитан';
+
+  @override
+  String get consequenceAccount => 'Аккаунт сохранится';
+
+  @override
+  String get consequenceFavorite => 'Запись в избранном';
+
+  @override
+  String get consequenceServer => 'Копия на сервере · синхронизация включена';
+
+  @override
+  String get irreversible => 'Это действие нельзя отменить.';
+
+  @override
+  String get progressAverageLast => 'среднее · последние';
+
+  @override
+  String get progressWeakTitle => 'Слабые темы';
+
+  @override
+  String get progressLegendTail =>
+      'полные сессии. Неполные в динамику не входят.';
+
+  @override
+  String get pointsWord => 'баллов';
+
+  @override
+  String get disputedMark => 'отзыв отправлен';
+
+  @override
+  String get colCorrect => 'Прав.';
+
+  @override
+  String get colComplete => 'Полн.';
+
+  @override
+  String get colClarity => 'Ясн.';
+
+  @override
+  String get colTotal => 'Итого';
+
+  @override
+  String get tableLegend => '… — ждёт оценки · — — пропущен (0 баллов)';
+
+  @override
+  String get delSessions => 'Сессии и ответы';
+
+  @override
+  String get delProgress => 'Прогресс и оценки';
+
+  @override
+  String get delTopics => 'Ваши темы';
+
+  @override
+  String get delLogin => 'Вход: email и пароль';
+
+  @override
+  String get traceDevice => 'Телефон';
+
+  @override
+  String get traceNetwork => 'Сеть';
+
+  @override
+  String get traceServer => 'Сервер';
+
+  @override
+  String get traceNoResponse => 'нет ответа';
+
+  @override
+  String get cloudKeptOnDevice =>
+      'Данные на устройстве сохранены. Проверьте сеть и повторите.';
+
+  @override
+  String get serverLabel => 'Сервер';
+
+  @override
+  String get deleteRemoteBody =>
+      'Проверьте сеть. Чтобы удалить только с устройства, сначала отключите синхронизацию.';
+
+  @override
+  String get openSync => 'Открыть синхронизацию';
+
+  @override
+  String get retryDelete => 'Повторить удаление';
+
+  @override
+  String get deleteRemoteTitle => 'Копия на сервере не удалена';
+
+  @override
+  String get deleteNothingRemoved => 'Ничего не удалено: сервер не ответил.';
+
+  @override
   String get levelBeginner => 'Начальный';
 
   @override
@@ -1547,6 +1709,47 @@ class AppLocalizationsRu extends AppLocalizations {
   String get weekdayFull7 => 'Воскресенье';
 
   @override
+  String consequenceAnswers(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n ответа и их оценки',
+      many: '$n ответов и их оценки',
+      few: '$n ответа и их оценки',
+      one: '$n ответ и его оценка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String consequenceTopic(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Тема и её $n вопроса',
+      many: 'Тема и её $n вопросов',
+      few: 'Тема и её $n вопроса',
+      one: 'Тема и её $n вопрос',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String weakAnswerBody(String topic) {
+    return 'Тему «$topic» стоит повторить после итогов.';
+  }
+
+  @override
+  String topicsSelected(int n) {
+    return 'выбрано: $n';
+  }
+
+  @override
+  String homeWeakest(String topic) {
+    return '$topic — самая слабая тема.';
+  }
+
+  @override
   String fieldRequired(String field) {
     return 'Заполните поле «$field».';
   }
@@ -1559,24 +1762,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String greeting(String name) {
     return 'Привет, $name!';
-  }
-
-  @override
-  String directionTopics(String direction) {
-    return 'Темы $direction';
-  }
-
-  @override
-  String continueWithTopics(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: 'Продолжить · $n темы',
-      many: 'Продолжить · $n тем',
-      few: 'Продолжить · $n темы',
-      one: 'Продолжить · $n тема',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -1648,11 +1833,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String savedAnswerHeader(int n, int total) {
-    return '$n / $total · Сохранённый ответ';
-  }
-
-  @override
   String lastSessions(int n) {
     String _temp0 = intl.Intl.pluralLogic(
       n,
@@ -1661,19 +1841,6 @@ class AppLocalizationsRu extends AppLocalizations {
       many: 'Последние $n полных сессий',
       few: 'Последние $n полные сессии',
       one: 'Последняя $n полная сессия',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String completeSessions(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n полные сессии',
-      many: '$n полных сессий',
-      few: '$n полные сессии',
-      one: '$n полная сессия',
     );
     return '$_temp0';
   }

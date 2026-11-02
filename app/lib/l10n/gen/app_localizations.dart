@@ -164,12 +164,6 @@ abstract class AppLocalizations {
   /// **'Басты бетке'**
   String get toHome;
 
-  /// No description provided for @backToHome.
-  ///
-  /// In kk, this message translates to:
-  /// **'Басты бетке оралу'**
-  String get backToHome;
-
   /// No description provided for @outOf100.
   ///
   /// In kk, this message translates to:
@@ -212,11 +206,23 @@ abstract class AppLocalizations {
   /// **'Прогресс'**
   String get navProgress;
 
-  /// No description provided for @navSettings.
+  /// No description provided for @navTopics.
   ///
   /// In kk, this message translates to:
-  /// **'Баптаулар'**
-  String get navSettings;
+  /// **'Тақырыптар'**
+  String get navTopics;
+
+  /// No description provided for @navResults.
+  ///
+  /// In kk, this message translates to:
+  /// **'Нәтижелер'**
+  String get navResults;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In kk, this message translates to:
+  /// **'Профиль'**
+  String get navProfile;
 
   /// No description provided for @splashTagline.
   ///
@@ -239,7 +245,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding1Body.
   ///
   /// In kk, this message translates to:
-  /// **'Сұраққа өз сөзіңізбен жауап беріңіз.\nНобай әр кезде құрылғыда сақталады.'**
+  /// **'Сұраққа өз сөзіңізбен жауап беріңіз. Нобай әр кезде құрылғыда сақталады.'**
   String get onboarding1Body;
 
   /// No description provided for @onboarding2Title.
@@ -251,7 +257,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding2Body.
   ///
   /// In kk, this message translates to:
-  /// **'ЖИ дұрыстық, толықтық және анықтықты\n0–5 бойынша бағалап, дәлелін көрсетеді.'**
+  /// **'ЖИ дұрыстық, толықтық және анықтықты 0–5 бойынша бағалап, дәлелін көрсетеді.'**
   String get onboarding2Body;
 
   /// No description provided for @onboarding3Title.
@@ -263,7 +269,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding3Body.
   ///
   /// In kk, this message translates to:
-  /// **'Нәтижеден ең көбі үш әлсіз тақырып\nұсынылады — келесі жаттығуға бір қадам.'**
+  /// **'Нәтижеден ең көбі үш әлсіз тақырып ұсынылады — келесі жаттығуға бір қадам.'**
   String get onboarding3Body;
 
   /// No description provided for @onboardingYourAnswer.
@@ -278,12 +284,6 @@ abstract class AppLocalizations {
   /// **'Әлсіз тақырыптар'**
   String get onboardingWeakTopics;
 
-  /// No description provided for @onboardingPractice.
-  ///
-  /// In kk, this message translates to:
-  /// **'Осы тақырыпты жаттықтыру'**
-  String get onboardingPractice;
-
   /// No description provided for @welcomeHero.
   ///
   /// In kk, this message translates to:
@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeBody.
   ///
   /// In kk, this message translates to:
-  /// **'IT сұхбатына мәтінмен жаттығыңыз.\nНені білетініңізді, нені толықтыру\nкерегін нақты көріңіз.'**
+  /// **'IT сұхбатына мәтінмен жаттығыңыз. Нені білетініңізді, нені толықтыру керегін нақты көріңіз.'**
   String get welcomeBody;
 
   /// No description provided for @welcomeAssessmentTitle.
@@ -452,18 +452,6 @@ abstract class AppLocalizations {
   /// **'Дайындықты тоқтаған жерден жалғастырыңыз.'**
   String get loginSubtitle;
 
-  /// No description provided for @loginErrorTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Кіру орындалмады'**
-  String get loginErrorTitle;
-
-  /// No description provided for @loginErrorSubtitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Email мен парольді тексеріңіз.'**
-  String get loginErrorSubtitle;
-
   /// No description provided for @loginWrongCredentials.
   ///
   /// In kk, this message translates to:
@@ -493,24 +481,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Қайта кіру'**
   String get loginRetry;
-
-  /// No description provided for @noAccount.
-  ///
-  /// In kk, this message translates to:
-  /// **'Әлі аккаунт жоқ па?'**
-  String get noAccount;
-
-  /// No description provided for @registerAction.
-  ///
-  /// In kk, this message translates to:
-  /// **'Тіркелу'**
-  String get registerAction;
-
-  /// No description provided for @dataPrivate.
-  ///
-  /// In kk, this message translates to:
-  /// **'Деректеріңіз тек өзіңізге қолжетімді.'**
-  String get dataPrivate;
 
   /// No description provided for @demoHint.
   ///
@@ -551,7 +521,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiConsentLater.
   ///
   /// In kk, this message translates to:
-  /// **'Жауапты бағалауға келісім\nалғашқы жаттығу алдында сұралады.'**
+  /// **'Жауапты бағалауға келісім алғашқы жаттығу алдында сұралады.'**
   String get aiConsentLater;
 
   /// No description provided for @createAccount.
@@ -569,13 +539,13 @@ abstract class AppLocalizations {
   /// No description provided for @resetTitle.
   ///
   /// In kk, this message translates to:
-  /// **'Кіруді қалпына\nкелтіру'**
+  /// **'Кіруді қалпына келтіру'**
   String get resetTitle;
 
   /// No description provided for @resetSubtitle.
   ///
   /// In kk, this message translates to:
-  /// **'Email-ге бір реттік сілтеме жібереміз.\nОл 15 минут жарамды болады.'**
+  /// **'Email-ге бір реттік сілтеме жібереміз. Ол 15 минут жарамды болады.'**
   String get resetSubtitle;
 
   /// No description provided for @resetSend.
@@ -593,7 +563,7 @@ abstract class AppLocalizations {
   /// No description provided for @resetNoEmailBody.
   ///
   /// In kk, this message translates to:
-  /// **'«Спам» бумасын тексеріңіз.\nEmail мекенжайын түзетіп,\nқайта сұрауға болады.'**
+  /// **'«Спам» бумасын тексеріңіз. Email мекенжайын түзетіп, қайта сұрауға болады.'**
   String get resetNoEmailBody;
 
   /// No description provided for @backToLogin.
@@ -607,12 +577,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Хат жіберілді'**
   String get resetSentTitle;
-
-  /// No description provided for @resetSentBody.
-  ///
-  /// In kk, this message translates to:
-  /// **'Сілтемені 15 минут ішінде ашыңыз.\nОны тек бір рет қолдануға болады.'**
-  String get resetSentBody;
 
   /// No description provided for @resetResend.
   ///
@@ -695,7 +659,7 @@ abstract class AppLocalizations {
   /// No description provided for @resetSentHint.
   ///
   /// In kk, this message translates to:
-  /// **'«Спам» бумасын тексеріңіз.\nСілтемені ашқаннан кейін\nжаңа пароль орнатасыз.'**
+  /// **'«Спам» бумасын тексеріңіз. Сілтемені ашқаннан кейін жаңа пароль орнатасыз.'**
   String get resetSentHint;
 
   /// No description provided for @setupTitle.
@@ -716,28 +680,16 @@ abstract class AppLocalizations {
   /// **'Сақтау және жалғастыру'**
   String get setupSave;
 
-  /// No description provided for @homeSubtitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Бүгін бір қадам алға.'**
-  String get homeSubtitle;
-
-  /// No description provided for @homeResumeTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Жаттығуды\nжалғастырайық'**
-  String get homeResumeTitle;
-
   /// No description provided for @homeStartTitle.
   ///
   /// In kk, this message translates to:
-  /// **'Жаңа жаттығуды\nбастайық'**
+  /// **'Жаңа жаттығуды бастайық'**
   String get homeStartTitle;
 
   /// No description provided for @homeStartBody.
   ///
   /// In kk, this message translates to:
-  /// **'Бағыт пен тақырыпты таңдап,\n5 сұрақтан бастаңыз.'**
+  /// **'Бағыт пен тақырыпты таңдап, 5 сұрақтан бастаңыз.'**
   String get homeStartBody;
 
   /// No description provided for @homeStartAction.
@@ -745,24 +697,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Жаңа жаттығу'**
   String get homeStartAction;
-
-  /// No description provided for @homeNextTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Келесі жаттығу'**
-  String get homeNextTitle;
-
-  /// No description provided for @homeNextBody.
-  ///
-  /// In kk, this message translates to:
-  /// **'Flutter, Dart немесе жаңа тақырып.\nБелсенді сессияны алдымен аяқтаңыз.'**
-  String get homeNextBody;
-
-  /// No description provided for @homeNextBodyFree.
-  ///
-  /// In kk, this message translates to:
-  /// **'Каталогтан тақырып ашып, жаттығуды бастаңыз.'**
-  String get homeNextBodyFree;
 
   /// No description provided for @homeCatalog.
   ///
@@ -775,12 +709,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Соңғы нәтиже'**
   String get homeLastResult;
-
-  /// No description provided for @homeNoResult.
-  ///
-  /// In kk, this message translates to:
-  /// **'Толық сессия әлі жоқ.'**
-  String get homeNoResult;
 
   /// No description provided for @openProfile.
   ///
@@ -800,41 +728,11 @@ abstract class AppLocalizations {
   /// **'Кемінде бір тақырып таңдаңыз.'**
   String get topicsPickSubtitle;
 
-  /// No description provided for @pickTopicFirst.
-  ///
-  /// In kk, this message translates to:
-  /// **'Тақырып таңдаңыз'**
-  String get pickTopicFirst;
-
-  /// No description provided for @paramsTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Жаттығу параметрлері'**
-  String get paramsTitle;
-
-  /// No description provided for @paramsLanguage.
-  ///
-  /// In kk, this message translates to:
-  /// **'Сұхбат пен кері байланыс тілі'**
-  String get paramsLanguage;
-
   /// No description provided for @paramsCount.
   ///
   /// In kk, this message translates to:
   /// **'Сұрақ саны'**
   String get paramsCount;
-
-  /// No description provided for @paramsPaceTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Өзіңізге ыңғайлы қарқын'**
-  String get paramsPaceTitle;
-
-  /// No description provided for @paramsPaceBody.
-  ///
-  /// In kk, this message translates to:
-  /// **'Уақыт шектеуі жоқ. Сессияны\nүзіліске қойып, кейін жалғастырыңыз.\nЖауап нобайы құрылғыда сақталады.'**
-  String get paramsPaceBody;
 
   /// No description provided for @paramsStart.
   ///
@@ -845,7 +743,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentTitle.
   ///
   /// In kk, this message translates to:
-  /// **'Жауапты бағалауға\nкелісім'**
+  /// **'Жауапты бағалауға келісім'**
   String get consentTitle;
 
   /// No description provided for @consentWhatTitle.
@@ -857,7 +755,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentWhatBody.
   ///
   /// In kk, this message translates to:
-  /// **'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Қазір бағалау — құрылғыдағы\nдемо: жауап ешқайда жіберілмейді.'**
+  /// **'Сұрақ, жауабыңыз және жаттығу параметрлері. Қазір бағалау — құрылғыдағы демо: жауап ешқайда жіберілмейді.'**
   String get consentWhatBody;
 
   /// No description provided for @consentAdviceTitle.
@@ -869,7 +767,7 @@ abstract class AppLocalizations {
   /// No description provided for @consentAdviceBody.
   ///
   /// In kk, this message translates to:
-  /// **'ЖИ қателесуі мүмкін. Баға түсініксіз\nболса, пікір қалдыра аласыз.\nКеліспесеңіз, сессия басталмайды.'**
+  /// **'ЖИ қателесуі мүмкін. Баға түсініксіз болса, пікір қалдыра аласыз. Келіспесеңіз, сессия басталмайды.'**
   String get consentAdviceBody;
 
   /// No description provided for @consentAccept.
@@ -881,13 +779,13 @@ abstract class AppLocalizations {
   /// No description provided for @preparingTitle.
   ///
   /// In kk, this message translates to:
-  /// **'Сұрақтарды\nдайындап жатырмыз'**
+  /// **'Сұрақтарды дайындап жатырмыз'**
   String get preparingTitle;
 
   /// No description provided for @preparingBody.
   ///
   /// In kk, this message translates to:
-  /// **'Таңдалған тақырыптардан\nсұрақтарды іріктеп жатырмыз.'**
+  /// **'Таңдалған тақырыптардан сұрақтарды іріктеп жатырмыз.'**
   String get preparingBody;
 
   /// No description provided for @preparingMotto.
@@ -923,25 +821,25 @@ abstract class AppLocalizations {
   /// No description provided for @preparingHint.
   ///
   /// In kk, this message translates to:
-  /// **'Сұрақтар құрылғыдағы каталогтан\nалынады — интернет қажет емес.'**
+  /// **'Сұрақтар құрылғыдағы каталогтан алынады — интернет қажет емес.'**
   String get preparingHint;
 
   /// No description provided for @activeTitle.
   ///
   /// In kk, this message translates to:
-  /// **'Бір сессия\nаяқталмаған'**
+  /// **'Бір сессия аяқталмаған'**
   String get activeTitle;
 
   /// No description provided for @activeBody.
   ///
   /// In kk, this message translates to:
-  /// **'Жалғастыра аласыз немесе\nосы сессияны ерте аяқтап,\nжаңа жаттығу бастай аласыз.'**
+  /// **'Жалғастыра аласыз немесе осы сессияны ерте аяқтап, жаңа жаттығу бастай аласыз.'**
   String get activeBody;
 
   /// No description provided for @activeWarning.
   ///
   /// In kk, this message translates to:
-  /// **'Ерте аяқталған сессия «Толық емес»\nболып сақталады және орташа\nбалға кірмейді.'**
+  /// **'Ерте аяқталған сессия «Толық емес» болып сақталады және орташа балға кірмейді.'**
   String get activeWarning;
 
   /// No description provided for @activeResume.
@@ -1001,7 +899,7 @@ abstract class AppLocalizations {
   /// No description provided for @skipConfirmBody.
   ///
   /// In kk, this message translates to:
-  /// **'Өткізілген сұраққа 0 балл беріледі.\nОған кейін орала алмайсыз.'**
+  /// **'Өткізілген сұраққа 0 балл беріледі. Оған кейін орала алмайсыз.'**
   String get skipConfirmBody;
 
   /// No description provided for @assessing.
@@ -1121,7 +1019,7 @@ abstract class AppLocalizations {
   /// No description provided for @disputeNote.
   ///
   /// In kk, this message translates to:
-  /// **'Пікір осы сұрақ пен баға нұсқасына\nтіркеледі. Бастапқы балл\nавтоматты түрде өзгермейді.'**
+  /// **'Пікір осы сұрақ пен баға нұсқасына тіркеледі. Бастапқы балл автоматты түрде өзгермейді.'**
   String get disputeNote;
 
   /// No description provided for @disputeSend.
@@ -1211,7 +1109,7 @@ abstract class AppLocalizations {
   /// No description provided for @incompleteBody.
   ///
   /// In kk, this message translates to:
-  /// **'Барлық баға келгенде нәтиже\nқайта есептеледі. Әзірге бұл\nсессия орташа балға кірмейді.\nӨткізілген сұраққа 0 балл беріледі.'**
+  /// **'Барлық баға келгенде нәтиже қайта есептеледі. Әзірге бұл сессия орташа балға кірмейді. Өткізілген сұраққа 0 балл беріледі.'**
   String get incompleteBody;
 
   /// No description provided for @toHistory.
@@ -1253,7 +1151,7 @@ abstract class AppLocalizations {
   /// No description provided for @recommendLimit.
   ///
   /// In kk, this message translates to:
-  /// **'Бір уақытта ең көбі 3 әлсіз тақырып\nұсынылады. Қарқынды өзіңіз таңдаңыз.'**
+  /// **'Бір уақытта ең көбі 3 әлсіз тақырып ұсынылады. Қарқынды өзіңіз таңдаңыз.'**
   String get recommendLimit;
 
   /// No description provided for @otherWeakTopics.
@@ -1267,18 +1165,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Ұсыныс жасауға бағаланған жауап жеткіліксіз.'**
   String get noRecommendations;
-
-  /// No description provided for @historyTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Жаттығу тарихы'**
-  String get historyTitle;
-
-  /// No description provided for @historySubtitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Сақталған сессияларды қайта қараңыз.'**
-  String get historySubtitle;
 
   /// No description provided for @allDirections.
   ///
@@ -1352,12 +1238,6 @@ abstract class AppLocalizations {
   /// **'Сессияны жоясыз ба?'**
   String get deleteSessionTitle;
 
-  /// No description provided for @deleteSessionBody.
-  ///
-  /// In kk, this message translates to:
-  /// **'Жауаптар жойылып, прогресс\nқайта есептеледі. Аккаунт сақталады.'**
-  String get deleteSessionBody;
-
   /// No description provided for @sessionDeleted.
   ///
   /// In kk, this message translates to:
@@ -1406,30 +1286,6 @@ abstract class AppLocalizations {
   /// **'Сіздің жауабыңыз'**
   String get yourAnswerSaved;
 
-  /// No description provided for @progressTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Ілгерілеуіңіз'**
-  String get progressTitle;
-
-  /// No description provided for @progressSubtitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Бір бағыт пен деңгей ғана салыстырылады.'**
-  String get progressSubtitle;
-
-  /// No description provided for @scoreAxis.
-  ///
-  /// In kk, this message translates to:
-  /// **'Балл / 100'**
-  String get scoreAxis;
-
-  /// No description provided for @incompleteExcluded.
-  ///
-  /// In kk, this message translates to:
-  /// **'Толық емес сессиялар динамикаға\nжәне орташа балға кірмейді.'**
-  String get incompleteExcluded;
-
   /// No description provided for @sampleData.
   ///
   /// In kk, this message translates to:
@@ -1445,38 +1301,14 @@ abstract class AppLocalizations {
   /// No description provided for @progressEmptyBody.
   ///
   /// In kk, this message translates to:
-  /// **'Бір жаттығуды аяқтаңыз.\nОсы бағыт пен деңгейдегі\nбалл динамикасы осында көрінеді.'**
+  /// **'Бір жаттығуды аяқтаңыз. Осы бағыт пен деңгейдегі балл динамикасы осында көрінеді.'**
   String get progressEmptyBody;
-
-  /// No description provided for @progressEmptyHint.
-  ///
-  /// In kk, this message translates to:
-  /// **'Дайындықты 5 сұрақтан бастаңыз.\nУақыт шектеуі жоқ.'**
-  String get progressEmptyHint;
 
   /// No description provided for @progressEmptyAction.
   ///
   /// In kk, this message translates to:
   /// **'Алғашқы жаттығуды бастау'**
   String get progressEmptyAction;
-
-  /// No description provided for @settingsTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Баптаулар'**
-  String get settingsTitle;
-
-  /// No description provided for @settingsSubtitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Дайындықты өзіңізге бейімдеңіз.'**
-  String get settingsSubtitle;
-
-  /// No description provided for @profileLink.
-  ///
-  /// In kk, this message translates to:
-  /// **'Профиль'**
-  String get profileLink;
 
   /// No description provided for @interfaceLanguage.
   ///
@@ -1553,7 +1385,7 @@ abstract class AppLocalizations {
   /// No description provided for @logoutBody.
   ///
   /// In kk, this message translates to:
-  /// **'Тарих аккаунтта сақталады.\nДайындықты жалғастыру үшін\nқайта кіру қажет.'**
+  /// **'Тарих аккаунтта сақталады. Дайындықты жалғастыру үшін қайта кіру қажет.'**
   String get logoutBody;
 
   /// No description provided for @logoutAction.
@@ -1577,7 +1409,7 @@ abstract class AppLocalizations {
   /// No description provided for @appearanceNote.
   ///
   /// In kk, this message translates to:
-  /// **'Тақырып барлық экранға бірден қолданылады.\nБұрынғы сұхбаттардың тілі өзгермейді.'**
+  /// **'Тақырып барлық экранға бірден қолданылады. Бұрынғы сұхбаттардың тілі өзгермейді.'**
   String get appearanceNote;
 
   /// No description provided for @systemColors.
@@ -1775,7 +1607,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyAiBody.
   ///
   /// In kk, this message translates to:
-  /// **'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Қазір бағалау — құрылғыдағы\nдемо: жауап ешқайда жіберілмейді.'**
+  /// **'Сұрақ, жауабыңыз және жаттығу параметрлері. Қазір бағалау — құрылғыдағы демо: жауап ешқайда жіберілмейді.'**
   String get privacyAiBody;
 
   /// No description provided for @privacyStoredTitle.
@@ -1787,7 +1619,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyStoredBody.
   ///
   /// In kk, this message translates to:
-  /// **'Жауаптар, нобайлар, бағалар және\nпрогресс құрылғыда сақталады;\nсинхрондау қосулы болса — серверде де.'**
+  /// **'Жауаптар, нобайлар, бағалар және прогресс құрылғыда сақталады; синхрондау қосулы болса — серверде де.'**
   String get privacyStoredBody;
 
   /// No description provided for @privacyManageTitle.
@@ -1799,7 +1631,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyManageBody.
   ///
   /// In kk, this message translates to:
-  /// **'Сессияны тарихтан, аккаунтты\nбаптаулардан жоюға болады.'**
+  /// **'Сессияны тарихтан, аккаунтты баптаулардан жоюға болады.'**
   String get privacyManageBody;
 
   /// No description provided for @deleteAccountTitle.
@@ -1817,7 +1649,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountBody.
   ///
   /// In kk, this message translates to:
-  /// **'Сессиялар, тақырыптар мен прогресс\nқұрылғыдан бірден жойылады.\nСинхрондау қосулы болса —\nсерверден де.'**
+  /// **'Сессиялар, тақырыптар мен прогресс құрылғыдан бірден жойылады. Синхрондау қосулы болса — серверден де.'**
   String get deleteAccountBody;
 
   /// No description provided for @deleteAccountPassword.
@@ -1829,7 +1661,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountNote.
   ///
   /// In kk, this message translates to:
-  /// **'Қате пароль болса,\nаккаунт жойылмайды.'**
+  /// **'Қате пароль болса, аккаунт жойылмайды.'**
   String get deleteAccountNote;
 
   /// No description provided for @deleteAccountAction.
@@ -1916,24 +1748,6 @@ abstract class AppLocalizations {
   /// **'Ашу'**
   String get open;
 
-  /// No description provided for @searchTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Тақырып іздеу'**
-  String get searchTitle;
-
-  /// No description provided for @searchSubtitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Бағыт немесе тақырып атауын жазыңыз.'**
-  String get searchSubtitle;
-
-  /// No description provided for @searchLabel.
-  ///
-  /// In kk, this message translates to:
-  /// **'Іздеу'**
-  String get searchLabel;
-
   /// No description provided for @searchHint.
   ///
   /// In kk, this message translates to:
@@ -1949,7 +1763,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchAllDirections.
   ///
   /// In kk, this message translates to:
-  /// **'Frontend · Backend · Mobile · QA\nбойынша іздеуге болады.'**
+  /// **'Frontend · Backend · Mobile · QA бойынша іздеуге болады.'**
   String get searchAllDirections;
 
   /// No description provided for @clearSearch.
@@ -1973,7 +1787,7 @@ abstract class AppLocalizations {
   /// No description provided for @notFoundBody.
   ///
   /// In kk, this message translates to:
-  /// **'Атауын қысқартып көріңіз немесе\nбағыттар каталогын ашыңыз.\nІздеу басқа деректерді өзгертпейді.'**
+  /// **'Атауын қысқартып көріңіз немесе бағыттар каталогын ашыңыз. Іздеу басқа деректерді өзгертпейді.'**
   String get notFoundBody;
 
   /// No description provided for @favoritesTitle.
@@ -2009,14 +1823,8 @@ abstract class AppLocalizations {
   /// No description provided for @favoritesNote.
   ///
   /// In kk, this message translates to:
-  /// **'Тақырыпты ашып, жаңа жаттығу\nбастаңыз. Тізімнен алу бұрынғы\nнәтижелеріңізді жоймайды.'**
+  /// **'Тақырыпты ашып, жаңа жаттығу бастаңыз. Тізімнен алу бұрынғы нәтижелеріңізді жоймайды.'**
   String get favoritesNote;
-
-  /// No description provided for @toProfile.
-  ///
-  /// In kk, this message translates to:
-  /// **'Профильге өту'**
-  String get toProfile;
 
   /// No description provided for @favoritesEmptyTitle.
   ///
@@ -2027,20 +1835,8 @@ abstract class AppLocalizations {
   /// No description provided for @favoritesEmptyBody.
   ///
   /// In kk, this message translates to:
-  /// **'Каталогтан тақырып ашып,\n«Таңдаулыға қосу» әрекетін\nтаңдаңыз.'**
+  /// **'Каталогтан тақырып ашып, «Таңдаулыға қосу» әрекетін таңдаңыз.'**
   String get favoritesEmptyBody;
-
-  /// No description provided for @profileTitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Менің профилім'**
-  String get profileTitle;
-
-  /// No description provided for @profileSubtitle.
-  ///
-  /// In kk, this message translates to:
-  /// **'Дайындық параметрлері'**
-  String get profileSubtitle;
 
   /// No description provided for @editProfile.
   ///
@@ -2053,12 +1849,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Таңдаулы тақырыптар'**
   String get favoriteTopics;
-
-  /// No description provided for @toSettings.
-  ///
-  /// In kk, this message translates to:
-  /// **'Баптауларға өту'**
-  String get toSettings;
 
   /// No description provided for @editProfileSubtitle.
   ///
@@ -2567,7 +2357,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySyncBody.
   ///
   /// In kk, this message translates to:
-  /// **'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде де, құрылғыда да PBKDF2\nхэшімен сақталады.'**
+  /// **'Тек өзіңіз қоссаңыз ғана: деректер intRvue серверіне жіберіледі. Пароль серверде де, құрылғыда да PBKDF2 хэшімен сақталады.'**
   String get privacySyncBody;
 
   /// No description provided for @syncErrTimeout.
@@ -2785,6 +2575,540 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Қазір қосылу'**
   String get syncLiveRetry;
+
+  /// No description provided for @resultsTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Нәтижелер'**
+  String get resultsTitle;
+
+  /// No description provided for @profileGroupPractice.
+  ///
+  /// In kk, this message translates to:
+  /// **'Дайындық'**
+  String get profileGroupPractice;
+
+  /// No description provided for @profileGroupMore.
+  ///
+  /// In kk, this message translates to:
+  /// **'Қосымша'**
+  String get profileGroupMore;
+
+  /// No description provided for @deleteAccountRowHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сессиялар мен прогресс жойылады'**
+  String get deleteAccountRowHint;
+
+  /// No description provided for @loginWrongWhy.
+  ///
+  /// In kk, this message translates to:
+  /// **'Қайсысы екенін қауіпсіздік үшін айтпаймыз — екеуін де тексеріңіз.'**
+  String get loginWrongWhy;
+
+  /// No description provided for @noAccountRegister.
+  ///
+  /// In kk, this message translates to:
+  /// **'Әлі аккаунт жоқ па? Тіркелу'**
+  String get noAccountRegister;
+
+  /// No description provided for @readinessTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тексеру'**
+  String get readinessTitle;
+
+  /// No description provided for @readyName.
+  ///
+  /// In kk, this message translates to:
+  /// **'Аты'**
+  String get readyName;
+
+  /// No description provided for @readyEmail.
+  ///
+  /// In kk, this message translates to:
+  /// **'Email'**
+  String get readyEmail;
+
+  /// No description provided for @readyPassword.
+  ///
+  /// In kk, this message translates to:
+  /// **'Пароль'**
+  String get readyPassword;
+
+  /// No description provided for @readyConsent.
+  ///
+  /// In kk, this message translates to:
+  /// **'Келісім'**
+  String get readyConsent;
+
+  /// No description provided for @readyLength.
+  ///
+  /// In kk, this message translates to:
+  /// **'8+ таңба'**
+  String get readyLength;
+
+  /// No description provided for @readyLetter.
+  ///
+  /// In kk, this message translates to:
+  /// **'Әріп'**
+  String get readyLetter;
+
+  /// No description provided for @readyDigit.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сан'**
+  String get readyDigit;
+
+  /// No description provided for @readyMatch.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сәйкес'**
+  String get readyMatch;
+
+  /// No description provided for @passwordRules.
+  ///
+  /// In kk, this message translates to:
+  /// **'Пароль талаптары'**
+  String get passwordRules;
+
+  /// No description provided for @stepEmail.
+  ///
+  /// In kk, this message translates to:
+  /// **'Email'**
+  String get stepEmail;
+
+  /// No description provided for @stepLetter.
+  ///
+  /// In kk, this message translates to:
+  /// **'Хат'**
+  String get stepLetter;
+
+  /// No description provided for @stepNewPassword.
+  ///
+  /// In kk, this message translates to:
+  /// **'Жаңа пароль'**
+  String get stepNewPassword;
+
+  /// No description provided for @resetSentLead.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сілтеме бір реттік: ашқан соң жаңа пароль орнатасыз.'**
+  String get resetSentLead;
+
+  /// No description provided for @timelineSent.
+  ///
+  /// In kk, this message translates to:
+  /// **'Хат жіберілді'**
+  String get timelineSent;
+
+  /// No description provided for @timelineExpires.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сілтеме ескіреді'**
+  String get timelineExpires;
+
+  /// No description provided for @correctnessHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Мағынасы дұрыс па'**
+  String get correctnessHint;
+
+  /// No description provided for @completenessHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Негізгі ұғымдар ашылды ма'**
+  String get completenessHint;
+
+  /// No description provided for @clarityHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Түсінікті жеткізілді ме'**
+  String get clarityHint;
+
+  /// No description provided for @demoTag.
+  ///
+  /// In kk, this message translates to:
+  /// **'демо'**
+  String get demoTag;
+
+  /// No description provided for @demoAssessmentNote.
+  ///
+  /// In kk, this message translates to:
+  /// **'Бағалау үлгісі: оқу ұсынымы, қабылдау шешімі емес.'**
+  String get demoAssessmentNote;
+
+  /// No description provided for @setupStep.
+  ///
+  /// In kk, this message translates to:
+  /// **'Профиль · 1 қадам'**
+  String get setupStep;
+
+  /// No description provided for @homeActiveSession.
+  ///
+  /// In kk, this message translates to:
+  /// **'Белсенді сессия'**
+  String get homeActiveSession;
+
+  /// No description provided for @homeDeltaPrev.
+  ///
+  /// In kk, this message translates to:
+  /// **'алдыңғы сессиядан'**
+  String get homeDeltaPrev;
+
+  /// No description provided for @homeLastSession.
+  ///
+  /// In kk, this message translates to:
+  /// **'соңғы сессия'**
+  String get homeLastSession;
+
+  /// No description provided for @rubricQuestion.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сұрақ'**
+  String get rubricQuestion;
+
+  /// No description provided for @rubricLegend.
+  ///
+  /// In kk, this message translates to:
+  /// **'0–5 балл · 4–5 жақсы · 3 орташа · 0–2 әлсіз'**
+  String get rubricLegend;
+
+  /// No description provided for @homeAnswers.
+  ///
+  /// In kk, this message translates to:
+  /// **'Жауаптар'**
+  String get homeAnswers;
+
+  /// No description provided for @homeNextStep.
+  ///
+  /// In kk, this message translates to:
+  /// **'Келесі қадам'**
+  String get homeNextStep;
+
+  /// No description provided for @homeFirstLabel.
+  ///
+  /// In kk, this message translates to:
+  /// **'Алғашқы жаттығу'**
+  String get homeFirstLabel;
+
+  /// No description provided for @homeHowAssessed.
+  ///
+  /// In kk, this message translates to:
+  /// **'Қалай бағаланады'**
+  String get homeHowAssessed;
+
+  /// No description provided for @homeComplete.
+  ///
+  /// In kk, this message translates to:
+  /// **'толық'**
+  String get homeComplete;
+
+  /// No description provided for @lastScoreOn.
+  ///
+  /// In kk, this message translates to:
+  /// **'Соңғы балл'**
+  String get lastScoreOn;
+
+  /// No description provided for @weakTopicTag.
+  ///
+  /// In kk, this message translates to:
+  /// **'әлсіз тақырып'**
+  String get weakTopicTag;
+
+  /// No description provided for @hasModelAnswer.
+  ///
+  /// In kk, this message translates to:
+  /// **'Үлгі жауап бар'**
+  String get hasModelAnswer;
+
+  /// No description provided for @readySummary.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сипаттама'**
+  String get readySummary;
+
+  /// No description provided for @fieldTopics.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тақырыптар'**
+  String get fieldTopics;
+
+  /// No description provided for @consentCheck.
+  ///
+  /// In kk, this message translates to:
+  /// **'Жауаптарды бағалауға жіберуге келісемін'**
+  String get consentCheck;
+
+  /// No description provided for @consentCheckHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Демо бағалау құрылғыда өтеді. Атыңыз, email және пароль жіберілмейді.'**
+  String get consentCheckHint;
+
+  /// No description provided for @consentRequired.
+  ///
+  /// In kk, this message translates to:
+  /// **'Бастау үшін келісімді белгілеңіз.'**
+  String get consentRequired;
+
+  /// No description provided for @paramsFooter.
+  ///
+  /// In kk, this message translates to:
+  /// **'Уақыт шектеуі жоқ · нобай құрылғыда сақталады'**
+  String get paramsFooter;
+
+  /// No description provided for @paramsLanguageShort.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тілі'**
+  String get paramsLanguageShort;
+
+  /// No description provided for @practiceLabel.
+  ///
+  /// In kk, this message translates to:
+  /// **'Жаттығу'**
+  String get practiceLabel;
+
+  /// No description provided for @pauseSheetBody.
+  ///
+  /// In kk, this message translates to:
+  /// **'Нобай сақталды. Кейін тоқтаған жерден жалғастырасыз.'**
+  String get pauseSheetBody;
+
+  /// No description provided for @pauseHome.
+  ///
+  /// In kk, this message translates to:
+  /// **'Басты бетке шығу'**
+  String get pauseHome;
+
+  /// No description provided for @pauseHomeHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сессия белсенді болып қалады'**
+  String get pauseHomeHint;
+
+  /// No description provided for @pauseFinish.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сессияны ерте аяқтау'**
+  String get pauseFinish;
+
+  /// No description provided for @pauseFinishHint.
+  ///
+  /// In kk, this message translates to:
+  /// **'Орташа балға кірмейді'**
+  String get pauseFinishHint;
+
+  /// No description provided for @feedbackLabel.
+  ///
+  /// In kk, this message translates to:
+  /// **'Жауап талдауы'**
+  String get feedbackLabel;
+
+  /// No description provided for @zeroPoints.
+  ///
+  /// In kk, this message translates to:
+  /// **'= 0 балл'**
+  String get zeroPoints;
+
+  /// No description provided for @weakAnswerTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Әлсіз жауап'**
+  String get weakAnswerTitle;
+
+  /// No description provided for @disagreeShort.
+  ///
+  /// In kk, this message translates to:
+  /// **'Келіспеймін'**
+  String get disagreeShort;
+
+  /// No description provided for @sessionActions.
+  ///
+  /// In kk, this message translates to:
+  /// **'Әрекеттер'**
+  String get sessionActions;
+
+  /// No description provided for @consequenceProgress.
+  ///
+  /// In kk, this message translates to:
+  /// **'Прогресс қайта есептеледі'**
+  String get consequenceProgress;
+
+  /// No description provided for @consequenceAccount.
+  ///
+  /// In kk, this message translates to:
+  /// **'Аккаунт сақталады'**
+  String get consequenceAccount;
+
+  /// No description provided for @consequenceFavorite.
+  ///
+  /// In kk, this message translates to:
+  /// **'Таңдаулыдағы жазба'**
+  String get consequenceFavorite;
+
+  /// No description provided for @consequenceServer.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервердегі көшірме · синхрондау қосулы'**
+  String get consequenceServer;
+
+  /// No description provided for @irreversible.
+  ///
+  /// In kk, this message translates to:
+  /// **'Бұл әрекетті қайтару мүмкін емес.'**
+  String get irreversible;
+
+  /// No description provided for @progressAverageLast.
+  ///
+  /// In kk, this message translates to:
+  /// **'орташа · соңғы'**
+  String get progressAverageLast;
+
+  /// No description provided for @progressWeakTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Әлсіз тақырыптар'**
+  String get progressWeakTitle;
+
+  /// No description provided for @progressLegendTail.
+  ///
+  /// In kk, this message translates to:
+  /// **'толық сессиялар. Толық еместері динамикаға кірмейді.'**
+  String get progressLegendTail;
+
+  /// No description provided for @pointsWord.
+  ///
+  /// In kk, this message translates to:
+  /// **'ұпай'**
+  String get pointsWord;
+
+  /// No description provided for @disputedMark.
+  ///
+  /// In kk, this message translates to:
+  /// **'пікір жіберілген'**
+  String get disputedMark;
+
+  /// No description provided for @colCorrect.
+  ///
+  /// In kk, this message translates to:
+  /// **'Дұрыс.'**
+  String get colCorrect;
+
+  /// No description provided for @colComplete.
+  ///
+  /// In kk, this message translates to:
+  /// **'Толық.'**
+  String get colComplete;
+
+  /// No description provided for @colClarity.
+  ///
+  /// In kk, this message translates to:
+  /// **'Анық.'**
+  String get colClarity;
+
+  /// No description provided for @colTotal.
+  ///
+  /// In kk, this message translates to:
+  /// **'Барлығы'**
+  String get colTotal;
+
+  /// No description provided for @tableLegend.
+  ///
+  /// In kk, this message translates to:
+  /// **'… — бағалау күтілуде · — — өткізілді (0 балл)'**
+  String get tableLegend;
+
+  /// No description provided for @delSessions.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сессиялар мен жауаптар'**
+  String get delSessions;
+
+  /// No description provided for @delProgress.
+  ///
+  /// In kk, this message translates to:
+  /// **'Прогресс және бағалар'**
+  String get delProgress;
+
+  /// No description provided for @delTopics.
+  ///
+  /// In kk, this message translates to:
+  /// **'Өз тақырыптарыңыз'**
+  String get delTopics;
+
+  /// No description provided for @delLogin.
+  ///
+  /// In kk, this message translates to:
+  /// **'Кіру: email мен пароль'**
+  String get delLogin;
+
+  /// No description provided for @traceDevice.
+  ///
+  /// In kk, this message translates to:
+  /// **'Телефон'**
+  String get traceDevice;
+
+  /// No description provided for @traceNetwork.
+  ///
+  /// In kk, this message translates to:
+  /// **'Желі'**
+  String get traceNetwork;
+
+  /// No description provided for @traceServer.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервер'**
+  String get traceServer;
+
+  /// No description provided for @traceNoResponse.
+  ///
+  /// In kk, this message translates to:
+  /// **'жауап жоқ'**
+  String get traceNoResponse;
+
+  /// No description provided for @cloudKeptOnDevice.
+  ///
+  /// In kk, this message translates to:
+  /// **'Құрылғыдағы деректер сақталды. Желіні тексеріп, қайталап көріңіз.'**
+  String get cloudKeptOnDevice;
+
+  /// No description provided for @serverLabel.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервер'**
+  String get serverLabel;
+
+  /// No description provided for @deleteRemoteBody.
+  ///
+  /// In kk, this message translates to:
+  /// **'Желіні тексеріңіз. Тек құрылғыдан жою үшін алдымен синхрондауды ажыратыңыз.'**
+  String get deleteRemoteBody;
+
+  /// No description provided for @openSync.
+  ///
+  /// In kk, this message translates to:
+  /// **'Синхрондауды ашу'**
+  String get openSync;
+
+  /// No description provided for @retryDelete.
+  ///
+  /// In kk, this message translates to:
+  /// **'Қайталап жою'**
+  String get retryDelete;
+
+  /// No description provided for @deleteRemoteTitle.
+  ///
+  /// In kk, this message translates to:
+  /// **'Сервердегі көшірме жойылмады'**
+  String get deleteRemoteTitle;
+
+  /// No description provided for @deleteNothingRemoved.
+  ///
+  /// In kk, this message translates to:
+  /// **'Ештеңе жойылған жоқ: сервер жауап бермеді.'**
+  String get deleteNothingRemoved;
 
   /// No description provided for @levelBeginner.
   ///
@@ -3008,6 +3332,36 @@ abstract class AppLocalizations {
   /// **'Жексенбі'**
   String get weekdayFull7;
 
+  /// No description provided for @consequenceAnswers.
+  ///
+  /// In kk, this message translates to:
+  /// **'{n} жауап және олардың бағасы'**
+  String consequenceAnswers(int n);
+
+  /// No description provided for @consequenceTopic.
+  ///
+  /// In kk, this message translates to:
+  /// **'Тақырып және оның {n} сұрағы'**
+  String consequenceTopic(int n);
+
+  /// No description provided for @weakAnswerBody.
+  ///
+  /// In kk, this message translates to:
+  /// **'«{topic}» тақырыбын қорытындыдан кейін қайталаған жөн.'**
+  String weakAnswerBody(String topic);
+
+  /// No description provided for @topicsSelected.
+  ///
+  /// In kk, this message translates to:
+  /// **'{n} таңдалды'**
+  String topicsSelected(int n);
+
+  /// No description provided for @homeWeakest.
+  ///
+  /// In kk, this message translates to:
+  /// **'{topic} — ең әлсіз тақырып.'**
+  String homeWeakest(String topic);
+
   /// No description provided for @fieldRequired.
   ///
   /// In kk, this message translates to:
@@ -3025,18 +3379,6 @@ abstract class AppLocalizations {
   /// In kk, this message translates to:
   /// **'Сәлем, {name}!'**
   String greeting(String name);
-
-  /// No description provided for @directionTopics.
-  ///
-  /// In kk, this message translates to:
-  /// **'{direction} тақырыптары'**
-  String directionTopics(String direction);
-
-  /// No description provided for @continueWithTopics.
-  ///
-  /// In kk, this message translates to:
-  /// **'Жалғастыру · {n} тақырып'**
-  String continueWithTopics(int n);
 
   /// No description provided for @questionsCount.
   ///
@@ -3104,23 +3446,11 @@ abstract class AppLocalizations {
   /// **'Бағаланды · {total} / 15'**
   String assessedPoints(int total);
 
-  /// No description provided for @savedAnswerHeader.
-  ///
-  /// In kk, this message translates to:
-  /// **'{n} / {total} · Сақталған жауап'**
-  String savedAnswerHeader(int n, int total);
-
   /// No description provided for @lastSessions.
   ///
   /// In kk, this message translates to:
   /// **'Соңғы {n} толық сессия'**
   String lastSessions(int n);
-
-  /// No description provided for @completeSessions.
-  ///
-  /// In kk, this message translates to:
-  /// **'{n} толық сессия'**
-  String completeSessions(int n);
 
   /// No description provided for @averageScore.
   ///

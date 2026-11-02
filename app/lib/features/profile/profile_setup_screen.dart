@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
@@ -62,7 +64,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         onBack: () => context.go(Routes.home),
         title: S.setupTitle,
         subtitle: S.setupSubtitle,
-        headerGap: 30,
+        header: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+          child: Text(
+            S.setupStep,
+            style: context.text.bodySmall!.copyWith(
+              color: context.colors.onSurfaceVariant,
+            ),
+          ),
+        ),
         body: [
           AppTextField(
             label: S.fieldName,
@@ -70,7 +80,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             textCapitalization: TextCapitalization.words,
             validator: Validators.name,
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           ChoiceGroup<Direction>(
             label: S.fieldDirection,
             values: Direction.values,
@@ -78,7 +88,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             labelOf: (d) => d.label,
             onChanged: (d) => setState(() => _direction = d),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           ChoiceGroup<Level>(
             label: S.fieldLevel,
             columns: 3,
@@ -87,7 +97,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             labelOf: (l) => l.label,
             onChanged: (l) => setState(() => _level = l),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.lg),
           ChoiceGroup<InterviewLanguage>(
             label: S.fieldInterviewLanguage,
             columns: 3,
@@ -97,7 +107,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             onChanged: (l) => setState(() => _language = l),
           ),
         ],
-        actions: [AppButton(label: S.setupSave, onPressed: _save)],
+        actions: [AppButton.accent(label: S.setupSave, onPressed: _save)],
       ),
     );
   }

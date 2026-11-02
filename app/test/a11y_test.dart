@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'helpers/contrast_guideline.dart';
 import 'helpers/test_app.dart';
 
 const _routes = <(String, bool)>[
@@ -41,8 +42,6 @@ const _routes = <(String, bool)>[
   ('/settings/delete-account', true),
 ];
 
-const _shellTabs = {'/history', '/progress', '/settings'};
-
 void main() {
   setUpAll(loadFonts);
 
@@ -59,12 +58,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 400));
         await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
         await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
-        // Төменгі навигациядағы бөлімдерде textContrastGuideline түйін
-        // координатасын ~50 px ығысумен алып, көрші элементтің пикселін
-        // өлшейді (жалған қате). Олардың контрасты contrast_test.dart-та.
-        if (!_shellTabs.contains(route)) {
-          await expectLater(tester, meetsGuideline(textContrastGuideline));
-        }
+        // Flutter-дің textContrastGuideline экранды 1×-те өлшейді — жіңішке
+        // Medeo штрихы толық тегістеліп, жалған қате береді. Сол алгоритм,
+        // бірақ 3× тығыздықта (helpers/contrast_guideline.dart).
+        await expectLater(tester, meetsGuideline(hiDpiTextContrastGuideline));
         handle.dispose();
         await tester.pump(const Duration(seconds: 3));
       });

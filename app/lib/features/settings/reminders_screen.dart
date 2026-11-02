@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/utils/navigation.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/widgets.dart';
 import '../../app/routes.dart';
@@ -91,7 +93,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         await scheduler.cancelAll();
         if (!mounted) return;
         showAppSnackBar(context, S.remindersTurnedOff);
-        context.popOr(Routes.settings);
+        context.popOr(Routes.profile);
         return;
       }
       // Рұқсатты контекстте, яғни дәл қосқан сәтте сұраймыз.
@@ -128,29 +130,20 @@ class _RemindersScreenState extends State<RemindersScreen> {
       showBack: true,
       title: S.remindersTitle,
       subtitle: S.remindersSubtitle,
-      headerGap: 36,
       body: [
         // Бүкіл жол басылады — тек ауыстырғыш емес (BUG-8.03).
-        MergeSemantics(
-          child: InkWell(
-            onTap: () => _setEnabled(!_enabled),
-            borderRadius: BorderRadius.circular(12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    S.remindersEnable,
-                    style: context.text.titleMedium,
-                  ),
-                ),
-                Switch(value: _enabled, onChanged: _setEnabled),
-              ],
+        ListGroup(
+          children: [
+            SwitchListTile(
+              title: Text(S.remindersEnable, style: context.text.bodyLarge),
+              value: _enabled,
+              onChanged: _setEnabled,
             ),
-          ),
+          ],
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: AppSpacing.lg),
         Text(S.remindersDays, style: label),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.sm),
         // Жеті күн екі қатарда: 4 + 3, әрқайсысы 48 dp.
         for (final row in const [
           [1, 2, 3, 4],
@@ -175,14 +168,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
               ],
             ),
           ),
-        if (_error != null)
-          Text(
-            _error!,
-            style: context.text.bodyMedium!.copyWith(
-              color: colors.error,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+        if (_error != null) ReviewNote(_error!),
         const SizedBox(height: 24),
         AppTextField(
           key: ValueKey(_time),
@@ -191,9 +177,9 @@ class _RemindersScreenState extends State<RemindersScreen> {
           readOnly: true,
           enabled: _enabled,
           onTap: _pickTime,
-          suffixIcon: Icon(Icons.schedule, color: colors.onSurfaceVariant),
+          suffixIcon: Icon(AppIcons.schedule, color: colors.onSurfaceVariant),
         ),
-        const SizedBox(height: 40),
+        const SizedBox(height: AppSpacing.lg),
         if (_permitted ?? false)
           InfoSection(
             title: S.remindersPermissionGrantedTitle,
@@ -244,21 +230,21 @@ class _DayChip extends StatelessWidget {
       child: Opacity(
         opacity: enabled ? 1 : 0.38,
         child: Material(
-          color: selected ? colors.primary : colors.surface,
+          color: selected ? context.palette.ink : colors.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: selected ? colors.primary : colors.outline),
+            borderRadius: BorderRadius.circular(AppRadius.chip),
+            side: BorderSide(color: context.palette.ink),
           ),
           child: InkWell(
             onTap: enabled ? onTap : null,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppRadius.chip),
             child: SizedBox.square(
               dimension: 48,
               child: Center(
                 child: Text(
                   label,
                   style: context.text.labelMedium!.copyWith(
-                    color: selected ? colors.onPrimary : colors.onSurface,
+                    color: selected ? colors.surface : colors.onSurface,
                   ),
                 ),
               ),

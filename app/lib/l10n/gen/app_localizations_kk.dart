@@ -43,9 +43,6 @@ class AppLocalizationsKk extends AppLocalizations {
   String get toHome => 'Басты бетке';
 
   @override
-  String get backToHome => 'Басты бетке оралу';
-
-  @override
   String get outOf100 => '/ 100';
 
   @override
@@ -67,7 +64,13 @@ class AppLocalizationsKk extends AppLocalizations {
   String get navProgress => 'Прогресс';
 
   @override
-  String get navSettings => 'Баптаулар';
+  String get navTopics => 'Тақырыптар';
+
+  @override
+  String get navResults => 'Нәтижелер';
+
+  @override
+  String get navProfile => 'Профиль';
 
   @override
   String get splashTagline => 'Бір жауаптан басталады.';
@@ -80,21 +83,21 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get onboarding1Body =>
-      'Сұраққа өз сөзіңізбен жауап беріңіз.\nНобай әр кезде құрылғыда сақталады.';
+      'Сұраққа өз сөзіңізбен жауап беріңіз. Нобай әр кезде құрылғыда сақталады.';
 
   @override
   String get onboarding2Title => 'Бағаның себебін\nкөріңіз';
 
   @override
   String get onboarding2Body =>
-      'ЖИ дұрыстық, толықтық және анықтықты\n0–5 бойынша бағалап, дәлелін көрсетеді.';
+      'ЖИ дұрыстық, толықтық және анықтықты 0–5 бойынша бағалап, дәлелін көрсетеді.';
 
   @override
   String get onboarding3Title => 'Әлсіз тақырыпты\nқайталаңыз';
 
   @override
   String get onboarding3Body =>
-      'Нәтижеден ең көбі үш әлсіз тақырып\nұсынылады — келесі жаттығуға бір қадам.';
+      'Нәтижеден ең көбі үш әлсіз тақырып ұсынылады — келесі жаттығуға бір қадам.';
 
   @override
   String get onboardingYourAnswer => 'Жауабыңыз';
@@ -103,14 +106,11 @@ class AppLocalizationsKk extends AppLocalizations {
   String get onboardingWeakTopics => 'Әлсіз тақырыптар';
 
   @override
-  String get onboardingPractice => 'Осы тақырыпты жаттықтыру';
-
-  @override
   String get welcomeHero => 'Біліміңізді\nжауапқа\nайналдырыңыз.';
 
   @override
   String get welcomeBody =>
-      'IT сұхбатына мәтінмен жаттығыңыз.\nНені білетініңізді, нені толықтыру\nкерегін нақты көріңіз.';
+      'IT сұхбатына мәтінмен жаттығыңыз. Нені білетініңізді, нені толықтыру керегін нақты көріңіз.';
 
   @override
   String get welcomeAssessmentTitle => 'Бір жауап. Үш өлшем.';
@@ -191,12 +191,6 @@ class AppLocalizationsKk extends AppLocalizations {
   String get loginSubtitle => 'Дайындықты тоқтаған жерден жалғастырыңыз.';
 
   @override
-  String get loginErrorTitle => 'Кіру орындалмады';
-
-  @override
-  String get loginErrorSubtitle => 'Email мен парольді тексеріңіз.';
-
-  @override
   String get loginWrongCredentials => 'Email немесе пароль қате.';
 
   @override
@@ -210,15 +204,6 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get loginRetry => 'Қайта кіру';
-
-  @override
-  String get noAccount => 'Әлі аккаунт жоқ па?';
-
-  @override
-  String get registerAction => 'Тіркелу';
-
-  @override
-  String get dataPrivate => 'Деректеріңіз тек өзіңізге қолжетімді.';
 
   @override
   String get demoHint => 'Демо: aidana@example.com · intrvue2026';
@@ -242,7 +227,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get aiConsentLater =>
-      'Жауапты бағалауға келісім\nалғашқы жаттығу алдында сұралады.';
+      'Жауапты бағалауға келісім алғашқы жаттығу алдында сұралады.';
 
   @override
   String get createAccount => 'Аккаунт ашу';
@@ -251,11 +236,11 @@ class AppLocalizationsKk extends AppLocalizations {
   String get emailTaken => 'Бұл email тіркелген. Кіріп көріңіз.';
 
   @override
-  String get resetTitle => 'Кіруді қалпына\nкелтіру';
+  String get resetTitle => 'Кіруді қалпына келтіру';
 
   @override
   String get resetSubtitle =>
-      'Email-ге бір реттік сілтеме жібереміз.\nОл 15 минут жарамды болады.';
+      'Email-ге бір реттік сілтеме жібереміз. Ол 15 минут жарамды болады.';
 
   @override
   String get resetSend => 'Сілтеме жіберу';
@@ -265,17 +250,13 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get resetNoEmailBody =>
-      '«Спам» бумасын тексеріңіз.\nEmail мекенжайын түзетіп,\nқайта сұрауға болады.';
+      '«Спам» бумасын тексеріңіз. Email мекенжайын түзетіп, қайта сұрауға болады.';
 
   @override
   String get backToLogin => 'Кіру экранына оралу';
 
   @override
   String get resetSentTitle => 'Хат жіберілді';
-
-  @override
-  String get resetSentBody =>
-      'Сілтемені 15 минут ішінде ашыңыз.\nОны тек бір рет қолдануға болады.';
 
   @override
   String get resetResend => 'Хатты қайта сұрау';
@@ -320,7 +301,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get resetSentHint =>
-      '«Спам» бумасын тексеріңіз.\nСілтемені ашқаннан кейін\nжаңа пароль орнатасыз.';
+      '«Спам» бумасын тексеріңіз. Сілтемені ашқаннан кейін жаңа пароль орнатасыз.';
 
   @override
   String get setupTitle => 'Сізге сай жаттығу';
@@ -332,39 +313,20 @@ class AppLocalizationsKk extends AppLocalizations {
   String get setupSave => 'Сақтау және жалғастыру';
 
   @override
-  String get homeSubtitle => 'Бүгін бір қадам алға.';
-
-  @override
-  String get homeResumeTitle => 'Жаттығуды\nжалғастырайық';
-
-  @override
-  String get homeStartTitle => 'Жаңа жаттығуды\nбастайық';
+  String get homeStartTitle => 'Жаңа жаттығуды бастайық';
 
   @override
   String get homeStartBody =>
-      'Бағыт пен тақырыпты таңдап,\n5 сұрақтан бастаңыз.';
+      'Бағыт пен тақырыпты таңдап, 5 сұрақтан бастаңыз.';
 
   @override
   String get homeStartAction => 'Жаңа жаттығу';
-
-  @override
-  String get homeNextTitle => 'Келесі жаттығу';
-
-  @override
-  String get homeNextBody =>
-      'Flutter, Dart немесе жаңа тақырып.\nБелсенді сессияны алдымен аяқтаңыз.';
-
-  @override
-  String get homeNextBodyFree => 'Каталогтан тақырып ашып, жаттығуды бастаңыз.';
 
   @override
   String get homeCatalog => 'Тақырыптар каталогы';
 
   @override
   String get homeLastResult => 'Соңғы нәтиже';
-
-  @override
-  String get homeNoResult => 'Толық сессия әлі жоқ.';
 
   @override
   String get openProfile => 'Профильді ашу';
@@ -376,53 +338,37 @@ class AppLocalizationsKk extends AppLocalizations {
   String get topicsPickSubtitle => 'Кемінде бір тақырып таңдаңыз.';
 
   @override
-  String get pickTopicFirst => 'Тақырып таңдаңыз';
-
-  @override
-  String get paramsTitle => 'Жаттығу параметрлері';
-
-  @override
-  String get paramsLanguage => 'Сұхбат пен кері байланыс тілі';
-
-  @override
   String get paramsCount => 'Сұрақ саны';
-
-  @override
-  String get paramsPaceTitle => 'Өзіңізге ыңғайлы қарқын';
-
-  @override
-  String get paramsPaceBody =>
-      'Уақыт шектеуі жоқ. Сессияны\nүзіліске қойып, кейін жалғастырыңыз.\nЖауап нобайы құрылғыда сақталады.';
 
   @override
   String get paramsStart => 'Жаттығуды бастау';
 
   @override
-  String get consentTitle => 'Жауапты бағалауға\nкелісім';
+  String get consentTitle => 'Жауапты бағалауға келісім';
 
   @override
   String get consentWhatTitle => 'Бағалауға не қолданылады?';
 
   @override
   String get consentWhatBody =>
-      'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Қазір бағалау — құрылғыдағы\nдемо: жауап ешқайда жіберілмейді.';
+      'Сұрақ, жауабыңыз және жаттығу параметрлері. Қазір бағалау — құрылғыдағы демо: жауап ешқайда жіберілмейді.';
 
   @override
   String get consentAdviceTitle => 'Баға — оқу ұсынымы';
 
   @override
   String get consentAdviceBody =>
-      'ЖИ қателесуі мүмкін. Баға түсініксіз\nболса, пікір қалдыра аласыз.\nКеліспесеңіз, сессия басталмайды.';
+      'ЖИ қателесуі мүмкін. Баға түсініксіз болса, пікір қалдыра аласыз. Келіспесеңіз, сессия басталмайды.';
 
   @override
   String get consentAccept => 'Келісемін, бастау';
 
   @override
-  String get preparingTitle => 'Сұрақтарды\nдайындап жатырмыз';
+  String get preparingTitle => 'Сұрақтарды дайындап жатырмыз';
 
   @override
   String get preparingBody =>
-      'Таңдалған тақырыптардан\nсұрақтарды іріктеп жатырмыз.';
+      'Таңдалған тақырыптардан сұрақтарды іріктеп жатырмыз.';
 
   @override
   String get preparingMotto => 'Бір сұрақтан, бір қадамнан.';
@@ -442,18 +388,18 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get preparingHint =>
-      'Сұрақтар құрылғыдағы каталогтан\nалынады — интернет қажет емес.';
+      'Сұрақтар құрылғыдағы каталогтан алынады — интернет қажет емес.';
 
   @override
-  String get activeTitle => 'Бір сессия\nаяқталмаған';
+  String get activeTitle => 'Бір сессия аяқталмаған';
 
   @override
   String get activeBody =>
-      'Жалғастыра аласыз немесе\nосы сессияны ерте аяқтап,\nжаңа жаттығу бастай аласыз.';
+      'Жалғастыра аласыз немесе осы сессияны ерте аяқтап, жаңа жаттығу бастай аласыз.';
 
   @override
   String get activeWarning =>
-      'Ерте аяқталған сессия «Толық емес»\nболып сақталады және орташа\nбалға кірмейді.';
+      'Ерте аяқталған сессия «Толық емес» болып сақталады және орташа балға кірмейді.';
 
   @override
   String get activeResume => 'Сессияны жалғастыру';
@@ -484,7 +430,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get skipConfirmBody =>
-      'Өткізілген сұраққа 0 балл беріледі.\nОған кейін орала алмайсыз.';
+      'Өткізілген сұраққа 0 балл беріледі. Оған кейін орала алмайсыз.';
 
   @override
   String get assessing => 'Жауап бағаланып жатыр…';
@@ -545,7 +491,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get disputeNote =>
-      'Пікір осы сұрақ пен баға нұсқасына\nтіркеледі. Бастапқы балл\nавтоматты түрде өзгермейді.';
+      'Пікір осы сұрақ пен баға нұсқасына тіркеледі. Бастапқы балл автоматты түрде өзгермейді.';
 
   @override
   String get disputeSend => 'Пікірді жіберу';
@@ -591,7 +537,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get incompleteBody =>
-      'Барлық баға келгенде нәтиже\nқайта есептеледі. Әзірге бұл\nсессия орташа балға кірмейді.\nӨткізілген сұраққа 0 балл беріледі.';
+      'Барлық баға келгенде нәтиже қайта есептеледі. Әзірге бұл сессия орташа балға кірмейді. Өткізілген сұраққа 0 балл беріледі.';
 
   @override
   String get toHistory => 'Тарихқа өту';
@@ -613,7 +559,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get recommendLimit =>
-      'Бір уақытта ең көбі 3 әлсіз тақырып\nұсынылады. Қарқынды өзіңіз таңдаңыз.';
+      'Бір уақытта ең көбі 3 әлсіз тақырып ұсынылады. Қарқынды өзіңіз таңдаңыз.';
 
   @override
   String get otherWeakTopics => 'Басқа әлсіз тақырыптар';
@@ -621,12 +567,6 @@ class AppLocalizationsKk extends AppLocalizations {
   @override
   String get noRecommendations =>
       'Ұсыныс жасауға бағаланған жауап жеткіліксіз.';
-
-  @override
-  String get historyTitle => 'Жаттығу тарихы';
-
-  @override
-  String get historySubtitle => 'Сақталған сессияларды қайта қараңыз.';
 
   @override
   String get allDirections => 'Барлық бағыт';
@@ -666,10 +606,6 @@ class AppLocalizationsKk extends AppLocalizations {
   String get deleteSessionTitle => 'Сессияны жоясыз ба?';
 
   @override
-  String get deleteSessionBody =>
-      'Жауаптар жойылып, прогресс\nқайта есептеледі. Аккаунт сақталады.';
-
-  @override
   String get sessionDeleted => 'Сессия жойылды.';
 
   @override
@@ -694,19 +630,6 @@ class AppLocalizationsKk extends AppLocalizations {
   String get yourAnswerSaved => 'Сіздің жауабыңыз';
 
   @override
-  String get progressTitle => 'Ілгерілеуіңіз';
-
-  @override
-  String get progressSubtitle => 'Бір бағыт пен деңгей ғана салыстырылады.';
-
-  @override
-  String get scoreAxis => 'Балл / 100';
-
-  @override
-  String get incompleteExcluded =>
-      'Толық емес сессиялар динамикаға\nжәне орташа балға кірмейді.';
-
-  @override
   String get sampleData => 'Көрсетілген мәндер — үлгі деректер.';
 
   @override
@@ -714,23 +637,10 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get progressEmptyBody =>
-      'Бір жаттығуды аяқтаңыз.\nОсы бағыт пен деңгейдегі\nбалл динамикасы осында көрінеді.';
-
-  @override
-  String get progressEmptyHint =>
-      'Дайындықты 5 сұрақтан бастаңыз.\nУақыт шектеуі жоқ.';
+      'Бір жаттығуды аяқтаңыз. Осы бағыт пен деңгейдегі балл динамикасы осында көрінеді.';
 
   @override
   String get progressEmptyAction => 'Алғашқы жаттығуды бастау';
-
-  @override
-  String get settingsTitle => 'Баптаулар';
-
-  @override
-  String get settingsSubtitle => 'Дайындықты өзіңізге бейімдеңіз.';
-
-  @override
-  String get profileLink => 'Профиль';
 
   @override
   String get interfaceLanguage => 'Интерфейс тілі';
@@ -770,7 +680,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get logoutBody =>
-      'Тарих аккаунтта сақталады.\nДайындықты жалғастыру үшін\nқайта кіру қажет.';
+      'Тарих аккаунтта сақталады. Дайындықты жалғастыру үшін қайта кіру қажет.';
 
   @override
   String get logoutAction => 'Шығу';
@@ -783,7 +693,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get appearanceNote =>
-      'Тақырып барлық экранға бірден қолданылады.\nБұрынғы сұхбаттардың тілі өзгермейді.';
+      'Тақырып барлық экранға бірден қолданылады. Бұрынғы сұхбаттардың тілі өзгермейді.';
 
   @override
   String get systemColors => 'Жүйелік түстер';
@@ -890,21 +800,21 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get privacyAiBody =>
-      'Сұрақ, жауабыңыз және жаттығу\nпараметрлері. Қазір бағалау — құрылғыдағы\nдемо: жауап ешқайда жіберілмейді.';
+      'Сұрақ, жауабыңыз және жаттығу параметрлері. Қазір бағалау — құрылғыдағы демо: жауап ешқайда жіберілмейді.';
 
   @override
   String get privacyStoredTitle => 'Не сақталады';
 
   @override
   String get privacyStoredBody =>
-      'Жауаптар, нобайлар, бағалар және\nпрогресс құрылғыда сақталады;\nсинхрондау қосулы болса — серверде де.';
+      'Жауаптар, нобайлар, бағалар және прогресс құрылғыда сақталады; синхрондау қосулы болса — серверде де.';
 
   @override
   String get privacyManageTitle => 'Деректерді басқару';
 
   @override
   String get privacyManageBody =>
-      'Сессияны тарихтан, аккаунтты\nбаптаулардан жоюға болады.';
+      'Сессияны тарихтан, аккаунтты баптаулардан жоюға болады.';
 
   @override
   String get deleteAccountTitle => 'Аккаунтты жоясыз ба?';
@@ -914,13 +824,13 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get deleteAccountBody =>
-      'Сессиялар, тақырыптар мен прогресс\nқұрылғыдан бірден жойылады.\nСинхрондау қосулы болса —\nсерверден де.';
+      'Сессиялар, тақырыптар мен прогресс құрылғыдан бірден жойылады. Синхрондау қосулы болса — серверден де.';
 
   @override
   String get deleteAccountPassword => 'Растау үшін пароль';
 
   @override
-  String get deleteAccountNote => 'Қате пароль болса,\nаккаунт жойылмайды.';
+  String get deleteAccountNote => 'Қате пароль болса, аккаунт жойылмайды.';
 
   @override
   String get deleteAccountAction => 'Аккаунтты біржола жою';
@@ -965,15 +875,6 @@ class AppLocalizationsKk extends AppLocalizations {
   String get open => 'Ашу';
 
   @override
-  String get searchTitle => 'Тақырып іздеу';
-
-  @override
-  String get searchSubtitle => 'Бағыт немесе тақырып атауын жазыңыз.';
-
-  @override
-  String get searchLabel => 'Іздеу';
-
-  @override
   String get searchHint => 'Тақырып атауы';
 
   @override
@@ -981,7 +882,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get searchAllDirections =>
-      'Frontend · Backend · Mobile · QA\nбойынша іздеуге болады.';
+      'Frontend · Backend · Mobile · QA бойынша іздеуге болады.';
 
   @override
   String get clearSearch => 'Іздеуді тазарту';
@@ -994,7 +895,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get notFoundBody =>
-      'Атауын қысқартып көріңіз немесе\nбағыттар каталогын ашыңыз.\nІздеу басқа деректерді өзгертпейді.';
+      'Атауын қысқартып көріңіз немесе бағыттар каталогын ашыңыз. Іздеу басқа деректерді өзгертпейді.';
 
   @override
   String get favoritesTitle => 'Таңдаулы';
@@ -1013,32 +914,20 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get favoritesNote =>
-      'Тақырыпты ашып, жаңа жаттығу\nбастаңыз. Тізімнен алу бұрынғы\nнәтижелеріңізді жоймайды.';
-
-  @override
-  String get toProfile => 'Профильге өту';
+      'Тақырыпты ашып, жаңа жаттығу бастаңыз. Тізімнен алу бұрынғы нәтижелеріңізді жоймайды.';
 
   @override
   String get favoritesEmptyTitle => 'Әзірге сақталған тақырып жоқ';
 
   @override
   String get favoritesEmptyBody =>
-      'Каталогтан тақырып ашып,\n«Таңдаулыға қосу» әрекетін\nтаңдаңыз.';
-
-  @override
-  String get profileTitle => 'Менің профилім';
-
-  @override
-  String get profileSubtitle => 'Дайындық параметрлері';
+      'Каталогтан тақырып ашып, «Таңдаулыға қосу» әрекетін таңдаңыз.';
 
   @override
   String get editProfile => 'Профильді өзгерту';
 
   @override
   String get favoriteTopics => 'Таңдаулы тақырыптар';
-
-  @override
-  String get toSettings => 'Баптауларға өту';
 
   @override
   String get editProfileSubtitle => 'Жаңа сессияларға бастапқы параметр';
@@ -1315,7 +1204,7 @@ class AppLocalizationsKk extends AppLocalizations {
 
   @override
   String get privacySyncBody =>
-      'Тек өзіңіз қоссаңыз ғана: деректер\nintRvue серверіне жіберіледі. Пароль\nсерверде де, құрылғыда да PBKDF2\nхэшімен сақталады.';
+      'Тек өзіңіз қоссаңыз ғана: деректер intRvue серверіне жіберіледі. Пароль серверде де, құрылғыда да PBKDF2 хэшімен сақталады.';
 
   @override
   String get syncErrTimeout =>
@@ -1432,6 +1321,282 @@ class AppLocalizationsKk extends AppLocalizations {
   String get syncLiveRetry => 'Қазір қосылу';
 
   @override
+  String get resultsTitle => 'Нәтижелер';
+
+  @override
+  String get profileGroupPractice => 'Дайындық';
+
+  @override
+  String get profileGroupMore => 'Қосымша';
+
+  @override
+  String get deleteAccountRowHint => 'Сессиялар мен прогресс жойылады';
+
+  @override
+  String get loginWrongWhy =>
+      'Қайсысы екенін қауіпсіздік үшін айтпаймыз — екеуін де тексеріңіз.';
+
+  @override
+  String get noAccountRegister => 'Әлі аккаунт жоқ па? Тіркелу';
+
+  @override
+  String get readinessTitle => 'Тексеру';
+
+  @override
+  String get readyName => 'Аты';
+
+  @override
+  String get readyEmail => 'Email';
+
+  @override
+  String get readyPassword => 'Пароль';
+
+  @override
+  String get readyConsent => 'Келісім';
+
+  @override
+  String get readyLength => '8+ таңба';
+
+  @override
+  String get readyLetter => 'Әріп';
+
+  @override
+  String get readyDigit => 'Сан';
+
+  @override
+  String get readyMatch => 'Сәйкес';
+
+  @override
+  String get passwordRules => 'Пароль талаптары';
+
+  @override
+  String get stepEmail => 'Email';
+
+  @override
+  String get stepLetter => 'Хат';
+
+  @override
+  String get stepNewPassword => 'Жаңа пароль';
+
+  @override
+  String get resetSentLead =>
+      'Сілтеме бір реттік: ашқан соң жаңа пароль орнатасыз.';
+
+  @override
+  String get timelineSent => 'Хат жіберілді';
+
+  @override
+  String get timelineExpires => 'Сілтеме ескіреді';
+
+  @override
+  String get correctnessHint => 'Мағынасы дұрыс па';
+
+  @override
+  String get completenessHint => 'Негізгі ұғымдар ашылды ма';
+
+  @override
+  String get clarityHint => 'Түсінікті жеткізілді ме';
+
+  @override
+  String get demoTag => 'демо';
+
+  @override
+  String get demoAssessmentNote =>
+      'Бағалау үлгісі: оқу ұсынымы, қабылдау шешімі емес.';
+
+  @override
+  String get setupStep => 'Профиль · 1 қадам';
+
+  @override
+  String get homeActiveSession => 'Белсенді сессия';
+
+  @override
+  String get homeDeltaPrev => 'алдыңғы сессиядан';
+
+  @override
+  String get homeLastSession => 'соңғы сессия';
+
+  @override
+  String get rubricQuestion => 'Сұрақ';
+
+  @override
+  String get rubricLegend => '0–5 балл · 4–5 жақсы · 3 орташа · 0–2 әлсіз';
+
+  @override
+  String get homeAnswers => 'Жауаптар';
+
+  @override
+  String get homeNextStep => 'Келесі қадам';
+
+  @override
+  String get homeFirstLabel => 'Алғашқы жаттығу';
+
+  @override
+  String get homeHowAssessed => 'Қалай бағаланады';
+
+  @override
+  String get homeComplete => 'толық';
+
+  @override
+  String get lastScoreOn => 'Соңғы балл';
+
+  @override
+  String get weakTopicTag => 'әлсіз тақырып';
+
+  @override
+  String get hasModelAnswer => 'Үлгі жауап бар';
+
+  @override
+  String get readySummary => 'Сипаттама';
+
+  @override
+  String get fieldTopics => 'Тақырыптар';
+
+  @override
+  String get consentCheck => 'Жауаптарды бағалауға жіберуге келісемін';
+
+  @override
+  String get consentCheckHint =>
+      'Демо бағалау құрылғыда өтеді. Атыңыз, email және пароль жіберілмейді.';
+
+  @override
+  String get consentRequired => 'Бастау үшін келісімді белгілеңіз.';
+
+  @override
+  String get paramsFooter => 'Уақыт шектеуі жоқ · нобай құрылғыда сақталады';
+
+  @override
+  String get paramsLanguageShort => 'Тілі';
+
+  @override
+  String get practiceLabel => 'Жаттығу';
+
+  @override
+  String get pauseSheetBody =>
+      'Нобай сақталды. Кейін тоқтаған жерден жалғастырасыз.';
+
+  @override
+  String get pauseHome => 'Басты бетке шығу';
+
+  @override
+  String get pauseHomeHint => 'Сессия белсенді болып қалады';
+
+  @override
+  String get pauseFinish => 'Сессияны ерте аяқтау';
+
+  @override
+  String get pauseFinishHint => 'Орташа балға кірмейді';
+
+  @override
+  String get feedbackLabel => 'Жауап талдауы';
+
+  @override
+  String get zeroPoints => '= 0 балл';
+
+  @override
+  String get weakAnswerTitle => 'Әлсіз жауап';
+
+  @override
+  String get disagreeShort => 'Келіспеймін';
+
+  @override
+  String get sessionActions => 'Әрекеттер';
+
+  @override
+  String get consequenceProgress => 'Прогресс қайта есептеледі';
+
+  @override
+  String get consequenceAccount => 'Аккаунт сақталады';
+
+  @override
+  String get consequenceFavorite => 'Таңдаулыдағы жазба';
+
+  @override
+  String get consequenceServer => 'Сервердегі көшірме · синхрондау қосулы';
+
+  @override
+  String get irreversible => 'Бұл әрекетті қайтару мүмкін емес.';
+
+  @override
+  String get progressAverageLast => 'орташа · соңғы';
+
+  @override
+  String get progressWeakTitle => 'Әлсіз тақырыптар';
+
+  @override
+  String get progressLegendTail =>
+      'толық сессиялар. Толық еместері динамикаға кірмейді.';
+
+  @override
+  String get pointsWord => 'ұпай';
+
+  @override
+  String get disputedMark => 'пікір жіберілген';
+
+  @override
+  String get colCorrect => 'Дұрыс.';
+
+  @override
+  String get colComplete => 'Толық.';
+
+  @override
+  String get colClarity => 'Анық.';
+
+  @override
+  String get colTotal => 'Барлығы';
+
+  @override
+  String get tableLegend => '… — бағалау күтілуде · — — өткізілді (0 балл)';
+
+  @override
+  String get delSessions => 'Сессиялар мен жауаптар';
+
+  @override
+  String get delProgress => 'Прогресс және бағалар';
+
+  @override
+  String get delTopics => 'Өз тақырыптарыңыз';
+
+  @override
+  String get delLogin => 'Кіру: email мен пароль';
+
+  @override
+  String get traceDevice => 'Телефон';
+
+  @override
+  String get traceNetwork => 'Желі';
+
+  @override
+  String get traceServer => 'Сервер';
+
+  @override
+  String get traceNoResponse => 'жауап жоқ';
+
+  @override
+  String get cloudKeptOnDevice =>
+      'Құрылғыдағы деректер сақталды. Желіні тексеріп, қайталап көріңіз.';
+
+  @override
+  String get serverLabel => 'Сервер';
+
+  @override
+  String get deleteRemoteBody =>
+      'Желіні тексеріңіз. Тек құрылғыдан жою үшін алдымен синхрондауды ажыратыңыз.';
+
+  @override
+  String get openSync => 'Синхрондауды ашу';
+
+  @override
+  String get retryDelete => 'Қайталап жою';
+
+  @override
+  String get deleteRemoteTitle => 'Сервердегі көшірме жойылмады';
+
+  @override
+  String get deleteNothingRemoved =>
+      'Ештеңе жойылған жоқ: сервер жауап бермеді.';
+
+  @override
   String get levelBeginner => 'Бастапқы';
 
   @override
@@ -1543,6 +1708,31 @@ class AppLocalizationsKk extends AppLocalizations {
   String get weekdayFull7 => 'Жексенбі';
 
   @override
+  String consequenceAnswers(int n) {
+    return '$n жауап және олардың бағасы';
+  }
+
+  @override
+  String consequenceTopic(int n) {
+    return 'Тақырып және оның $n сұрағы';
+  }
+
+  @override
+  String weakAnswerBody(String topic) {
+    return '«$topic» тақырыбын қорытындыдан кейін қайталаған жөн.';
+  }
+
+  @override
+  String topicsSelected(int n) {
+    return '$n таңдалды';
+  }
+
+  @override
+  String homeWeakest(String topic) {
+    return '$topic — ең әлсіз тақырып.';
+  }
+
+  @override
   String fieldRequired(String field) {
     return '$field толтырылуы керек.';
   }
@@ -1555,16 +1745,6 @@ class AppLocalizationsKk extends AppLocalizations {
   @override
   String greeting(String name) {
     return 'Сәлем, $name!';
-  }
-
-  @override
-  String directionTopics(String direction) {
-    return '$direction тақырыптары';
-  }
-
-  @override
-  String continueWithTopics(int n) {
-    return 'Жалғастыру · $n тақырып';
   }
 
   @override
@@ -1628,18 +1808,8 @@ class AppLocalizationsKk extends AppLocalizations {
   }
 
   @override
-  String savedAnswerHeader(int n, int total) {
-    return '$n / $total · Сақталған жауап';
-  }
-
-  @override
   String lastSessions(int n) {
     return 'Соңғы $n толық сессия';
-  }
-
-  @override
-  String completeSessions(int n) {
-    return '$n толық сессия';
   }
 
   @override

@@ -6,6 +6,9 @@ import '../constants/app_strings.dart';
 /// интерфейс тілінде.
 abstract final class Fmt {
   /// Ай атауы (ілік септік формасы) интерфейс тілінде, 1 = қаңтар.
+  /// «қазан»
+  static String month(DateTime d) => _month(d.month);
+
   static String _month(int m) => switch (m) {
     1 => S.month1,
     2 => S.month2,

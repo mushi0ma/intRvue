@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/wordmark.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../data/services/reminder_coordinator.dart';
@@ -50,45 +52,67 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final muted = context.text.bodyLarge!.copyWith(
-      color: colors.onSurfaceVariant,
-    );
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Spacer(flex: 5),
-            Semantics(
-              header: true,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: Wordmark(large: true),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(S.splashTagline, style: muted, textAlign: TextAlign.center),
-            const SizedBox(height: 64),
-            Center(
-              child: SizedBox(
-                width: 200,
-                child: AnimatedBuilder(
-                  animation: _progress,
-                  builder: (context, _) => ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
-                    child: LinearProgressIndicator(
-                      value: Curves.easeOut.transform(_progress.value),
-                      minHeight: 4,
-                    ),
+    final p = context.palette;
+    final muted = context.text.bodySmall!.copyWith(color: p.onPanelMuted);
+    // A1: қараңғы панель екі тақырыпта да; күй жолағы ақ.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: p.panel,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.inset),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Spacer(flex: 5),
+                Semantics(
+                  header: true,
+                  child: const Wordmark(large: true, onPanel: true),
+                ),
+                const SizedBox(height: AppSpacing.smd),
+                Text(
+                  S.splashTagline,
+                  style: context.text.titleLarge!.copyWith(
+                    color: p.onPanelMuted,
                   ),
                 ),
-              ),
+                const Spacer(flex: 6),
+                // Жүктелу: үш сегмент кезекпен толады.
+                AnimatedBuilder(
+                  animation: _progress,
+                  builder: (context, _) {
+                    final v = Curves.easeOut.transform(_progress.value) * 3;
+                    return Row(
+                      spacing: 4,
+                      children: [
+                        for (var i = 0; i < 3; i++)
+                          SizedBox(
+                            width: 24,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.pill,
+                              ),
+                              child: LinearProgressIndicator(
+                                value: (v - i).clamp(0, 1),
+                                minHeight: 3,
+                                color: p.accent,
+                                backgroundColor: p.onPanelMuted.withValues(
+                                  alpha: 0.35,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.smd),
+                Text(S.splashFooter, style: muted),
+                const SizedBox(height: AppSpacing.lg),
+              ],
             ),
-            const Spacer(flex: 6),
-            Text(S.splashFooter, style: muted, textAlign: TextAlign.center),
-            const SizedBox(height: 48),
-          ],
+          ),
         ),
       ),
     );

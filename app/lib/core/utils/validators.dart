@@ -7,6 +7,10 @@ abstract final class Validators {
   static final _letter = RegExp(r'[A-Za-zА-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]');
   static final _digit = RegExp(r'\d');
 
+  /// Пароль талаптары (рубрика ұяшықтары үшін де).
+  static bool hasLetter(String v) => _letter.hasMatch(v);
+  static bool hasDigit(String v) => _digit.hasMatch(v);
+
   static const minPasswordLength = 8;
 
   static String? required(String? value, {String? field}) {

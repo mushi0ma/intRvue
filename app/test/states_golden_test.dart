@@ -4,15 +4,21 @@
 @Tags(['golden'])
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intrvue/app/routes.dart';
 import 'package:intrvue/core/constants/app_strings.dart';
+import 'package:intrvue/data/local/app_database.dart';
+import 'package:intrvue/data/remote/sync_api.dart';
 import 'package:intrvue/data/models/enums.dart';
 import 'package:intrvue/data/models/topic.dart';
 import 'package:intrvue/data/repositories/session_repository.dart';
 import 'package:intrvue/data/repositories/topic_repository.dart';
 
+import 'helpers/fake_sync_api.dart';
 import 'helpers/test_app.dart';
 
 Future<void> shot(WidgetTester tester, String name) => expectLater(
@@ -22,7 +28,9 @@ Future<void> shot(WidgetTester tester, String name) => expectLater(
 
 Future<void> tap(WidgetTester tester, String text) async {
   await tester.pump();
-  final f = find.text(text).last;
+  final f = find.text(text).evaluate().isEmpty
+      ? find.byTooltip(text).last
+      : find.text(text).last;
   await tester.ensureVisible(f);
   await tester.pump();
   await tester.tap(f);
@@ -122,15 +130,19 @@ void main() {
   });
 
   testWidgets('dialogs', (tester) async {
-    await pumpApp(tester, location: '/settings');
+    await pumpApp(tester, location: '/profile');
     await tap(tester, S.logout);
     await shot(tester, 'D1_logout_dialog');
   });
 
   testWidgets('history delete dialog and filtered empty', (tester) async {
     await pumpApp(tester, location: '/history');
-    await tester.tap(find.text(S.delete).first);
+    await tester.tap(find.byTooltip(S.sessionActions).first);
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    // Мәзір — ең үстіңгі қабат (басқа бөлімдерде де «Жою» мәтіні бар).
+    await tester.tap(find.text(S.delete).last);
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 500));
     await shot(tester, 'D2_delete_session_dialog');
   });
@@ -160,13 +172,73 @@ void main() {
     await shot(tester, 'S14_progress_empty');
   });
 
+  // Синхрондау күйлері (F9, F13, F17): қосулы, сервер жауап бермейді.
+  final linked = {
+    'sync.link.1': jsonEncode({
+      'email': AppDatabase.demoEmail,
+      'token': 'token-${AppDatabase.demoEmail}',
+      'lastSyncAt': 1792422960000,
+    }),
+  };
+
+  Future<void> realWait(WidgetTester tester, {bool Function()? until}) async {
+    for (var i = 0; i < 40 && !(until?.call() ?? i >= 3); i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 100)),
+      );
+      await tester.pump();
+    }
+  }
+
+  testWidgets('sync linked', (tester) async {
+    await pumpApp(
+      tester,
+      location: Routes.sync,
+      prefs: linked,
+      syncApi: (_) => FakeSyncApi(failure: SyncFailure.offline),
+    );
+    await realWait(tester);
+    await shot(tester, 'F9_sync_linked');
+  });
+
+  testWidgets('cloud topics offline', (tester) async {
+    await pumpApp(
+      tester,
+      location: Routes.cloudTopics,
+      prefs: linked,
+      syncApi: (_) => FakeSyncApi(failure: SyncFailure.timeout),
+    );
+    await realWait(tester);
+    await shot(tester, 'F14_cloud_timeout');
+  });
+
+  testWidgets('delete account server unavailable', (tester) async {
+    await pumpApp(
+      tester,
+      location: Routes.deleteAccount,
+      prefs: linked,
+      syncApi: (_) => FakeSyncApi(failure: SyncFailure.offline),
+    );
+    await tester.enterText(
+      find.byType(TextFormField),
+      AppDatabase.demoPassword,
+    );
+    await tester.tap(find.text(S.deleteAccountAction));
+    await realWait(
+      tester,
+      until: () => find.text(S.deleteRemoteTitle).evaluate().isNotEmpty,
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+    await shot(tester, 'F17_delete_server_unavailable');
+  });
+
   // Орыс тіліндегі интерфейс: негізгі экрандар және ұзын мәтіндердің сыюы.
   for (final (name, route, loggedIn) in const [
     ('ru_welcome', '/welcome', false),
     ('ru_login', '/login', false),
     ('ru_home', '/home', true),
     ('ru_history', '/history', true),
-    ('ru_settings', '/settings', true),
+    ('ru_profile', '/profile', true),
     ('ru_interview', '/interview', true),
     ('ru_summary', '/sessions/s-1019', true),
     ('ru_catalog', '/topics', true),

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
@@ -23,43 +24,49 @@ class FavoritesScreen extends StatelessWidget {
       showBack: true,
       title: S.favoritesTitle,
       subtitle: S.favoritesSubtitle,
-      headerGap: 40,
       body: [
         if (favorites.isEmpty)
           EmptyState(title: S.favoritesEmptyTitle, body: S.favoritesEmptyBody)
         else ...[
-          for (final topic in favorites)
-            ListRow(
-              title: topic.title,
-              titleStyle: context.text.titleLarge,
-              subtitle: topic.trackLabel,
-              onTap: () => context.push(Routes.topic(topic.id)),
-              trailing: TextButton(
-                onPressed: () async {
-                  try {
-                    final addedAt = await repo.removeFavorite(topic.id);
-                    if (!context.mounted) return;
-                    showAppSnackBar(
-                      context,
-                      S.topicRemoved,
-                      actionLabel: S.undo,
-                      // Бұрынғы уақытымен қайтарамыз — тізімдегі орны сақталады.
-                      onAction: () => repo.addFavorite(topic.id, at: addedAt),
-                    );
-                  } on AppException catch (e) {
-                    if (context.mounted) showAppSnackBar(context, e.message);
-                  }
-                },
-                child: Text(
-                  S.remove,
-                  semanticsLabel: '${S.remove}: ${topic.title}',
+          ListGroup(
+            children: [
+              for (final topic in favorites)
+                ItemRow(
+                  overline: topic.trackLabel,
+                  title: topic.title,
+                  meta: topic.summary,
+                  onTap: () => context.push(Routes.topic(topic.id)),
+                  trailing: TextButton(
+                    onPressed: () async {
+                      try {
+                        final addedAt = await repo.removeFavorite(topic.id);
+                        if (!context.mounted) return;
+                        showAppSnackBar(
+                          context,
+                          S.topicRemoved,
+                          actionLabel: S.undo,
+                          // Бұрынғы уақытымен қайтарамыз — тізімдегі орны сақталады.
+                          onAction: () =>
+                              repo.addFavorite(topic.id, at: addedAt),
+                        );
+                      } on AppException catch (e) {
+                        if (context.mounted) {
+                          showAppSnackBar(context, e.message);
+                        }
+                      }
+                    },
+                    child: Text(
+                      S.remove,
+                      semanticsLabel: '${S.remove}: ${topic.title}',
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          const SizedBox(height: 40),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
           Text(
             S.favoritesNote,
-            style: context.text.bodyLarge!.copyWith(
+            style: context.text.bodySmall!.copyWith(
               color: colors.onSurfaceVariant,
             ),
           ),
@@ -69,18 +76,13 @@ class FavoritesScreen extends StatelessWidget {
         if (favorites.isEmpty)
           AppButton(
             label: S.toCatalog,
-            onPressed: () => context.push(Routes.topics),
+            onPressed: () => context.go(Routes.topics),
           )
-        else ...[
+        else
           AppButton.tonal(
             label: S.homeCatalog,
-            onPressed: () => context.push(Routes.topics),
+            onPressed: () => context.go(Routes.topics),
           ),
-          AppButton(
-            label: S.toProfile,
-            onPressed: () => context.push(Routes.profile),
-          ),
-        ],
       ],
     );
   }

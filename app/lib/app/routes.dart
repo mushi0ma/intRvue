@@ -10,22 +10,28 @@ abstract final class Routes {
   static const resetPassword = '/reset-password';
   static const profileSetup = '/profile-setup';
 
-  // Төменгі навигация (StatefulShellRoute)
+  // Төменгі навигация (StatefulShellRoute): Басты бет, Тақырыптар,
+  // Нәтижелер (Тарих | Прогресс), Профиль (баптаулар ішінде).
   static const home = '/home';
-  static const history = '/history';
-  static const progress = '/progress';
+  static const topics = '/topics';
+  static const results = '/results';
+  static const history = '/results?tab=history';
+  static const progress = '/results?tab=progress';
+  static const profile = '/profile';
+
+  /// Ескі жолдар (хабарландыру, сілтеме) — [results], [profile]-ге бағытталады.
+  static const legacyHistory = '/history';
+  static const legacyProgress = '/progress';
   static const settings = '/settings';
 
-  // Тақырыптар: List → Detail, Search, Favorites
-  static const topics = '/topics';
+  // Тақырыптар: Detail, Search, Favorites
   static const topicNew = '/topics/new';
   static String topic(String id) => '/topics/$id';
   static String topicEdit(String id) => '/topics/$id/edit';
   static const search = '/search';
   static const favorites = '/favorites';
 
-  // Профиль: View → Edit
-  static const profile = '/profile';
+  // Профиль: Edit
   static const profileEdit = '/profile/edit';
 
   // Жаттығу сценарийі

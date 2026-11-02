@@ -27,12 +27,15 @@ enum Level {
 
 /// Сұхбат пен кері байланыс тілі.
 enum InterviewLanguage {
-  kk('Қазақша'),
-  ru('Русский'),
-  en('English');
+  kk('Қазақша', 'ҚАЗ'),
+  ru('Русский', 'РУС'),
+  en('English', 'ENG');
 
-  const InterviewLanguage(this.label);
+  const InterviewLanguage(this.label, this.code);
   final String label;
+
+  /// Тар сегменттер үшін қысқа белгі (Figma D1).
+  final String code;
 }
 
 /// Интерфейс тілі. Қазір тек қазақша мәтіндер бар.

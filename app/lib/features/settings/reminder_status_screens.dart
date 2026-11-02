@@ -9,7 +9,7 @@ import '../../core/widgets/widgets.dart';
 import '../../data/repositories/settings_repository.dart';
 import '../../data/services/reminder_coordinator.dart';
 import '../../data/services/reminder_scheduler.dart';
-import 'settings_screen.dart';
+import '../profile/profile_screen.dart';
 
 /// «Еске салу қосулы» (Figma 7:334): жоспарланған күндер мен уақыт.
 class RemindersEnabledScreen extends StatelessWidget {
@@ -20,15 +20,14 @@ class RemindersEnabledScreen extends StatelessWidget {
     final reminders = context.watch<SettingsRepository>().reminders;
     return AppPage(
       showBack: true,
-      onBack: () => context.go(Routes.settings),
+      onBack: () => context.go(Routes.profile),
       title: S.remindersEnabledTitle,
       subtitle: S.remindersEnabledSubtitle,
-      headerGap: 40,
       body: [
         Semantics(
           liveRegion: true,
           child: Text(
-            SettingsScreen.reminderLabel(reminders),
+            ProfileScreen.reminderLabel(reminders),
             style: context.text.headlineSmall,
           ),
         ),
@@ -47,7 +46,7 @@ class RemindersEnabledScreen extends StatelessWidget {
         ),
         AppButton(
           label: S.backToSettings,
-          onPressed: () => context.go(Routes.settings),
+          onPressed: () => context.go(Routes.profile),
         ),
       ],
     );
@@ -101,10 +100,9 @@ class _NotificationsDeniedScreenState extends State<NotificationsDeniedScreen> {
   Widget build(BuildContext context) {
     return AppPage(
       showBack: true,
-      onBack: () => context.go(Routes.settings),
+      onBack: () => context.go(Routes.profile),
       title: S.reminders,
       subtitle: S.notificationsOffSubtitle,
-      headerGap: 40,
       body: [
         InfoSection(
           title: S.notificationsOffTitle,
@@ -119,7 +117,7 @@ class _NotificationsDeniedScreenState extends State<NotificationsDeniedScreen> {
         ),
         AppButton.text(
           label: S.notNow,
-          onPressed: () => context.go(Routes.settings),
+          onPressed: () => context.go(Routes.profile),
         ),
       ],
     );

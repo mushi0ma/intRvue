@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/repositories/session_repository.dart';
@@ -46,7 +48,6 @@ class RecommendationsScreen extends StatelessWidget {
 
     final main = weak.first;
     final mainTopic = topics.byId(main.topicId);
-    final onBlock = TextStyle(color: colors.onPrimaryContainer);
     final answers = session!.answers
         .where((a) => a.question.topicId == main.topicId)
         .toList();
@@ -54,68 +55,129 @@ class RecommendationsScreen extends StatelessWidget {
         .take(2)
         .join('; ');
 
+    final p = context.palette;
+    final small = context.text.bodySmall!.copyWith(
+      color: colors.onSurfaceVariant,
+    );
     return AppPage(
       showBack: true,
       title: S.recommendTitle,
       subtitle: S.recommendSubtitle,
-      headerGap: 40,
       body: [
-        TrainingBlock(
-          children: [
-            Text(
-              mainTopic.title,
-              style: context.text.headlineMedium!.merge(onBlock),
+        // Басты беттегі «Келесі қадам» панелімен бір тіл: қараңғы панель,
+        // балл шаршыда, жасыл әрекет.
+        FullBleed(
+          child: ColoredBox(
+            color: p.panel,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: AppSpacing.xs,
+                          children: [
+                            Text(
+                              mainTopic.title,
+                              style: context.text.headlineSmall!.copyWith(
+                                color: p.onPanel,
+                              ),
+                            ),
+                            Text(
+                              mainTopic.reviewPoints.join(', '),
+                              style: context.text.bodySmall!.copyWith(
+                                color: p.onPanelMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.smd),
+                      Semantics(
+                        label: S.recommendScore(Fmt.score(main.score)),
+                        excludeSemantics: true,
+                        child: Container(
+                          width: 56,
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: p.onPanel),
+                            borderRadius: BorderRadius.circular(AppRadius.cell),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                '${main.score.round()}',
+                                textScaler: TextScaler.noScaling,
+                                style: context.text.headlineSmall!.copyWith(
+                                  color: p.onPanel,
+                                ),
+                              ),
+                              Text(
+                                '/ 100',
+                                textScaler: TextScaler.noScaling,
+                                style: context.text.bodySmall!.copyWith(
+                                  color: p.onPanelMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppButton.accent(
+                    label: S.practiceThisTopic,
+                    onPressed: () => context.push(
+                      TopicDetailScreen.practiceLocation(mainTopic),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              S.recommendScore(Fmt.score(main.score)),
-              style: context.text.bodyLarge!
-                  .merge(onBlock)
-                  .copyWith(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              mainTopic.reviewPoints.join(', '),
-              style: context.text.bodyLarge!.merge(onBlock),
-            ),
-            const SizedBox(height: 24),
-            AppButton(
-              label: S.practiceThisTopic,
-              onPressed: () =>
-                  context.push(TopicDetailScreen.practiceLocation(mainTopic)),
-            ),
-          ],
+          ),
         ),
-        const SizedBox(height: 24),
-        Text(S.whyThisTopic, style: context.text.titleLarge),
-        const SizedBox(height: 16),
-        Text(
+        const SizedBox(height: AppSpacing.lg),
+        Text(S.whyThisTopic, style: context.text.titleMedium),
+        const SizedBox(height: AppSpacing.sm),
+        CodeText(
           missing.isEmpty
               ? S.whyLowest(answers.length)
               : S.whyMissing(answers.length, missing),
-          style: muted,
-        ),
-        if (weak.length > 1) ...[
-          const SizedBox(height: 32),
-          Text(S.otherWeakTopics, style: context.text.titleMedium),
-          const SizedBox(height: 4),
-          for (final w in weak.skip(1))
-            ListRow(
-              title: topics.byId(w.topicId).title,
-              trailing: Text(
-                Fmt.score(w.score),
-                style: context.text.titleSmall!.copyWith(color: colors.primary),
-              ),
-              onTap: () => context.push(Routes.topic(w.topicId)),
-            ),
-        ],
-        const SectionDivider(vertical: 24),
-        Text(
-          S.recommendLimit,
           style: context.text.bodyMedium!.copyWith(
             color: colors.onSurfaceVariant,
           ),
         ),
+        if (weak.length > 1) ...[
+          GroupHeader(title: S.otherWeakTopics),
+          ListGroup(
+            children: [
+              for (final w in weak.skip(1))
+                ItemRow(
+                  title: topics.byId(w.topicId).title,
+                  onTap: () => context.push(Routes.topic(w.topicId)),
+                  trailing: Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: AppSpacing.sm,
+                      children: [
+                        Text(Fmt.score(w.score), style: context.text.bodyLarge),
+                        const Icon(AppIcons.forward, size: 18),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: AppSpacing.md),
+        Text(S.recommendLimit, style: small),
       ],
       actions: [
         AppButton.tonal(

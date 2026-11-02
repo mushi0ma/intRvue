@@ -34,6 +34,9 @@ class ReminderCoordinator {
   final ReminderScheduler _scheduler;
   final DateTime Function() _clock;
 
+  /// Қазіргі уақыт (тесттерде бекітіледі).
+  DateTime get now => _clock();
+
   bool _dirty = false;
   bool _disposed = false;
   Completer<void>? _running;

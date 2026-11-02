@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intrvue/core/constants/app_strings.dart';
+import 'package:intrvue/core/widgets/widgets.dart';
 import 'package:intrvue/data/models/enums.dart';
 import 'package:intrvue/data/repositories/settings_repository.dart';
 import 'package:intrvue/data/repositories/session_repository.dart';
@@ -10,13 +11,21 @@ import 'package:intrvue/data/remote/sync_api.dart';
 import 'package:intrvue/data/repositories/sync_repository.dart';
 import 'package:intrvue/data/repositories/topic_repository.dart';
 import 'package:intrvue/data/services/reminder_scheduler.dart';
+import 'package:intrvue/features/history/history_screen.dart';
+import 'package:intrvue/features/home/home_screen.dart';
+import 'package:intrvue/features/interview/session_setup_screen.dart';
+import 'package:intrvue/features/progress/progress_screen.dart';
+import 'package:intrvue/features/topics/topic_catalog_screen.dart';
 
 import 'helpers/fake_sync_api.dart';
 import 'helpers/test_app.dart';
 
 Future<void> tapText(WidgetTester tester, String text) async {
   await tester.pump();
-  final finder = find.text(text).last;
+  // Мәтін болмаса — белгіше-батырманың tooltip-і (мысалы, «Өңдеу»).
+  final finder = find.text(text).evaluate().isEmpty
+      ? find.byTooltip(text).last
+      : find.text(text).last;
   await tester.ensureVisible(finder);
   await tester.pump();
   await tester.tap(finder);
@@ -24,7 +33,11 @@ Future<void> tapText(WidgetTester tester, String text) async {
   await tester.pump(const Duration(milliseconds: 600));
 }
 
-Future<void> back(WidgetTester tester) => tapText(tester, S.back);
+Future<void> back(WidgetTester tester) async {
+  await tester.tap(find.byTooltip(S.back).last);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 600));
+}
 
 void main() {
   testWidgets('Splash → Onboarding → Welcome → Login → Home', (tester) async {
@@ -65,8 +78,8 @@ void main() {
     );
     await tester.enterText(find.byType(TextFormField).at(1), 'wrong123');
     await tapText(tester, S.loginAction);
-    expect(find.text(S.loginWrongCredentials), findsOneWidget);
-    expect(find.text(S.loginErrorTitle), findsOneWidget);
+    expect(find.textContaining(S.loginWrongCredentials), findsOneWidget);
+    expect(find.text(S.loginRetry), findsOneWidget);
 
     // Дұрыс деректер → басты бет.
     await tester.enterText(find.byType(TextFormField).at(1), 'intrvue2026');
@@ -105,29 +118,33 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester, location: '/home', noFavorites: true);
-    await tapText(tester, S.homeCatalog);
-    expect(find.text(S.catalogTitle), findsOneWidget);
+    await tapText(tester, S.navTopics);
+    expect(find.byType(TopicCatalogScreen), findsOneWidget);
 
     await tapText(tester, 'Күйді басқару');
     expect(find.text(S.whatWeReview), findsOneWidget);
     await tapText(tester, S.addFavorite);
-    expect(find.text(S.removeFavorite), findsOneWidget);
+    expect(find.byTooltip(S.removeFavorite), findsOneWidget);
     expect(find.text(S.addedToFavorites), findsOneWidget);
 
     await tapText(tester, S.open);
     expect(find.text(S.favoritesTitle), findsOneWidget);
     expect(find.text('Күйді басқару'), findsOneWidget);
 
-    await tapText(tester, S.toProfile);
-    expect(find.text(S.profileTitle), findsOneWidget);
-    await tapText(tester, S.editProfile);
+    // Таңдаулы → Detail → каталог → «Профиль» бөлімі.
+    await back(tester);
+    await back(tester);
+    await tapText(tester, S.navProfile);
+    expect(find.text(S.profileGroupPractice), findsOneWidget);
+    await tester.tap(find.byTooltip(S.editProfile));
+    await tester.pump(const Duration(milliseconds: 600));
     await tester.enterText(find.byType(TextFormField).first, '');
     await tapText(tester, S.saveChanges);
     expect(find.text(S.nameEmpty), findsOneWidget);
     await tester.enterText(find.byType(TextFormField).first, 'Айдана Н.');
     await tapText(tester, S.saveChanges);
     expect(find.text('Айдана Н.'), findsOneWidget);
-    expect(find.text(S.profileTitle), findsOneWidget);
+    expect(find.text(S.profileGroupPractice), findsOneWidget);
   });
 
   testWidgets('Іздеу: нәтиже және «табылмады»', (tester) async {
@@ -144,29 +161,69 @@ void main() {
 
   testWidgets('Төменгі навигация: төрт бөлім', (tester) async {
     await pumpApp(tester, location: '/home');
-    await tapText(tester, S.navHistory);
-    expect(find.text(S.historySubtitle), findsOneWidget);
+    await tapText(tester, S.navTopics);
+    expect(find.byType(TopicCatalogScreen), findsOneWidget);
+    await tapText(tester, S.navResults);
+    expect(find.byType(HistoryScreen), findsOneWidget);
+    // «Прогресс» — Нәтижелер ішіндегі қойынды.
     await tapText(tester, S.navProgress);
-    expect(find.text(S.progressSubtitle), findsOneWidget);
-    await tapText(tester, S.navSettings);
-    expect(find.text(S.settingsSubtitle), findsOneWidget);
+    expect(find.byType(ProgressScreen), findsOneWidget);
+    await tapText(tester, S.navProfile);
+    expect(find.text(S.profileGroupPractice), findsOneWidget);
+    // Бөлімге қайта оралғанда қойынды сақталады.
+    await tapText(tester, S.navResults);
+    expect(find.byType(ProgressScreen), findsOneWidget);
     await tapText(tester, S.navHome);
-    expect(find.text(S.homeNextTitle), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
+  testWidgets('Прогресс бос: жаттығу сүзгідегі бағыт пен деңгеймен ашылады', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/progress');
+    await tapText(tester, Level.beginner.label);
+    await tapText(tester, Level.middle.label);
+    expect(find.text(S.progressEmptyTitle), findsOneWidget);
+    await tapText(tester, S.progressEmptyAction);
+    expect(find.byType(SessionSetupScreen), findsOneWidget);
+    final level = tester.widget<ChoiceGroup<Level>>(
+      find.byType(ChoiceGroup<Level>),
+    );
+    expect(level.selected, Level.middle);
+    final direction = tester.widget<ChoiceGroup<Direction>>(
+      find.byType(ChoiceGroup<Direction>),
+    );
+    expect(direction.selected, Direction.mobile);
   });
 
   testWidgets('BUG-8.01: жүйелік «Артқа» бөлімнен Басты бетке қайтарады', (
     tester,
   ) async {
     await pumpApp(tester, location: '/home');
-    await tapText(tester, S.navSettings);
-    expect(find.text(S.settingsSubtitle), findsOneWidget);
+    await tapText(tester, S.navProfile);
+    expect(find.text(S.profileGroupPractice), findsOneWidget);
 
     // Түзетуге дейін: маршрут жабылып, қосымша жабылатын (true емес → шығу).
     final handled = await tester.binding.handlePopRoute();
     await tester.pump(const Duration(milliseconds: 600));
     expect(handled, isTrue);
-    expect(find.text(S.homeNextTitle), findsOneWidget);
-    expect(find.text(S.settingsSubtitle), findsNothing);
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text(S.profileGroupPractice), findsNothing);
+  });
+
+  testWidgets('D2: тақырып таңдалмаса — бастау өшік, түсініктеме көрінеді', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/practice/topics?direction=mobile');
+    expect(find.text(S.topicsSelected(2)), findsOneWidget);
+    await tapText(tester, 'Dart негіздері');
+    await tapText(tester, 'Flutter виджеттері');
+    expect(find.text(S.topicsSelected(0)), findsOneWidget);
+    expect(find.text(S.topicsPickSubtitle), findsOneWidget);
+    // Бағытты ауыстырғанда әдепкі екі тақырып қайта таңдалады.
+    await tapText(tester, 'Backend');
+    expect(find.text(S.topicsSelected(2)), findsOneWidget);
+    expect(find.text(S.topicsPickSubtitle), findsNothing);
   });
 
   testWidgets('Толық жаттығу сессиясы: 5 сұрақ → қорытынды → ұсыныс', (
@@ -178,17 +235,19 @@ void main() {
 
     await tapText(tester, S.homeStartAction);
     expect(find.text(S.topicsPickTitle), findsOneWidget);
-    await tapText(tester, S.continueWithTopics(2));
-    expect(find.text(S.paramsTitle), findsOneWidget);
+    // D1: келісімсіз бастау батырмасы өшік, жиекте белгі тұр.
+    expect(find.text(S.consentRequired), findsOneWidget);
     await tapText(tester, S.paramsStart);
-    expect(find.text(S.consentAccept), findsOneWidget);
-    await tapText(tester, S.consentAccept);
+    expect(find.text(S.preparingMotto), findsNothing);
+    await tapText(tester, S.consentCheck);
+    await tapText(tester, S.paramsStart);
+    expect(repo<SessionRepository>(tester).consentGiven, isTrue);
     expect(find.text(S.preparingMotto), findsOneWidget);
     await tester.pump(const Duration(seconds: 2));
     await tester.pump(const Duration(milliseconds: 600));
 
     for (var i = 1; i <= 5; i++) {
-      expect(find.text(S.progressOf(i, 5)), findsOneWidget);
+      expect(find.text('$i / 5'), findsOneWidget);
       if (i == 3) {
         await tapText(tester, S.skipQuestion);
         await tapText(tester, S.skip);
@@ -208,7 +267,7 @@ void main() {
       expect(find.text(S.evidenceTitle), findsOneWidget);
 
       if (i == 1) {
-        await tapText(tester, S.readModelAnswer);
+        await tapText(tester, S.modelAnswerTitle);
         expect(find.text(S.modelAnswerTitle), findsOneWidget);
         await tapText(tester, S.backToFeedback);
       }
@@ -231,7 +290,13 @@ void main() {
     await tapText(tester, '80,0');
     expect(find.text(S.summaryTitle), findsOneWidget);
     await back(tester);
-    await tester.tap(find.text(S.delete).first);
+    // E1: жою ⋮ мәзірінде.
+    await tester.tap(find.byTooltip(S.sessionActions).first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    // Мәзір — ең үстіңгі қабат (басқа бөлімдерде де «Жою» мәтіні бар).
+    await tester.tap(find.text(S.delete).last);
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text(S.deleteSessionTitle), findsOneWidget);
     await tester.tap(find.text(S.delete).last);
@@ -241,11 +306,11 @@ void main() {
 
   testWidgets('Баптаулар: тақырып → қараңғы, шығу', (tester) async {
     await pumpApp(tester, location: '/settings');
-    await tapText(tester, S.theme);
+    await tapText(tester, S.appearanceTitle);
     await tapText(tester, S.themeDark);
     await tapText(tester, S.save);
     expect(
-      Theme.of(tester.element(find.text(S.settingsSubtitle))).brightness,
+      Theme.of(tester.element(find.text(S.profileGroupPractice))).brightness,
       Brightness.dark,
     );
 
@@ -253,6 +318,22 @@ void main() {
     expect(find.text(S.logoutTitle), findsOneWidget);
     await tapText(tester, S.logoutAction);
     expect(find.text(S.loginTitle), findsOneWidget);
+  });
+
+  // s-1015: 2-сұрақ бағалауды күтеді, 3-сұрақ өткізілген.
+  testWidgets('Сақталған жауап: бағалауды күтетін жауап', (tester) async {
+    await pumpApp(tester, location: '/sessions/s-1015/answers/1');
+    expect(find.text(S.statusPending), findsOneWidget);
+    expect(find.text(S.yourAnswerSaved), findsOneWidget);
+  });
+
+  testWidgets('Сақталған жауап: өткізілген сұрақ «күтілуде» емес', (
+    tester,
+  ) async {
+    await pumpApp(tester, location: '/sessions/s-1015/answers/2');
+    expect(find.text(S.skippedPoints), findsOneWidget);
+    expect(find.text(S.statusPending), findsNothing);
+    expect(find.text(S.yourAnswerSaved), findsNothing);
   });
 
   testWidgets('Аккаунтты жою: қате пароль', (tester) async {
@@ -293,7 +374,7 @@ void main() {
 
     // Read: Detail экраны.
     expect(find.text('Тест тақырыбы'), findsWidgets);
-    expect(find.text(S.edit), findsOneWidget);
+    expect(find.byTooltip(S.edit), findsOneWidget);
 
     // Update. Алдыңғы хабарлама төменгі батырманы жаппауы үшін жабамыз.
     ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first))
@@ -314,7 +395,7 @@ void main() {
     await tester.tap(find.text(S.delete).last);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
-    expect(find.text(S.catalogTitle), findsOneWidget);
+    expect(find.byType(TopicCatalogScreen), findsOneWidget);
     expect(find.text('Өзгертілген тақырып'), findsNothing);
   });
 
@@ -430,7 +511,7 @@ void main() {
     expect(find.text(S.notificationsOffTitle), findsOneWidget);
     expect(find.text(S.openAndroidSettings), findsOneWidget);
     await tapText(tester, S.notNow);
-    expect(find.text(S.settingsSubtitle), findsOneWidget);
+    expect(find.text(S.profileGroupPractice), findsOneWidget);
   });
 
   testWidgets('Парольді ұмыттым → сілтеме → жаңа пароль → кіру', (
@@ -439,7 +520,7 @@ void main() {
     await pumpApp(tester, location: '/forgot-password', loggedIn: false);
     await tester.enterText(find.byType(TextFormField), 'aidana@example.com');
     await tapText(tester, S.resetSend);
-    expect(find.text(S.resetSentTitle), findsOneWidget);
+    expect(find.text(S.resetSentLead), findsOneWidget);
     await tapText(tester, S.resetDemoOpen);
     expect(find.text(S.newPasswordSubtitle), findsOneWidget);
 
@@ -466,15 +547,15 @@ void main() {
     await pumpApp(tester, location: '/settings/appearance');
     await tapText(tester, 'Русский');
     await tapText(tester, S.save);
-    expect(find.text('Настройки'), findsWidgets);
-    expect(find.text('Язык интерфейса'), findsOneWidget);
+    expect(find.text('Подготовка'), findsOneWidget);
+    expect(find.text('Вид и язык'), findsOneWidget);
     expect(find.text('Главная'), findsOneWidget);
     expect(repo<SettingsRepository>(tester).language, InterfaceLanguage.ru);
     // Қайта ауыстыру.
-    await tapText(tester, 'Язык интерфейса');
+    await tapText(tester, 'Вид и язык');
     await tapText(tester, 'Қазақша');
     await tapText(tester, 'Сохранить');
-    expect(find.text('Баптаулар'), findsWidgets);
+    expect(find.text('Дайындық'), findsOneWidget);
   });
 
   testWidgets('Бұлттық синхрондау: қосу → күйі → ажырату', (tester) async {
@@ -605,6 +686,6 @@ void main() {
     await tester.enterText(fields.first, 'ghost@example.com');
     await tester.enterText(fields.last, 'qwerty2026');
     await tapText(tester, S.loginAction);
-    expect(find.text(S.loginWrongCredentials), findsOneWidget);
+    expect(find.textContaining(S.loginWrongCredentials), findsOneWidget);
   });
 }

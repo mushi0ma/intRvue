@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/local/db_errors.dart';
@@ -25,7 +27,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _password = TextEditingController();
   var _autovalidate = AutovalidateMode.disabled;
   bool _loading = false;
+  bool _consent = false;
   String? _emailError;
+
+  bool get _submitted => _autovalidate != AutovalidateMode.disabled;
+
+  /// Рубрика ұяшығы: бос және әлі жіберілмеген — «…», әйтпесе ✓ / !.
+  bool? _state(TextEditingController c, String? Function(String?) v) {
+    if (c.text.isEmpty && !_submitted) return null;
+    return v(c.text) == null;
+  }
 
   @override
   void dispose() {
@@ -86,11 +97,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               autofillHints: const [AutofillHints.givenName],
               validator: Validators.name,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             AppTextField(
               label: S.fieldEmail,
               controller: _email,
               hint: 'name@example.com',
+              leadingIcon: AppIcons.mail,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               autofillHints: const [AutofillHints.email],
@@ -100,11 +112,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 if (_emailError != null) setState(() => _emailError = null);
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             AppTextField(
               label: S.fieldPassword,
               controller: _password,
               obscure: true,
+              leadingIcon: AppIcons.lock,
               helper: S.passwordRule,
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.newPassword],
@@ -114,25 +127,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
             FormField<bool>(
               initialValue: false,
               validator: (v) => v == true ? null : S.privacyConsentRequired,
-              builder: (field) => Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _ConsentRow(
-                    checked: field.value ?? false,
-                    onChanged: field.didChange,
-                  ),
-                  if (field.hasError)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 40, top: 4),
-                      child: Text(
-                        field.errorText!,
-                        style: context.text.bodyMedium!.copyWith(
-                          color: colors.error,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+              builder: (field) => ReviewGutter(
+                flagged: field.hasError,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _ConsentRow(
+                      checked: field.value ?? false,
+                      onChanged: (v) {
+                        field.didChange(v);
+                        setState(() => _consent = v);
+                      },
                     ),
-                ],
+                    if (field.hasError)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 40, top: 4),
+                        child: ReviewNote(field.errorText!),
+                      ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -144,6 +157,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ],
           actions: [
+            ListenableBuilder(
+              listenable: Listenable.merge([_name, _email, _password]),
+              builder: (context, _) => ReadinessRow(
+                title: S.readinessTitle,
+                items: [
+                  (S.readyName, _state(_name, Validators.name)),
+                  (S.readyEmail, _state(_email, Validators.email)),
+                  (S.readyPassword, _state(_password, Validators.newPassword)),
+                  (
+                    S.readyConsent,
+                    _consent ? true : (_submitted ? false : null),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
             AppButton(
               label: S.createAccount,
               loading: _loading,

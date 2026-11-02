@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -18,8 +19,8 @@ const gestureBar = 24.0;
 
 bool _fontsLoaded = false;
 
-/// Inter мен Material Icons-ты тест ортасына жүктейді — скриншоттар
-/// нақты шрифтпен салынады.
+/// Medeo, Material Symbols және Material Icons-ты тест ортасына жүктейді —
+/// скриншоттар нақты шрифтпен салынады.
 Future<void> loadFonts() async {
   if (_fontsLoaded) return;
   Future<void> load(String family, List<String> paths) async {
@@ -31,9 +32,21 @@ Future<void> loadFonts() async {
     await loader.load();
   }
 
-  await load('Inter', [
-    for (final w in ['Regular', 'Medium', 'SemiBold', 'Bold'])
-      'assets/fonts/Inter-$w.ttf',
+  await load('Medeo Sans', [
+    for (final w in ['Regular', 'Medium', 'SemiBold'])
+      'assets/fonts/MedeoSans-$w.ttf',
+  ]);
+  await load('Medeo Sans Display', [
+    for (final w in ['Light', 'Regular', 'Medium'])
+      'assets/fonts/MedeoSansDisplay-$w.ttf',
+  ]);
+  await load('Medeo Mono', [
+    for (final w in ['Regular', 'Medium']) 'assets/fonts/MedeoMono-$w.ttf',
+  ]);
+  // Пакет қарпі тестте `packages/<пакет>/<отбасы>` атымен ізделеді.
+  final symbols = _packageRoot('material_symbols_icons');
+  await load('packages/material_symbols_icons/MaterialSymbolsSharp', [
+    '$symbols/lib/fonts/MaterialSymbolsSharp.ttf',
   ]);
   final flutterRoot =
       Platform.environment['FLUTTER_ROOT'] ??
@@ -44,6 +57,20 @@ Future<void> loadFonts() async {
   _fontsLoaded = true;
 }
 
+/// `.dart_tool/package_config.json` бойынша пакеттің түбірлік қалтасы.
+String _packageRoot(String name) {
+  final config = jsonDecode(
+    File('.dart_tool/package_config.json').readAsStringSync(),
+  ) as Map<String, Object?>;
+  final pkg = (config['packages']! as List)
+      .cast<Map<String, Object?>>()
+      .firstWhere((p) => p['name'] == name);
+  final root = Uri.parse(pkg['rootUri']! as String);
+  return root.isAbsolute
+      ? root.toFilePath()
+      : Directory('.dart_tool').uri.resolveUri(root).toFilePath();
+}
+
 /// Қосымшаны берілген маршрутта ашады.
 Future<void> pumpApp(
   WidgetTester tester, {
@@ -52,6 +79,7 @@ Future<void> pumpApp(
   Map<String, Object> prefs = const {},
   ThemeMode theme = ThemeMode.light,
   Size size = figmaSize,
+  double pixelRatio = 1,
   double textScale = 1,
   bool noFavorites = false,
   String? databasePath,
@@ -59,10 +87,16 @@ Future<void> pumpApp(
   SyncApi Function(Uri)? syncApi,
 }) async {
   tester.view
-    ..physicalSize = size
-    ..devicePixelRatio = 1
-    ..padding = const FakeViewPadding(top: statusBar, bottom: gestureBar)
-    ..viewPadding = const FakeViewPadding(top: statusBar, bottom: gestureBar);
+    ..physicalSize = size * pixelRatio
+    ..devicePixelRatio = pixelRatio
+    ..padding = FakeViewPadding(
+      top: statusBar * pixelRatio,
+      bottom: gestureBar * pixelRatio,
+    )
+    ..viewPadding = FakeViewPadding(
+      top: statusBar * pixelRatio,
+      bottom: gestureBar * pixelRatio,
+    );
   tester.platformDispatcher.textScaleFactorTestValue = textScale;
   addTearDown(tester.view.reset);
   addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

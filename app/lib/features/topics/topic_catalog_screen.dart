@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/widgets.dart';
@@ -95,29 +96,44 @@ class _TopicCatalogScreenState extends State<TopicCatalogScreen> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final items = _items;
-    final muted = context.text.bodyMedium!.copyWith(
-      color: colors.onSurfaceVariant,
-    );
 
     return AppPage(
-      showBack: true,
-      title: S.catalogTitle,
-      subtitle: items == null ? ' ' : S.topicCount(items.length),
-      headerGap: 24,
+      bottomNavigation: true,
       body: [
+        const SizedBox(height: AppSpacing.md),
+        // C1: атау және санауыш бір жолда.
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Expanded(
+              child: Semantics(
+                header: true,
+                child: Text(S.catalogTitle, style: context.text.headlineLarge),
+              ),
+            ),
+            if (items != null)
+              Text(
+                S.topicCount(items.length),
+                style: context.text.bodySmall!.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
         TextField(
           controller: _search,
           onChanged: _onSearch,
           textInputAction: TextInputAction.search,
-          style: context.text.bodyLarge!.copyWith(height: 1.4),
           decoration: InputDecoration(
             hintText: S.searchTopics,
-            prefixIcon: Icon(Icons.search, color: colors.onSurfaceVariant),
+            prefixIcon: Icon(AppIcons.search, color: colors.onSurfaceVariant),
             suffixIcon: _query.search.isEmpty
                 ? null
                 : IconButton(
                     tooltip: S.clearSearch,
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(AppIcons.close),
                     onPressed: () {
                       _search.clear();
                       _update(_query.copyWith(search: ''));
@@ -125,56 +141,57 @@ class _TopicCatalogScreenState extends State<TopicCatalogScreen> {
                   ),
           ),
         ),
-        const SizedBox(height: 12),
-        Row(
-          spacing: 12,
-          children: [
-            Expanded(
-              child: FilterDropdown<Direction?>(
-                value: _query.direction,
-                values: const [null, ...Direction.values],
-                labelOf: (d) => d?.label ?? S.allDirections,
-                semanticLabel: S.fieldDirection,
-                onChanged: (d) => _update(_query.copyWith(direction: () => d)),
-              ),
+        const SizedBox(height: AppSpacing.sm),
+        // Сүзгі чиптері көлденең айналады — шет 16 сақталады.
+        FullBleed(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.inset),
+            child: Row(
+              spacing: AppSpacing.sm,
+              children: [
+                FilterDropdown<Direction?>(
+                  expand: false,
+                  highlighted: _query.direction != null,
+                  value: _query.direction,
+                  values: const [null, ...Direction.values],
+                  labelOf: (d) => d?.label ?? S.allDirections,
+                  semanticLabel: S.fieldDirection,
+                  onChanged: (d) =>
+                      _update(_query.copyWith(direction: () => d)),
+                ),
+                FilterDropdown<Level?>(
+                  expand: false,
+                  highlighted: _query.level != null,
+                  value: _query.level,
+                  values: const [null, ...Level.values],
+                  labelOf: (l) => l?.label ?? S.allLevels,
+                  semanticLabel: S.fieldLevel,
+                  onChanged: (l) => _update(_query.copyWith(level: () => l)),
+                ),
+                FilterChip(
+                  avatar: const Icon(AppIcons.bookmark, size: 18),
+                  label: Text(S.filterFavorites),
+                  selected: _query.onlyFavorites,
+                  showCheckmark: false,
+                  onSelected: (v) => _update(_query.copyWith(onlyFavorites: v)),
+                ),
+                FilterChip(
+                  label: Text(S.filterMine),
+                  selected: _query.onlyMine,
+                  onSelected: (v) => _update(_query.copyWith(onlyMine: v)),
+                ),
+              ],
             ),
-            Expanded(
-              child: FilterDropdown<Level?>(
-                value: _query.level,
-                values: const [null, ...Level.values],
-                labelOf: (l) => l?.label ?? S.allLevels,
-                semanticLabel: S.fieldLevel,
-                onChanged: (l) => _update(_query.copyWith(level: () => l)),
-              ),
-            ),
-          ],
+          ),
         ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            FilterChip(
-              label: Text(S.filterFavorites),
-              selected: _query.onlyFavorites,
-              onSelected: (v) => _update(_query.copyWith(onlyFavorites: v)),
-            ),
-            FilterChip(
-              label: Text(S.filterMine),
-              selected: _query.onlyMine,
-              onSelected: (v) => _update(_query.copyWith(onlyMine: v)),
-            ),
-            _SortButton(
-              value: _query.sort,
-              onChanged: (s) => _update(_query.copyWith(sort: s)),
-            ),
-          ],
+        _SortButton(
+          value: _query.sort,
+          onChanged: (s) => _update(_query.copyWith(sort: s)),
         ),
-        const SizedBox(height: 8),
         if (_error != null) ...[
           const SizedBox(height: 24),
-          Text(_error!, style: muted.copyWith(color: colors.error)),
+          ReviewNote(_error!),
           const SizedBox(height: 12),
           AppButton.tonal(label: S.retry, onPressed: _load),
         ] else if (items == null)
@@ -194,38 +211,34 @@ class _TopicCatalogScreenState extends State<TopicCatalogScreen> {
             AppButton.tonal(label: S.resetFilters, onPressed: _reset),
           ],
         ] else
-          for (final item in items)
-            _TopicRow(
-              item: item,
-              onTap: () => context.push(Routes.topic(item.topic.id)),
-              onFavorite: () => _toggleFavorite(item.topic),
-            ),
+          ListGroup(
+            children: [
+              for (final item in items)
+                TopicItemRow(
+                  item: item,
+                  onTap: () => context.push(Routes.topic(item.topic.id)),
+                  onFavorite: () => _toggleFavorite(item.topic),
+                ),
+            ],
+          ),
       ],
       actions: [
+        // C1: бір әрекет; жаттығу Басты беттен және тақырып бетінен басталады.
         AppButton.tonal(
           label: S.addTopic,
-          icon: Icons.add,
+          icon: AppIcons.add,
           onPressed: () => context.push(Routes.topicNew),
-        ),
-        AppButton(
-          label: S.newTraining,
-          onPressed: () => context.push(
-            Uri(
-              path: Routes.practiceTopics,
-              queryParameters: {
-                if (_query.direction != null)
-                  'direction': _query.direction!.name,
-              },
-            ).toString(),
-          ),
         ),
       ],
     );
   }
 }
 
-class _TopicRow extends StatelessWidget {
-  const _TopicRow({
+/// Тақырып жолы: «Mobile · Бастапқы · Менің тақырыбым», атау,
+/// «3 сұрақ · орт. 73,3», бетбелгі. Каталог, іздеу, таңдаулыда ортақ.
+class TopicItemRow extends StatelessWidget {
+  const TopicItemRow({
+    super.key,
     required this.item,
     required this.onTap,
     required this.onFavorite,
@@ -239,24 +252,21 @@ class _TopicRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final topic = item.topic;
-    final meta = [
-      topic.trackLabel,
-      S.questionsCount(item.questionCount),
-      if (item.averageScore != null)
-        S.averageShort(Fmt.score(item.averageScore!)),
-    ].join(' · ');
-
-    return ListRow(
+    return ItemRow(
+      overline: [topic.trackLabel, if (topic.isCustom) S.myTopic].join(' · '),
       title: topic.title,
-      subtitle: '${topic.summary}\n$meta',
-      meta: topic.isCustom ? S.myTopic : null,
+      meta: [
+        S.questionsCount(item.questionCount),
+        if (item.averageScore != null)
+          S.averageShort(Fmt.score(item.averageScore!)),
+      ].join(' · '),
       onTap: onTap,
       trailing: IconButton(
         tooltip: item.isFavorite ? S.removeFavorite : S.addFavorite,
         isSelected: item.isFavorite,
         onPressed: onFavorite,
-        icon: Icon(Icons.bookmark_border, color: colors.onSurfaceVariant),
-        selectedIcon: Icon(Icons.bookmark, color: colors.primary),
+        icon: Icon(AppIcons.bookmark, color: colors.onSurface),
+        selectedIcon: Icon(AppIcons.bookmark, fill: 1, color: colors.onSurface),
       ),
     );
   }
@@ -283,14 +293,16 @@ class _SortButton extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: AppSpacing.touchTarget),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sort, size: 20, color: colors.primary),
-            const SizedBox(width: 6),
-            Text(
-              value.label,
-              style: context.text.labelMedium!.copyWith(color: colors.primary),
+            Expanded(
+              child: Text(
+                '${S.sortLabel}: ${value.label}',
+                style: context.text.bodySmall!.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
             ),
+            Icon(AppIcons.sort, size: 20, color: colors.onSurface),
           ],
         ),
       ),

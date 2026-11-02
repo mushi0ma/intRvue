@@ -1,51 +1,105 @@
 import 'package:flutter/material.dart';
 
-/// Figma «Типографика · Inter» шкаласы.
+/// Figma «v2/*» мәтін стильдері, Medeo (OFL): Sans, Sans Display, Mono.
 ///
-/// | Figma            | Flutter          |
-/// |------------------|------------------|
-/// | Display 68/600   | displayLarge     |
-/// | Hero 38/600      | displayMedium    |
-/// | Headline 30/600  | headlineLarge    |
-/// | Card title 28/600| headlineMedium   |
-/// | Question 26/600  | headlineSmall    |
-/// | Title 22/600     | titleLarge       |
-/// | Item 18/600      | titleMedium      |
-/// | Body 16/400·24   | bodyLarge        |
-/// | Body small 14/400| bodyMedium       |
-/// | Caption 12/400   | bodySmall        |
-/// | Label 16/600     | labelLarge       |
-/// | Label medium 14/500 | labelMedium   |
-/// | Navigation 12/500| labelSmall       |
+/// | Figma v2      | Flutter                         |
+/// |---------------|---------------------------------|
+/// | numeral-xl    | displayLarge  · Display Light 64/64 |
+/// | numeral-l     | displayMedium · Display Light 40/44 |
+/// | numeral-m     | displaySmall  · Display 28/32   |
+/// | title-l       | headlineLarge, headlineMedium · Display 30/36 |
+/// | title-m       | headlineSmall, titleLarge · Display 22/28 |
+/// | title-s       | titleMedium · Sans Medium 17/24 |
+/// | —             | titleSmall · Sans Medium 16/24  |
+/// | body          | bodyLarge · 16/24               |
+/// | body-s        | bodyMedium · 14/20              |
+/// | caption       | bodySmall · 12/16               |
+/// | label         | labelLarge, labelMedium · Medium 14/20 |
+/// | nav           | labelSmall · Medium 12/16       |
+/// | code          | [AppTypography.code] · Mono 14/20 |
+///
+/// Сандар барлық жерде кесте цифрларымен (tnum): ұпайлар бағанда тураланады.
 abstract final class AppTypography {
-  static const fontFamily = 'Inter';
+  static const fontFamily = 'Medeo Sans';
+  static const displayFamily = 'Medeo Sans Display';
+  static const monoFamily = 'Medeo Mono';
+
+  static const _tnum = [FontFeature.tabularFigures()];
+
+  static TextStyle _style(
+    String family,
+    double size,
+    double lineHeight,
+    FontWeight weight, {
+    double tracking = 0,
+    required Color color,
+  }) => TextStyle(
+    fontFamily: family,
+    fontSize: size,
+    height: lineHeight / size,
+    fontWeight: weight,
+    letterSpacing: tracking,
+    fontFeatures: _tnum,
+    color: color,
+  );
 
   static TextTheme textTheme(ColorScheme colors) {
-    TextStyle style(double size, FontWeight weight, double height) => TextStyle(
-      fontFamily: fontFamily,
-      fontSize: size,
-      fontWeight: weight,
-      height: height,
-      letterSpacing: 0,
-      color: colors.onSurface,
+    final c = colors.onSurface;
+    const light = FontWeight.w300;
+    const regular = FontWeight.w400;
+    const medium = FontWeight.w500;
+    final titleL = _style(
+      displayFamily,
+      30,
+      36,
+      regular,
+      tracking: -0.3,
+      color: c,
     );
+    final titleM = _style(
+      displayFamily,
+      22,
+      28,
+      regular,
+      tracking: -0.1,
+      color: c,
+    );
+    final label = _style(fontFamily, 14, 20, medium, color: c);
 
     return TextTheme(
-      displayLarge: style(68, FontWeight.w600, 1.1),
-      displayMedium: style(38, FontWeight.w600, 1.2),
-      displaySmall: style(34, FontWeight.w600, 1.2),
-      headlineLarge: style(30, FontWeight.w600, 1.2),
-      headlineMedium: style(28, FontWeight.w600, 1.2),
-      headlineSmall: style(26, FontWeight.w600, 1.2),
-      titleLarge: style(22, FontWeight.w600, 1.25),
-      titleMedium: style(18, FontWeight.w600, 1.25),
-      titleSmall: style(16, FontWeight.w600, 1.25),
-      bodyLarge: style(16, FontWeight.w400, 1.5),
-      bodyMedium: style(14, FontWeight.w400, 1.4),
-      bodySmall: style(12, FontWeight.w400, 1.35),
-      labelLarge: style(16, FontWeight.w600, 1.2),
-      labelMedium: style(14, FontWeight.w500, 1.2),
-      labelSmall: style(12, FontWeight.w500, 1.25),
+      displayLarge: _style(
+        displayFamily,
+        64,
+        64,
+        light,
+        tracking: -1,
+        color: c,
+      ),
+      displayMedium: _style(
+        displayFamily,
+        40,
+        44,
+        light,
+        tracking: -0.5,
+        color: c,
+      ),
+      displaySmall: _style(displayFamily, 28, 32, regular, color: c),
+      headlineLarge: titleL,
+      headlineMedium: titleL,
+      headlineSmall: titleM,
+      titleLarge: titleM,
+      titleMedium: _style(fontFamily, 17, 24, medium, color: c),
+      titleSmall: _style(fontFamily, 16, 24, medium, color: c),
+      bodyLarge: _style(fontFamily, 16, 24, regular, color: c),
+      bodyMedium: _style(fontFamily, 14, 20, regular, color: c),
+      bodySmall: _style(fontFamily, 12, 16, regular, tracking: 0.1, color: c),
+      labelLarge: label,
+      labelMedium: label,
+      labelSmall: _style(fontFamily, 12, 16, medium, tracking: 0.1, color: c),
     );
   }
+
+  /// v2/code — үлгі жауап, сұраулар ізі, формула.
+  static TextStyle code(Color color) =>
+      _style(monoFamily, 14, 20, FontWeight.w400, color: color);
 }

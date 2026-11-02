@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../app/routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/repositories/auth_repository.dart';
@@ -63,37 +64,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // A2–A4: «1 / 3» және «Өткізу»; артқа — жүйелік қимыл.
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 4, 0),
                     child: SizedBox(
                       height: AppSpacing.touchTarget,
                       child: Row(
                         children: [
-                          if (_index == 0)
-                            const Flexible(
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 16),
-                                child: Wordmark(),
-                              ),
-                            )
-                          else
-                            AppBackLink(onPressed: () => _go(_index - 1)),
+                          Text(
+                            '${_index + 1} / ${_content.length}',
+                            style: context.text.bodySmall!.copyWith(
+                              color: context.colors.onSurfaceVariant,
+                            ),
+                          ),
                           const Spacer(),
                           if (!_isLast)
-                            TextButton(
-                              onPressed: _finish,
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                              ),
-                              child: Text(S.skip),
-                            ),
+                            TextButton(onPressed: _finish, child: Text(S.skip)),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 28),
                   Expanded(
                     child: PageView.builder(
                       controller: _pages,
@@ -106,10 +96,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                   ),
-                  PageIndicator(count: _content.length, index: _index),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
-                    child: AppButton(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: PageIndicator(count: _content.length, index: _index),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    child: AppButton.accent(
                       label: _isLast ? S.start : S.next,
                       onPressed: _isLast ? _finish : () => _go(_index + 1),
                     ),
@@ -138,49 +131,41 @@ class _OnboardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final p = context.palette;
     return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.inset),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ColoredBox(
-            color: colors.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
-              child: ExcludeSemantics(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.card),
-                  ),
-                  child: switch (index) {
-                    0 => const _AnswerPreview(),
-                    1 => const _AssessmentPreview(),
-                    _ => const _WeakTopicsPreview(),
-                  },
-                ),
+          const SizedBox(height: AppSpacing.sm),
+          ExcludeSemantics(
+            child: Container(
+              decoration: BoxDecoration(
+                color: p.surface,
+                borderRadius: BorderRadius.circular(AppRadius.card),
+                border: Border.all(color: p.lineSubtle),
               ),
+              clipBehavior: Clip.antiAlias,
+              child: switch (index) {
+                0 => const _AnswerPreview(),
+                1 => const _AssessmentPreview(),
+                _ => const _WeakTopicsPreview(),
+              },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Semantics(
-                  header: true,
-                  child: Text(title, style: context.text.headlineLarge),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  body,
-                  style: context.text.bodyLarge!.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
+          const SizedBox(height: AppSpacing.lg),
+          Semantics(
+            header: true,
+            child: Text(title, style: context.text.headlineLarge),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            body,
+            style: context.text.bodyMedium!.copyWith(
+              color: colors.onSurfaceVariant,
             ),
           ),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
@@ -193,54 +178,57 @@ class _AnswerPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final p = context.palette;
     final small = context.text.bodySmall!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'Flutter виджеттері',
-          style: context.text.labelMedium!.copyWith(
-            color: colors.primary,
-            fontWeight: FontWeight.w600,
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(AppIcons.code, size: 16, color: colors.onSurface),
+              const SizedBox(width: 6),
+              Expanded(child: Text('Flutter виджеттері', style: small)),
+              Text(
+                '2 / 5',
+                style: small.copyWith(color: colors.onSurfaceVariant),
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'StatelessWidget пен\nStatefulWidget айырмасы?',
-          style: context.text.titleMedium,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          S.onboardingYourAnswer,
-          style: context.text.labelMedium!.copyWith(
-            color: colors.onSurfaceVariant,
+          const SizedBox(height: AppSpacing.smd),
+          Text(
+            'StatelessWidget пен StatefulWidget-тің айырмашылығы неде?',
+            style: context.text.titleMedium,
           ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          height: 84,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: colors.outline),
-            borderRadius: BorderRadius.circular(AppRadius.field),
-          ),
-          child: Text(
-            'Stateless өзгермейтін интерфейс,\nStateful күйге қарай жаңарады.',
-            style: context.text.bodyMedium,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Text(S.draftSaved, style: small.copyWith(color: colors.primary)),
-            const Spacer(),
-            Text(
-              '58 / 4000',
-              style: small.copyWith(color: colors.onSurfaceVariant),
+          const SizedBox(height: AppSpacing.smd),
+          Text(S.onboardingYourAnswer, style: context.text.labelLarge),
+          const SizedBox(height: 6),
+          Container(
+            height: 84,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: p.ink, width: 1.5),
+              borderRadius: BorderRadius.circular(AppRadius.control),
             ),
-          ],
-        ),
-      ],
+            child: Text(
+              'StatelessWidget өзгермейтін интерфейсті көрсетеді…',
+              style: context.text.bodyMedium,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Icon(AppIcons.check, size: 14, color: p.success),
+              const SizedBox(width: 4),
+              Text(
+                '${S.draftSaved} · 17:42',
+                style: small.copyWith(color: p.success),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -250,26 +238,74 @@ class _AssessmentPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text('Негізгі ой дұрыс.', style: context.text.titleMedium),
-        const SizedBox(height: 20),
-        AssessmentScales(
-          correctness: 4,
-          completeness: 3,
-          clarity: 5,
-          labels: (S.correctness, S.completeness, S.clarity),
-          spacing: 16,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          '«Күйі өзгергенде интерфейс жаңарады»',
-          style: context.text.bodySmall!.copyWith(
-            color: context.colors.onSurfaceVariant,
+    final colors = context.colors;
+    final p = context.palette;
+    final small = context.text.bodySmall!;
+    Widget cell(String label, int v) => Expanded(
+      child: Column(
+        spacing: 6,
+        children: [
+          Text(label, style: small.copyWith(color: colors.onSurfaceVariant)),
+          ScoreCell(
+            text: '$v',
+            band: bandOf(v),
+            width: double.infinity,
+            height: 48,
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            spacing: 8,
+            children: [
+              cell(S.correctness, 4),
+              cell(S.completeness, 3),
+              cell(S.clarity, 5),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.smd),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.smd),
+            decoration: BoxDecoration(
+              color: p.muted,
+              borderRadius: BorderRadius.circular(AppRadius.cell),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                Text(
+                  S.evidenceTitle,
+                  style: small.copyWith(color: colors.onSurfaceVariant),
+                ),
+                Text(
+                  '«Өзгермейтін интерфейс» дұрыс түсіндірілген.',
+                  style: context.text.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.smd),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
+            children: [
+              AppTag(S.demoTag, kind: TagKind.warning),
+              Expanded(
+                child: Text(
+                  S.demoAssessmentNote,
+                  style: small.copyWith(color: colors.onSurfaceVariant),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -280,46 +316,45 @@ class _WeakTopicsPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final title = context.text.titleSmall!;
+    final p = context.palette;
+    final small = context.text.bodySmall!.copyWith(
+      color: colors.onSurfaceVariant,
+    );
     Widget row(String name, String score) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          Expanded(child: Text(name, style: title)),
-          Text(score, style: title.copyWith(color: colors.primary)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: context.text.bodyLarge),
+                Text('Mobile · Бастапқы', style: small),
+              ],
+            ),
+          ),
+          Text(score, style: context.text.bodyMedium),
+          const SizedBox(width: 8),
+          Icon(AppIcons.forward, size: 18, color: colors.onSurface),
         ],
       ),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          S.onboardingWeakTopics,
-          style: context.text.labelMedium!.copyWith(
-            color: colors.primary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 4),
-        row('Күйді басқару', '58,0'),
-        const Divider(),
-        row('Асинхрондылық', '61,3'),
-        const Divider(),
-        row('Dart негіздері', '66,7'),
-        const SizedBox(height: 12),
         Container(
-          height: 40,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: colors.secondaryContainer,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            S.onboardingPractice,
-            style: context.text.labelMedium!.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w600,
-            ),
+          color: p.muted,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(S.onboardingWeakTopics, style: small),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: ListGroup(
+            children: [
+              row('Асинхрондылық', '60 / 100'),
+              row('Күйді басқару', '66 / 100'),
+              row('Dart негіздері', '72 / 100'),
+            ],
           ),
         ),
       ],

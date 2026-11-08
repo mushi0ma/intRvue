@@ -161,7 +161,14 @@ class CloudTopicsRepository extends ChangeNotifier {
       } on SyncApiException catch (e) {
         // Серверде әлі жоқ — жаңасын жасаймыз.
         if (e.failure != SyncFailure.notFound) rethrow;
-        saved = await api.createTopic(token, dto);
+        try {
+          saved = await api.createTopic(token, dto);
+        } on SyncApiException catch (e) {
+          // PATCH пен POST арасында тақырыпты тікелей байланыс (/v1/sync)
+          // жіберіп үлгерді: id серверде бар, сондықтан тағы PATCH.
+          if (e.failure != SyncFailure.conflict) rethrow;
+          saved = await api.updateTopic(token, topic.id, dto.toPatchJson());
+        }
       }
       _sync.markOwnTopic(topic.id, saved.updatedAt);
     });

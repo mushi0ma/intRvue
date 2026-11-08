@@ -9,6 +9,7 @@ import 'package:intrvue/core/log.dart';
 import 'package:intrvue/data/local/app_database.dart';
 import 'package:intrvue/data/models/enums.dart';
 import 'package:intrvue/data/models/topic.dart';
+import 'package:intrvue/data/remote/dto.dart';
 import 'package:intrvue/data/remote/live_channel.dart';
 import 'package:intrvue/data/remote/request_state.dart';
 import 'package:intrvue/data/remote/sync_api.dart';
@@ -477,6 +478,35 @@ Future<void> main() async {
     });
 
     test(
+      'REST POST: тақырыпты басқа арна бұрын жіберсе (409), PATCH қайталанады',
+      () async {
+        // Эмуляторда байқалған жарыс: PATCH 404, сол сәтте тікелей байланыс
+        // тақырыпты жібереді, POST 409 conflict қайтарады.
+        SharedPreferences.setMockInitialValues({});
+        final s = await AppServices.start(
+          factory: databaseFactoryFfiNoIsolate,
+          databasePath: inMemoryDatabasePath,
+          reminders: const NoopReminderScheduler(),
+          syncApi: (_) => _RacingApi(base),
+        );
+        addTearDown(s.dispose);
+        await s.auth.register(
+          name: 'Ерлан',
+          email: 'race@example.com',
+          password: 'rest2026pass',
+        );
+        expect(await s.sync.connect('rest2026pass'), isNull);
+        final token = s.sync.link!.token;
+        final custom = await s.topics.create(_topic);
+
+        expect(await s.cloud.pushSaved(custom), isNull);
+        final topics = await HttpSyncApi(base).topics(token);
+        expect(topics.single.id, custom.id);
+        expect(topics.single.title, 'Docker негіздері');
+      },
+    );
+
+    test(
       'REST PATCH: серверде өзгерген атау құрылғыға және экранға келеді',
       () async {
         final (s, _) = await linked('patch@example.com');
@@ -601,4 +631,15 @@ Future<void> main() async {
       expect(s.sessions.history.length, before);
     },
   );
+}
+
+/// POST алдында тақырыпты басқа арна жіберіп қойғандай етеді.
+class _RacingApi extends HttpSyncApi {
+  _RacingApi(super.baseUrl);
+
+  @override
+  Future<TopicDto> createTopic(String token, TopicDto topic) async {
+    await super.createTopic(token, topic);
+    return super.createTopic(token, topic);
+  }
 }

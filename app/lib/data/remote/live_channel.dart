@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -75,15 +76,31 @@ class LiveChannel extends ChangeNotifier {
   static Future<WebSocketChannel> _ioConnect(
     Uri uri,
     Map<String, String> headers,
-  ) async {
-    final channel = IOWebSocketChannel.connect(
-      uri,
-      headers: headers,
-      pingInterval: ping,
-      connectTimeout: const Duration(seconds: 8),
-    );
-    await channel.ready;
-    return channel;
+  ) => connectIo(uri, headers);
+
+  @visibleForTesting
+  static Future<WebSocketChannel> connectIo(
+    Uri uri,
+    Map<String, String> headers, {
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    final pending = WebSocket.connect(uri.toString(), headers: headers);
+    final WebSocket socket;
+    try {
+      socket = await pending.timeout(timeout);
+    } on TimeoutException {
+      // Timeout қосылуды тоқтатпайды: сервер кейін жауап берсе, сокет
+      // ашылады да, ешкімде қалмайды (BUG-10). Сондықтан бірден жабамыз.
+      unawaited(
+        pending.then(
+          (late) => late.close(WebSocketStatus.goingAway),
+          onError: (Object _) {},
+        ),
+      );
+      rethrow;
+    }
+    socket.pingInterval = ping;
+    return IOWebSocketChannel(socket);
   }
 
   final LiveConnector _connector;

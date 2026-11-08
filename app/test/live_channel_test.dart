@@ -1,6 +1,7 @@
 // LiveChannel (практикалық №7): тест ішіндегі нақты WebSocket сервері
 // (dart:io) — қосылу, хабар алу, сокет арқылы синхрондау, үзілу және
 // қайта қосылу. Әр тестте «күтілетін нәтиже» expect-те көрсетілген.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -229,5 +230,33 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(off.status, LiveStatus.off);
     expect(server.accepted, 0);
+  });
+  test('BUG-10: уақыты өткен қосылу кейін ашылса — сокет жабылады', () async {
+    final http = await HttpServer.bind('127.0.0.1', 0);
+    addTearDown(() => http.close(force: true));
+    final opened = Completer<WebSocket>();
+    http.listen((request) async {
+      // Сервер клиент күтуді тоқтатқаннан кейін ғана жауап береді.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      opened.complete(await WebSocketTransformer.upgrade(request));
+    });
+
+    await expectLater(
+      LiveChannel.connectIo(
+        Uri.parse('ws://127.0.0.1:${http.port}/'),
+        const {},
+        timeout: const Duration(milliseconds: 50),
+      ),
+      throwsA(anything),
+    );
+
+    // Күтілетін нәтиже: ешкімге керек емес сокетті клиент өзі жабады.
+    final socket = await opened.future;
+    final closed = Completer<int?>();
+    socket.listen((_) {}, onDone: () => closed.complete(socket.closeCode));
+    expect(
+      await closed.future.timeout(const Duration(seconds: 2)),
+      WebSocketStatus.goingAway,
+    );
   });
 }
